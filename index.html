@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en" class="dark h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geospatial Modification Deck & Cross-Sheet SSV Lookup</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0f7ff', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- PapaParse CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Chart.js for Executive Dashboard Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        html:not(.dark) .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        select option {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+        }
+        html:not(.dark) select option {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+        .glass-card { backdrop-filter: blur(12px); }
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f8fafc;
+        }
+        html:not(.dark) .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+            color: #0f172a;
+        }
+
+        .leaflet-container { font-family: 'Inter', system-ui, sans-serif !important; }
+
+        .custom-pin-label {
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .dark .custom-pin-label {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #f8fafc;
+        }
+        html:not(.dark) .custom-pin-label {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            color: #0f172a;
+        }
+
+        .ruler-map-tooltip {
+            background: #0f172a !important;
+            border: 1.5px solid #f59e0b !important;
+            color: #f59e0b !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            font-family: monospace !important;
+            border-radius: 6px !important;
+            padding: 3px 8px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+        }
+        html:not(.dark) .ruler-map-tooltip {
+            background: #ffffff !important;
+            border: 1.5px solid #d97706 !important;
+            color: #b45309 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        .leaflet-popup-tip { background: #0f172a !important; }
+        html:not(.dark) .leaflet-popup-tip { background: #ffffff !important; }
+    </style>
+</head>
+
+<body class="h-full flex flex-col font-sans antialiased bg-slate-950 text-slate-100 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200 overflow-hidden">
+
+    <header class="h-14 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur sticky top-0 z-30 px-4 flex items-center justify-between shrink-0 transition-colors">
+        <div class="flex items-center gap-3">
+            <button id="toggle-sidebar-btn" onclick="toggleSidebar()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-700 transition" title="Toggle Sidebar">
+                <i data-lucide="panel-left" class="w-4 h-4"></i>
+            </button>
+            <div class="flex items-center gap-2">
+                <div class="p-1.5 bg-blue-600/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-500/30">
+                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">Geospatial Modification Deck</h1>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                        <span>Swap Sheet: <strong class="text-slate-700 dark:text-slate-300">Main</strong></span>
+                        <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
+                        <span>SSV Tracker: <strong class="text-slate-700 dark:text-slate-300">Sheet1</strong></span>
+                        <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
+                        <span id="sync-status" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Syncing...
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button onclick="toggleTheme()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-500 dark:text-amber-300 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5" title="Toggle Light / Dark Theme">
+                <i id="theme-icon" data-lucide="sun" class="w-4 h-4"></i>
+                <span id="theme-label" class="text-xs font-semibold text-slate-800 dark:text-slate-200 hidden md:inline">Light Mode</span>
+            </button>
+
+            <button onclick="downloadIndexHTML()" class="px-2.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="file-code" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Save index.html</span>
+            </button>
+            <button onclick="fetchSheetData()" class="px-2.5 py-1.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Sync Sheets</span>
+            </button>
+            <button onclick="openTableModal()" class="px-2.5 py-1.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5">
+                <i data-lucide="table" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Data Matrix</span>
+            </button>
+            <button onclick="openDashboardModal()" class="px-2.5 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Analytics</span>
+            </button>
+            <button onclick="exportToKML()" class="px-2.5 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Export KML</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden relative">
+
+        <aside id="sidebar-deck" class="w-80 sm:w-96 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-20 shrink-0 transition-all duration-300 transform translate-x-0 custom-scrollbar overflow-y-auto">
+            <div class="p-4 space-y-5">
+
+                <!-- 1. Database Sources -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        <span class="flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4 text-blue-500"></i> Google Sheet Sources</span>
+                    </div>
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
+                        <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="Swap Sheet: 12amb34jsOrqkkeKST2-0uxiYYg6M-IGmsM_z-jojy4M">
+                            Primary Swap: <span class="text-blue-600 dark:text-blue-400">12amb34jsOrqkke...</span>
+                        </div>
+                        <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="SSV Sheet: 15owO_lt9EltLfAVh5CEfOObWBGqR_HsT0GnzmRFpc6I">
+                            SSV Tracker: <span class="text-purple-600 dark:text-purple-400">15owO_lt9EltLfA...</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800">
+                            <span class="text-slate-500 dark:text-slate-400">Loaded Sites / Lookups:</span>
+                            <span id="sidebar-record-count" class="font-bold text-slate-900 dark:text-white">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Database Field Mapping -->
+                <div class="space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                        <i data-lucide="sliders" class="w-4 h-4 text-indigo-500"></i> Database Field Mapping
+                    </div>
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
+                        <div>
+                            <label class="block text-slate-600 dark:text-slate-400 mb-1">PLAID / Site ID Column</label>
+                            <select id="map-col-id" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-slate-600 dark:text-slate-400 mb-1">Latitude (Y)</label>
+                                <select id="map-col-lat" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-600 dark:text-slate-400 mb-1">Longitude (X)</label>
+                                <select id="map-col-lon" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 dark:text-slate-400 mb-1">Pin Display Label Column</label>
+                            <select id="map-col-label" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Map Display Settings -->
+                <div class="space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                        <i data-lucide="layers" class="w-4 h-4 text-emerald-500"></i> Map Display Settings
+                    </div>
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 text-xs">
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
+                                <input type="checkbox" id="chk-show-pins" checked onchange="togglePinsVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Show Pins
+                            </label>
+                            <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
+                                <input type="checkbox" id="chk-show-labels" onchange="toggleLabelsVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Labels
+                            </label>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 dark:text-slate-400 mb-1">Tile Provider</label>
+                            <select id="tile-provider-select" onchange="changeTileProvider()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="carto-dark">CartoDB Dark Matter</option>
+                                <option value="carto-light">CartoDB Positron (Light)</option>
+                                <option value="osm">OpenStreetMap Standard</option>
+                                <option value="esri-sat">Esri World Imagery (Satellite)</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-slate-600 dark:text-slate-400 mb-1">Pin Size: <span id="pin-size-val">14px</span></label>
+                                <input type="range" id="slider-pin-size" min="8" max="28" value="14" oninput="updatePinSize(this.value)" class="w-full accent-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-slate-600 dark:text-slate-400 mb-1">Font Size: <span id="font-size-val">11px</span></label>
+                                <input type="range" id="slider-font-size" min="8" max="16" value="11" oninput="updateFontSize(this.value)" class="w-full accent-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Color Legend Panel -->
+                <div class="space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><i data-lucide="palette" class="w-4 h-4 text-purple-500"></i> Color Legend Column</span>
+                    </div>
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 text-xs">
+                        <select id="map-col-group" onchange="onGroupColumnChanged()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+
+                        <!-- Saved Column Schemes Manager (Max 2 Slots) -->
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800/80 space-y-2">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                <span>Saved Color Schemes (2 Slots)</span>
+                                <button onclick="saveCurrentColumnPalette()" class="px-2 py-0.5 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-md transition shadow-sm flex items-center gap-1">
+                                    <i data-lucide="save" class="w-3 h-3"></i> Save Current
+                                </button>
+                            </div>
+                            <div id="saved-palettes-slots" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                <!-- Dynamic Palette Slot Buttons Render Here -->
+                            </div>
+                        </div>
+
+                        <div id="color-swatches-container" class="space-y-2 max-h-52 overflow-y-auto custom-scrollbar pr-1"></div>
+                    </div>
+                </div>
+
+                <!-- 5. Pin Tooltip Fields Settings -->
+                <div class="space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><i data-lucide="message-square" class="w-4 h-4 text-cyan-500"></i> Pin Click Tooltip Fields</span>
+                    </div>
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
+                        <p class="text-slate-500 dark:text-slate-400 text-[11px] mb-2">Check the fields displayed when clicking pins on the map:</p>
+                        <div id="tooltip-fields-container" class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1"></div>
+                    </div>
+                </div>
+
+                <!-- 6. Geospatial Tools & Distance Ruler -->
+                <div class="space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                        <i data-lucide="ruler" class="w-4 h-4 text-amber-500"></i> Distance Ruler Tool
+                    </div>
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
+                        <button id="btn-ruler" onclick="toggleRulerMode()" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg font-medium transition flex items-center justify-center gap-1.5">
+                            <i data-lucide="ruler" class="w-4 h-4"></i> Activate Distance Ruler
+                        </button>
+                        <div id="ruler-result" class="hidden p-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-[11px] text-amber-600 dark:text-amber-400 font-mono text-center">
+                            Click on the map to add distance points
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Inspector Panel / Detail Editor -->
+                <div class="space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><i data-lucide="info" class="w-4 h-4 text-rose-500"></i> Site Inspector Panel</span>
+                        <span id="inspect-site-id" class="text-blue-600 dark:text-blue-400 font-mono text-[10px]">None Selected</span>
+                    </div>
+                    <div id="inspector-container" class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
+                        <div class="text-slate-500 italic text-center py-4">Click any site pin on the map to inspect or edit details.</div>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <main class="flex-1 relative flex flex-col h-full bg-slate-100 dark:bg-slate-950">
+
+            <!-- Search & Filter Toolbar -->
+            <div class="p-2.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 z-10 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1">
+                        <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Search:</span>
+                        <select id="search-col-select" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold"></select>
+                        <input type="text" id="search-input" onkeyup="if(event.key==='Enter') executeSearch()" placeholder="Value..." class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 w-28 sm:w-36">
+                        <button onclick="executeSearch()" class="px-2 py-0.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded transition">Find</button>
+                        <button onclick="clearSearch()" class="px-1.5 py-0.5 text-slate-400 hover:text-slate-800 dark:hover:text-white">✕</button>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1">
+                        <i data-lucide="filter" class="w-3.5 h-3.5 text-emerald-500"></i>
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Filter:</span>
+                        <select id="filter-col-select" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold"></select>
+                        <input type="text" id="filter-input" onkeyup="if(event.key==='Enter') executeFilter()" placeholder="Value..." class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 w-28 sm:w-36">
+                        <button onclick="executeFilter()" class="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded transition">Filter</button>
+                        <button onclick="clearFilter()" class="px-1.5 py-0.5 text-slate-400 hover:text-slate-800 dark:hover:text-white">✕</button>
+                    </div>
+                </div>
+
+                <div id="search-filter-status" class="text-[11px] text-blue-600 dark:text-blue-400 font-medium truncate"></div>
+            </div>
+
+            <!-- Leaflet Map Element -->
+            <div id="map" class="flex-1 w-full h-full z-0"></div>
+
+            <!-- Floating On-Map Legend Overlay -->
+            <div id="floating-map-legend" class="absolute top-16 right-4 z-10 glass-card rounded-xl p-3 max-w-xs shadow-2xl border border-slate-300 dark:border-slate-700/60 hidden sm:block">
+                <div class="flex items-center justify-between mb-2 text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800/80 pb-1">
+                    <span class="flex items-center gap-1"><i data-lucide="layers" class="w-3.5 h-3.5 text-blue-500"></i> Map Legend</span>
+                    <button onclick="document.getElementById('floating-map-legend').classList.toggle('hidden')" class="text-slate-400 hover:text-slate-800 dark:hover:text-white">✕</button>
+                </div>
+                <div id="floating-legend-content" class="space-y-1 text-xs max-h-48 overflow-y-auto custom-scrollbar"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Data Table Matrix Modal -->
+    <div id="table-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex flex-col p-4 sm:p-8">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-blue-600/20 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/30">
+                        <i data-lucide="table" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-base text-slate-900 dark:text-white">Merged Spreadsheet Matrix (Includes All Sites & IBS)</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Search and filter enriched dataset records with SSV lookup status</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportFilteredTableCSV()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
+                    </button>
+                    <button onclick="closeTableModal()" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 text-xs">
+                <input type="text" id="grid-global-search" oninput="renderTableGrid()" placeholder="Quick filter table rows..." class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                <span id="grid-status-count" class="text-slate-500 dark:text-slate-400 font-mono">Showing 0 rows</span>
+            </div>
+
+            <div class="flex-1 overflow-auto custom-scrollbar p-2">
+                <table class="w-full text-left text-xs text-slate-800 dark:text-slate-300 border-collapse">
+                    <thead id="grid-thead" class="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 uppercase tracking-wider font-bold sticky top-0 border-b border-slate-200 dark:border-slate-800"></thead>
+                    <tbody id="grid-tbody" class="divide-y divide-slate-200 dark:divide-slate-800/60 font-mono"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Dashboard Modal -->
+    <div id="dashboard-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex flex-col p-4 sm:p-8">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden custom-scrollbar">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-purple-600/20 text-purple-600 dark:text-purple-400 rounded-xl border border-purple-500/30">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-base text-slate-900 dark:text-white">Cluster Rollout & Looked-Up SSV Status Analytics</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Dynamic completion metrics exclude IBS on SWAP STATUS; Tables include all sites</p>
+                    </div>
+                </div>
+                <button onclick="closeDashboardModal()" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 p-6 space-y-6 overflow-y-auto custom-scrollbar">
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 p-6 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Overall SSV Completion Rate (Excludes IBS)</span>
+                                <p class="text-xs text-slate-500 dark:text-slate-500 mt-0.5">Calculated from non-IBS SSV Approved sites vs. non-IBS total swapped sites</p>
+                            </div>
+                            <span id="dash-completion-pct" class="text-3xl font-black text-emerald-600 dark:text-emerald-400">0.0%</span>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-4 overflow-hidden p-0.5 border border-slate-300 dark:border-slate-700">
+                                <div id="dash-progress-bar" class="bg-gradient-to-r from-blue-500 via-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs font-medium">
+                                <span id="dash-completion-sub" class="text-slate-700 dark:text-slate-300">0 of 0 sites SSV approved</span>
+                                <span id="dash-remaining-sub" class="text-amber-600 dark:text-amber-400">0 sites pending SSV</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3 pt-2 border-t border-slate-200 dark:border-slate-800">
+                            <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">Total Sites (Excl. IBS)</div>
+                                <div id="dash-kpi-total" class="text-lg font-black text-slate-900 dark:text-white mt-1">0</div>
+                            </div>
+                            <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <div class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">SSV Approved</div>
+                                <div id="dash-kpi-swapped" class="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-1">0</div>
+                            </div>
+                            <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <div class="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-bold">Pending / Ongoing</div>
+                                <div id="dash-kpi-pending" class="text-lg font-black text-amber-600 dark:text-amber-400 mt-1">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col items-center justify-center space-y-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">SSV Status Distribution (Excl. IBS)</span>
+                        <div class="w-48 h-48 relative flex items-center justify-center">
+                            <canvas id="dash-donut-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dash-kpi-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
+
+                <div class="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-5">
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="grid" class="w-4 h-4 text-blue-500"></i> Region / Province SSV Pivot Matrix (Ranked by Completion %, Includes IBS)
+                        </h3>
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="text-slate-500 dark:text-slate-400">Group By:</span>
+                            <select id="dash-pivot-col" onchange="renderDashboard()" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2.5 py-1 outline-none"></select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-800 dark:text-slate-300">
+                            <thead id="dash-pivot-thead" class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-400 font-bold uppercase border-b border-slate-200 dark:border-slate-800"></thead>
+                            <tbody id="dash-pivot-tbody" class="divide-y divide-slate-200 dark:divide-slate-800/60 font-mono"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PRIMARY_PROXY_URL = '/api/sheet-data';
+        const SSV_PROXY_URL = '/api/ssv-data';
+
+        const PRIMARY_SHEET_ID = '12amb34jsOrqkkeKST2-0uxiYYg6M-IGmsM_z-jojy4M';
+        const SSV_SHEET_ID = '15owO_lt9EltLfAVh5CEfOObWBGqR_HsT0GnzmRFpc6I';
+
+        const PRIMARY_DIRECT_URL = `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Main`;
+        const SSV_DIRECT_URL = `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/export?format=csv&gid=0`;
+
+        let rawDataset = [];
+        let ssvLookupMap = {}; // Key: PLAID / Lookup Key -> SSV Status Record
+        let map = null;
+        let markersLayerGroup = null;
+        let activeTileLayer = null;
+        let leafletMarkers = [];
+
+        // Mapped Columns
+        let colId = 'Site_ID';
+        let colLat = 'Latitude';
+        let colLon = 'Longitude';
+        let colLabel = 'Site_ID';
+        let colGroup = 'SSV STATUS';
+
+        let categoryColors = {};
+        let selectedSiteIndex = null;
+
+        // Custom Tooltip Configuration
+        let userTooltipFields = [];
+
+        // Saved Column Color Palettes (Persisted in localStorage for up to 2 columns)
+        let savedColumnPalettes = {};
+        try {
+            savedColumnPalettes = JSON.parse(localStorage.getItem('hermes_column_palettes') || '{}');
+        } catch(e) { savedColumnPalettes = {}; }
+
+        // Display Settings
+        let showPins = true;
+        let showLabels = false;
+        let pinSize = 14;
+        let labelFontSize = 11;
+        let isDarkMode = true;
+
+        // Distance Ruler Tool State
+        let isRulerMode = false;
+        let rulerPoints = [];
+        let rulerLine = null;
+        let rulerMarkers = [];
+
+        // Chart Instance
+        let donutChartInstance = null;
+
+        // Preset Palette
+        const presetPalette = [
+            '#10b981', '#f59e0b', '#ef4444', '#3b82f6', 
+            '#8b5cf6', '#a855f7', '#06b6d4', '#64748b'
+        ];
+
+        // Tile Providers
+        const tileProviders = {
+            'carto-dark': 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+            'carto-light': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+            'osm': 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'esri-sat': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            try { lucide.createIcons(); } catch(e) {}
+            initMap();
+            renderSavedPaletteSlots();
+            fetchSheetData();
+        });
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            const htmlEl = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeLabel = document.getElementById('theme-label');
+
+            if (isDarkMode) {
+                htmlEl.classList.add('dark');
+                themeLabel.innerText = "Light Mode";
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'sun');
+                document.getElementById('tile-provider-select').value = 'carto-dark';
+            } else {
+                htmlEl.classList.remove('dark');
+                themeLabel.innerText = "Dark Mode";
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
+                document.getElementById('tile-provider-select').value = 'carto-light';
+            }
+
+            try { lucide.createIcons(); } catch(e) {}
+            changeTileProvider();
+            plotPinsOnMap();
+        }
+
+        function downloadIndexHTML() {
+            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function initMap() {
+            map = L.map('map', {
+                center: [14.5995, 120.9842],
+                zoom: 11,
+                zoomControl: false
+            });
+
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            activeTileLayer = L.tileLayer(tileProviders['carto-dark'], {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap & CartoDB'
+            }).addTo(map);
+
+            markersLayerGroup = L.layerGroup().addTo(map);
+
+            map.on('click', (e) => {
+                if (isRulerMode) {
+                    addRulerPoint(e.latlng);
+                }
+            });
+        }
+
+        async function fetchSheetData() {
+            const syncStatus = document.getElementById('sync-status');
+            if (syncStatus) {
+                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing Dual Sheets...';
+                syncStatus.className = 'text-amber-500 flex items-center gap-1';
+            }
+
+            // 1. Fetch SSV Tracker Data First
+            let ssvCsvText = await fetchCsvEndpoint([SSV_PROXY_URL, SSV_DIRECT_URL]);
+            if (ssvCsvText) {
+                parseSSVTracker(ssvCsvText);
+            }
+
+            // 2. Fetch Primary Swap Data
+            let primaryCsvText = await fetchCsvEndpoint([PRIMARY_PROXY_URL, PRIMARY_DIRECT_URL]);
+            if (primaryCsvText) {
+                parsePrimarySwapSheet(primaryCsvText);
+            } else {
+                if (syncStatus) {
+                    syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Offline Mode';
+                    syncStatus.className = 'text-red-500 flex items-center gap-1';
+                }
+            }
+        }
+
+        async function fetchCsvEndpoint(urls) {
+            for (const url of urls) {
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const text = await res.text();
+                        if (text && text.length > 50 && !text.startsWith('<!DOCTYPE html>')) {
+                            return text;
+                        }
+                    }
+                } catch (e) {
+                    console.warn(`Fetch error for ${url}:`, e);
+                }
+            }
+            return null;
+        }
+
+        function parseSSVTracker(csvText) {
+            ssvLookupMap = {};
+            Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: 'greedy',
+                complete: function (results) {
+                    if (results.data && results.data.length > 0) {
+                        const headers = Object.keys(results.data[0]);
+                        const colPlaid = headers.find(h => h.toUpperCase().includes('PLAID') || h.toUpperCase().includes('LOOKUP') || h.toUpperCase().includes('SITE')) || headers[0];
+                        const colStatus = headers.find(h => h.toUpperCase().includes('APPROVAL') || h.toUpperCase().includes('MILESTONE') || h.toUpperCase().includes('SSV') || h.toUpperCase().includes('STATUS')) || headers[0];
+
+                        // Group all logical band records by unique physical site ID (PLAID)
+                        const plaidBandsMap = {};
+                        results.data.forEach(row => {
+                            const plaid = String(row[colPlaid] || '').trim().toUpperCase();
+                            const rawStatus = String(row[colStatus] || 'NOT YET TRFS').trim();
+
+                            if (plaid) {
+                                if (!plaidBandsMap[plaid]) plaidBandsMap[plaid] = [];
+                                plaidBandsMap[plaid].push({ row, rawStatus });
+                            }
+                        });
+
+                        // Evaluates logical band status severity (Rank 5 = Worst / Highest Impediment, Rank 1 = Best / Milestone)
+                        function getStatusSeverity(statusStr) {
+                            const s = String(statusStr || '').toUpperCase().trim();
+                            if (s.includes('NOT') || s.includes('PENDING') || s.includes('UNSWAPPED')) {
+                                return { rank: 5, category: 'NOT YET TRFS' };
+                            }
+                            // Re-submit milestone mapped to FOR GT REVIEW
+                            if (s.includes('RE-SUBMIT') || s.includes('RESUBMIT') || s.includes('RE_SUBMIT')) {
+                                return { rank: 2, category: 'FOR GT REVIEW' };
+                            }
+                            if (s.includes('REJECT') || s.includes('REVISION') || s.includes('FAILED')) {
+                                return { rank: 4, category: 'REJECTED' };
+                            }
+                            if (s.includes('ONGOING') || s.includes('PROGRESS')) {
+                                return { rank: 3, category: 'ONGOING SSV' };
+                            }
+                            if (s.includes('REVIEW') || s.includes('SUBMIT')) {
+                                return { rank: 2, category: 'FOR GT REVIEW' };
+                            }
+                            if (s.includes('APPROV') || s.includes('DONE') || s.includes('PASS') || s.includes('COMPLET')) {
+                                return { rank: 1, category: 'SSV APPROVED' };
+                            }
+                            return { rank: 5, category: 'NOT YET TRFS' };
+                        }
+
+                        // Consolidate physical site SSV status by ranking all bands from worst to milestone
+                        Object.keys(plaidBandsMap).forEach(plaid => {
+                            const bands = plaidBandsMap[plaid];
+                            let worstRank = 0;
+                            let consolidatedStatus = 'SSV APPROVED';
+                            let allApproved = true;
+
+                            bands.forEach(b => {
+                                const info = getStatusSeverity(b.rawStatus);
+                                if (info.category !== 'SSV APPROVED') {
+                                    allApproved = false;
+                                }
+                                if (info.rank > worstRank) {
+                                    worstRank = info.rank;
+                                    consolidatedStatus = info.category;
+                                }
+                            });
+
+                            if (allApproved) {
+                                consolidatedStatus = 'SSV APPROVED';
+                            }
+
+                            ssvLookupMap[plaid] = {
+                                SSV_Status: consolidatedStatus,
+                                Band_Count: bands.length,
+                                All_Bands_Approved: allApproved,
+                                Raw_SSV_Data: bands[0].row
+                            };
+                        });
+                    }
+                }
+            });
+        }
+
+        function parsePrimarySwapSheet(csvText) {
+            const syncStatus = document.getElementById('sync-status');
+            Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: 'greedy',
+                complete: function (results) {
+                    if (results.data && results.data.length > 0) {
+                        autoDetectColumns(results.data[0]);
+
+                        // Helper to strictly identify Primary Swap Status column from 1st sheet
+                        const findSwapStatus = (r) => {
+                            const keys = Object.keys(r);
+                            const swapKey = keys.find(k => {
+                                const l = k.toLowerCase().trim();
+                                return l === 'swap status' || l === 'swap_status' || (l.includes('swap') && !l.includes('ssv')) || l === 'status';
+                            }) || 'Status';
+                            return String(r[swapKey] || '').trim().toUpperCase();
+                        };
+
+                        rawDataset = results.data.map(row => {
+                            const plaidVal = String(row[colId] || '').trim().toUpperCase();
+                            const primarySwapStatus = findSwapStatus(row);
+
+                            let lookedUpSSVStatus = 'NOT YET SWAPPED';
+
+                            // Lookup unique PLAID for sites tagged DONE or NSB_DONE using consolidated physical site SSV status from 2nd source
+                            if (primarySwapStatus.includes('DONE') || primarySwapStatus.includes('NSB') || primarySwapStatus.includes('SWAPPED')) {
+                                if (ssvLookupMap[plaidVal]) {
+                                    lookedUpSSVStatus = ssvLookupMap[plaidVal].SSV_Status;
+                                } else {
+                                    lookedUpSSVStatus = 'NOT YET TRFS'; // Swapped on site, but pending submission in SSV tracker
+                                }
+                            } else {
+                                lookedUpSSVStatus = 'NOT YET SWAPPED';
+                            }
+
+                            return {
+                                ...row,
+                                'SWAP STATUS': primarySwapStatus || 'PENDING',
+                                'SSV STATUS': lookedUpSSVStatus,
+                                'LOOKED_UP_SSV_STATUS': lookedUpSSVStatus
+                            };
+                        });
+
+                        if (syncStatus) {
+                            const lookupCount = Object.keys(ssvLookupMap).length;
+                            syncStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Synced ${rawDataset.length.toLocaleString()} Sites (${lookupCount} Physical SSV Lookups)`;
+                            syncStatus.className = 'text-emerald-600 dark:text-emerald-400 flex items-center gap-1';
+                        }
+                        document.getElementById('sidebar-record-count').innerText = `${rawDataset.length.toLocaleString()} (${Object.keys(ssvLookupMap).length} SSV Physical Lookups)`;
+
+                        try {
+                            fetch('/api/save-synced-data', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(rawDataset)
+                            }).then(res => {
+                                if (res.ok) console.log('Auto-saved synced primary swap dataset to local CSV');
+                            }).catch(err => console.warn('Auto-save request failed:', err));
+                        } catch(e) {}
+
+                        updateDropdownControls();
+                        initTooltipFieldsConfig();
+                        plotPinsOnMap();
+                        updateLegendSwatches();
+                    }
+                }
+            });
+        }
+
+        function autoDetectColumns(sampleRow) {
+            if (!sampleRow) return;
+            const headers = Object.keys(sampleRow);
+
+            const findHeader = (patterns) => headers.find(h => patterns.some(p => h.toLowerCase().includes(p))) || headers[0];
+
+            colId = headers.find(h => h.toLowerCase() === 'site_id' || h.toLowerCase() === 'site id' || h.toLowerCase() === 'plaid') || findHeader(['site', 'plaid', 'id']);
+            colLat = headers.find(h => h.toLowerCase() === 'latitude' || h.toLowerCase() === 'lat') || findHeader(['lat', 'y']);
+            colLon = headers.find(h => h.toLowerCase() === 'longitude' || h.toLowerCase() === 'lon' || h.toLowerCase() === 'lng') || findHeader(['lon', 'lng', 'x']);
+            colLabel = colId;
+            colGroup = 'SSV STATUS';
+        }
+
+        function updateDropdownControls() {
+            if (rawDataset.length === 0) return;
+            const headers = Object.keys(rawDataset[0]);
+
+            const populateSelect = (elementId, selectedVal) => {
+                const sel = document.getElementById(elementId);
+                if (!sel) return;
+                sel.innerHTML = headers.map(h => `<option value="${h}" ${h === selectedVal ? 'selected' : ''}>${h}</option>`).join('');
+            };
+
+            populateSelect('map-col-id', colId);
+            populateSelect('map-col-lat', colLat);
+            populateSelect('map-col-lon', colLon);
+            populateSelect('map-col-label', colLabel);
+            populateSelect('map-col-group', 'SSV STATUS');
+            populateSelect('search-col-select', colId);
+            populateSelect('filter-col-select', 'SSV STATUS');
+            populateSelect('dash-pivot-col', headers.find(h => h.toLowerCase().includes('province') || h.toLowerCase().includes('region')) || headers[0]);
+        }
+
+        function initTooltipFieldsConfig() {
+            if (rawDataset.length === 0) return;
+            const headers = Object.keys(rawDataset[0]);
+
+            if (userTooltipFields.length === 0) {
+                userTooltipFields = [colId, 'SWAP STATUS', 'SSV STATUS'].filter(h => headers.includes(h));
+            }
+
+            renderTooltipFieldsChecklist();
+        }
+
+        function renderTooltipFieldsChecklist() {
+            const container = document.getElementById('tooltip-fields-container');
+            if (!container || rawDataset.length === 0) return;
+
+            const headers = Object.keys(rawDataset[0]);
+
+            container.innerHTML = headers.map(field => `
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="${field}" ${userTooltipFields.includes(field) ? 'checked' : ''} onchange="toggleTooltipField('${field}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="${field}">${field}</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleTooltipField(field) {
+            if (userTooltipFields.includes(field)) {
+                userTooltipFields = userTooltipFields.filter(f => f !== field);
+            } else {
+                userTooltipFields.push(field);
+            }
+            plotPinsOnMap();
+        }
+
+        function updateFieldMappings() {
+            colId = document.getElementById('map-col-id').value;
+            colLat = document.getElementById('map-col-lat').value;
+            colLon = document.getElementById('map-col-lon').value;
+            colLabel = document.getElementById('map-col-label').value;
+
+            plotPinsOnMap();
+        }
+
+        function cleanHexColor(color) {
+            if (!color || color === 'None' || color === 'undefined') return '#3b82f6';
+            const str = String(color).trim();
+            if (/^#[0-9A-F]{6}$/i.test(str)) return str;
+            const presetMap = {
+                'approved': '#10b981', 'ssv approved': '#10b981', 'done': '#10b981', 'completed': '#10b981',
+                'ongoing ssv': '#f59e0b', 'ongoing': '#f59e0b', 'rejected': '#ef4444',
+                'not yet swapped': '#64748b', 'not yet trfs': '#a855f7', 'for gt review': '#3b82f6'
+            };
+            return presetMap[str.toLowerCase()] || '#3b82f6';
+        }
+
+        function plotPinsOnMap() {
+            markersLayerGroup.clearLayers();
+            leafletMarkers = [];
+
+            if (!showPins || rawDataset.length === 0) return;
+
+            const latVals = [];
+            const lonVals = [];
+
+            rawDataset.forEach((row, index) => {
+                const lat = parseFloat(row[colLat]);
+                const lon = parseFloat(row[colLon]);
+
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    latVals.push(lat);
+                    lonVals.push(lon);
+
+                    const groupVal = String(row[colGroup] || 'Unclassified').trim();
+                    if (!categoryColors[groupVal]) {
+                        categoryColors[groupVal] = cleanHexColor(groupVal);
+                    }
+                    const color = categoryColors[groupVal];
+
+                    const markerIcon = L.divIcon({
+                        className: 'custom-pin-marker',
+                        html: `<div style="background-color: ${color}; width: ${pinSize}px; height: ${pinSize}px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.5);"></div>`,
+                        iconSize: [pinSize, pinSize],
+                        iconAnchor: [pinSize / 2, pinSize / 2]
+                    });
+
+                    const marker = L.marker([lat, lon], { icon: markerIcon });
+
+                    const popupHTML = `
+                        <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[210px] text-xs font-sans border transition-colors">
+                            <div class="font-bold text-sm text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-800 pb-1.5 mb-2 flex items-center justify-between">
+                                <span>${row[colId] || 'Site Details'}</span>
+                                <span class="w-3 h-3 rounded-full border border-white/50" style="background-color: ${color};"></span>
+                            </div>
+                            <div class="space-y-1.5">
+                                ${userTooltipFields.length > 0 ? userTooltipFields.map(f => `
+                                    <div class="flex justify-between gap-3 items-center">
+                                        <span class="text-slate-600 dark:text-slate-400 font-medium">${f}:</span>
+                                        <span class="font-semibold text-slate-900 dark:text-slate-100 text-right truncate max-w-[130px]" title="${row[f] || ''}">${row[f] || '--'}</span>
+                                    </div>
+                                `).join('') : '<div class="text-slate-500 italic">No fields selected</div>'}
+                            </div>
+                        </div>
+                    `;
+
+                    marker.bindPopup(popupHTML, { closeButton: false, offset: [0, -pinSize / 2] });
+
+                    if (showLabels) {
+                        const labelText = String(row[colLabel] || row[colId] || '');
+                        marker.bindTooltip(labelText, {
+                            permanent: true,
+                            direction: 'top',
+                            className: 'custom-pin-label'
+                        });
+                    }
+
+                    marker.on('click', () => inspectSite(index));
+                    markersLayerGroup.addLayer(marker);
+                    leafletMarkers.push({ index, marker, lat, lon });
+                }
+            });
+
+            if (latVals.length > 0 && !map._userPanned) {
+                const avgLat = latVals.reduce((a, b) => a + b, 0) / latVals.length;
+                const avgLon = lonVals.reduce((a, b) => a + b, 0) / lonVals.length;
+                map.setView([avgLat, avgLon], 10);
+            }
+
+            updateFloatingLegend();
+        }
+
+        function onGroupColumnChanged() {
+            colGroup = document.getElementById('map-col-group').value;
+
+            // Restore saved color scheme if available for selected column
+            if (savedColumnPalettes[colGroup]) {
+                categoryColors = { ...savedColumnPalettes[colGroup] };
+            } else {
+                categoryColors = {};
+            }
+
+            plotPinsOnMap();
+            updateLegendSwatches();
+            renderSavedPaletteSlots();
+        }
+
+        function saveCurrentColumnPalette() {
+            if (!colGroup) return;
+            const currentKeys = Object.keys(savedColumnPalettes);
+
+            if (!savedColumnPalettes[colGroup] && currentKeys.length >= 2) {
+                delete savedColumnPalettes[currentKeys[0]];
+            }
+
+            savedColumnPalettes[colGroup] = { ...categoryColors };
+            try {
+                localStorage.setItem('hermes_column_palettes', JSON.stringify(savedColumnPalettes));
+            } catch(e) {}
+
+            renderSavedPaletteSlots();
+            alert(`Color scheme for "${colGroup}" saved successfully!`);
+        }
+
+        function loadSavedColumnPalette(colName) {
+            if (!savedColumnPalettes[colName]) return;
+            document.getElementById('map-col-group').value = colName;
+            colGroup = colName;
+            categoryColors = { ...savedColumnPalettes[colName] };
+
+            plotPinsOnMap();
+            updateLegendSwatches();
+            renderSavedPaletteSlots();
+        }
+
+        function removeSavedColumnPalette(colName) {
+            delete savedColumnPalettes[colName];
+            try {
+                localStorage.setItem('hermes_column_palettes', JSON.stringify(savedColumnPalettes));
+            } catch(e) {}
+            renderSavedPaletteSlots();
+        }
+
+        function renderSavedPaletteSlots() {
+            const container = document.getElementById('saved-palettes-slots');
+            if (!container) return;
+
+            const keys = Object.keys(savedColumnPalettes);
+
+            if (keys.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-[10px] text-slate-400 italic text-center py-1">No saved schemes. Click "Save Current".</div>`;
+                return;
+            }
+
+            container.innerHTML = keys.slice(0, 2).map((key, idx) => {
+                const isActive = (key === colGroup);
+                return `
+                    <div class="p-1.5 ${isActive ? 'bg-purple-100 dark:bg-purple-950/60 border-purple-400 dark:border-purple-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'} border rounded-lg flex items-center justify-between gap-1 transition">
+                        <button onclick="loadSavedColumnPalette('${key}')" class="truncate text-[10px] font-bold ${isActive ? 'text-purple-700 dark:text-purple-300' : 'text-slate-700 dark:text-slate-300'} hover:underline text-left" title="Load ${key}">
+                            Slot ${idx + 1}: ${key}
+                        </button>
+                        <button onclick="removeSavedColumnPalette('${key}')" class="text-slate-400 hover:text-rose-500 text-[10px] px-1" title="Remove slot">✕</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCategoryColor(cat, newColor) {
+            categoryColors[cat] = newColor;
+
+            if (savedColumnPalettes[colGroup]) {
+                savedColumnPalettes[colGroup][cat] = newColor;
+                try {
+                    localStorage.setItem('hermes_column_palettes', JSON.stringify(savedColumnPalettes));
+                } catch(e) {}
+            }
+
+            plotPinsOnMap();
+            updateLegendSwatches();
+        }
+
+        function updateLegendSwatches() {
+            const container = document.getElementById('color-swatches-container');
+            if (!container) return;
+
+            const categories = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
+
+            container.innerHTML = categories.map(cat => {
+                if (!categoryColors[cat]) categoryColors[cat] = cleanHexColor(cat);
+                const color = categoryColors[cat];
+
+                const presetChips = presetPalette.map(pColor => `
+                    <button onclick="updateCategoryColor('${cat}', '${pColor}')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: ${pColor};" title="Set to ${pColor}"></button>
+                `).join('');
+
+                return `
+                    <div class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs" title="${cat}">${cat}</span>
+                            <div class="flex items-center gap-1.5">
+                                <input type="color" value="${color}" onchange="updateCategoryColor('${cat}', this.value)" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 pt-1 border-t border-slate-200 dark:border-slate-800/60 overflow-x-auto custom-scrollbar">
+                            <span class="text-[10px] text-slate-500 mr-1 shrink-0">Preset:</span>
+                            ${presetChips}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateFloatingLegend() {
+            const container = document.getElementById('floating-legend-content');
+            if (!container) return;
+
+            const counts = {};
+            rawDataset.forEach(d => {
+                const cat = String(d[colGroup] || 'Unclassified').trim();
+                counts[cat] = (counts[cat] || 0) + 1;
+            });
+
+            container.innerHTML = Object.entries(counts).map(([cat, count]) => `
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-1.5 truncate">
+                        <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-color: ${categoryColors[cat] || '#3b82f6'}"></span>
+                        <span class="text-slate-700 dark:text-slate-300 truncate" title="${cat}">${cat}</span>
+                    </div>
+                    <span class="font-bold text-slate-500 dark:text-slate-400 font-mono">${count}</span>
+                </div>
+            `).join('');
+        }
+
+        function inspectSite(index) {
+            selectedSiteIndex = index;
+            const site = rawDataset[index];
+            if (!site) return;
+
+            document.getElementById('inspect-site-id').innerText = site[colId] || `Row #${index + 1}`;
+
+            const container = document.getElementById('inspector-container');
+            const fields = Object.keys(site);
+
+            container.innerHTML = `
+                <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                    ${fields.map(field => `
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">${field}</label>
+                            <input type="text" id="inspect-field-${field}" value="${site[field] || ''}" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    `).join('')}
+                </div>
+                <button onclick="saveSiteDetails()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition text-xs shadow-sm mt-2">
+                    Save Changes
+                </button>
+            `;
+        }
+
+        function saveSiteDetails() {
+            if (selectedSiteIndex === null || !rawDataset[selectedSiteIndex]) return;
+            const site = rawDataset[selectedSiteIndex];
+
+            Object.keys(site).forEach(field => {
+                const el = document.getElementById(`inspect-field-${field}`);
+                if (el) site[field] = el.value;
+            });
+
+            plotPinsOnMap();
+            alert('Site details updated successfully!');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar-deck').classList.toggle('-translate-x-full');
+        }
+
+        function togglePinsVisibility() {
+            showPins = document.getElementById('chk-show-pins').checked;
+            plotPinsOnMap();
+        }
+
+        function toggleLabelsVisibility() {
+            showLabels = document.getElementById('chk-show-labels').checked;
+            plotPinsOnMap();
+        }
+
+        function changeTileProvider() {
+            const provider = document.getElementById('tile-provider-select').value;
+            if (activeTileLayer) map.removeLayer(activeTileLayer);
+            activeTileLayer = L.tileLayer(tileProviders[provider], { maxZoom: 19 }).addTo(map);
+        }
+
+        function updatePinSize(val) {
+            pinSize = parseInt(val);
+            document.getElementById('pin-size-val').innerText = `${val}px`;
+            plotPinsOnMap();
+        }
+
+        function updateFontSize(val) {
+            labelFontSize = parseInt(val);
+            document.getElementById('font-size-val').innerText = `${val}px`;
+            plotPinsOnMap();
+        }
+
+        function toggleRulerMode() {
+            isRulerMode = !isRulerMode;
+            const btn = document.getElementById('btn-ruler');
+            const resultBox = document.getElementById('ruler-result');
+
+            if (isRulerMode) {
+                btn.className = "w-full px-3 py-2 bg-amber-600 text-white border border-amber-500 rounded-lg font-bold transition flex items-center justify-center gap-1.5 shadow-sm";
+                resultBox.classList.remove('hidden');
+                clearRuler();
+            } else {
+                btn.className = "w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg font-medium transition flex items-center justify-center gap-1.5";
+                resultBox.classList.add('hidden');
+                clearRuler();
+            }
+        }
+
+        function addRulerPoint(latlng) {
+            rulerPoints.push(latlng);
+            const ptIndex = rulerPoints.length;
+
+            let labelText = `Start (P1)`;
+            let segmentDist = 0;
+            let totalDist = 0;
+
+            if (ptIndex > 1) {
+                for (let i = 0; i < ptIndex - 1; i++) {
+                    totalDist += rulerPoints[i].distanceTo(rulerPoints[i + 1]);
+                }
+                segmentDist = rulerPoints[ptIndex - 2].distanceTo(rulerPoints[ptIndex - 1]);
+                labelText = `P${ptIndex}: +${(segmentDist / 1000).toFixed(2)} km (Total: ${(totalDist / 1000).toFixed(2)} km)`;
+            }
+
+            const circle = L.circleMarker(latlng, {
+                radius: 6,
+                color: '#f59e0b',
+                fillColor: '#f59e0b',
+                fillOpacity: 1,
+                weight: 2
+            }).addTo(map);
+
+            circle.bindTooltip(labelText, {
+                permanent: true,
+                direction: 'top',
+                className: 'ruler-map-tooltip'
+            }).openTooltip();
+
+            rulerMarkers.push(circle);
+
+            if (ptIndex > 1) {
+                if (rulerLine) map.removeLayer(rulerLine);
+                rulerLine = L.polyline(rulerPoints, {
+                    color: '#f59e0b',
+                    weight: 4,
+                    dashArray: '6, 8',
+                    opacity: 0.95
+                }).addTo(map);
+
+                document.getElementById('ruler-result').innerText = `Total Distance: ${(totalDist / 1000).toFixed(2)} km (${rulerPoints.length} Points)`;
+            }
+        }
+
+        function clearRuler() {
+            rulerMarkers.forEach(m => map.removeLayer(m));
+            if (rulerLine) map.removeLayer(rulerLine);
+            rulerMarkers = [];
+            rulerLine = null;
+            rulerPoints = [];
+            if (document.getElementById('ruler-result')) {
+                document.getElementById('ruler-result').innerText = 'Click on the map to add distance points';
+            }
+        }
+
+        function openTableModal() {
+            document.getElementById('table-modal').classList.remove('hidden');
+            renderTableGrid();
+        }
+
+        function closeTableModal() {
+            document.getElementById('table-modal').classList.add('hidden');
+        }
+
+        function renderTableGrid() {
+            if (rawDataset.length === 0) return;
+            const headers = Object.keys(rawDataset[0]);
+
+            const query = (document.getElementById('grid-global-search').value || '').toLowerCase();
+            const filtered = rawDataset.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(query)));
+
+            document.getElementById('grid-status-count').innerText = `Showing ${filtered.length.toLocaleString()} of ${rawDataset.length.toLocaleString()} rows (Includes IBS)`;
+
+            document.getElementById('grid-thead').innerHTML = `
+                <tr>
+                    <th class="p-2 border border-slate-200 dark:border-slate-800 w-10 text-center">#</th>
+                    ${headers.map(h => `<th class="p-2 border border-slate-200 dark:border-slate-800">${h}</th>`).join('')}
+                </tr>
+            `;
+
+            document.getElementById('grid-tbody').innerHTML = filtered.slice(0, 200).map((row, idx) => `
+                <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/50 transition">
+                    <td class="p-2 border border-slate-200 dark:border-slate-800 text-center text-slate-500 font-bold">${idx + 1}</td>
+                    ${headers.map(h => `<td class="p-2 border border-slate-200 dark:border-slate-800 truncate max-w-xs" title="${row[h] || ''}">${row[h] || ''}</td>`).join('')}
+                </tr>
+            `).join('');
+        }
+
+        function openDashboardModal() {
+            document.getElementById('dashboard-modal').classList.remove('hidden');
+            renderDashboard();
+        }
+
+        function closeDashboardModal() {
+            document.getElementById('dashboard-modal').classList.add('hidden');
+        }
+
+        function renderDashboard() {
+            if (rawDataset.length === 0) return;
+
+            // Helper to strictly identify IBS sites on SWAP STATUS
+            const isIbsRow = (d) => {
+                const swapSt = String(d['SWAP STATUS'] || d['Swap Status'] || '').toUpperCase().trim();
+                return swapSt.includes('IBS');
+            };
+
+            // Dynamic completion metrics and progress charts EXCLUDE IBS on SWAP STATUS
+            const nonIbsDataset = rawDataset.filter(d => !isIbsRow(d));
+
+            const total = nonIbsDataset.length;
+            const swappedList = nonIbsDataset.filter(d => {
+                const val = String(d[colGroup] || '').toLowerCase();
+                return val.includes('approved') || val.includes('swapped') || val.includes('done') || val.includes('completed');
+            });
+            const swappedCount = swappedList.length;
+            const pendingCount = total - swappedCount;
+            const pct = total > 0 ? ((swappedCount / total) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('dash-completion-pct').innerText = `${pct}%`;
+            document.getElementById('dash-progress-bar').style.width = `${pct}%`;
+            document.getElementById('dash-completion-sub').innerText = `${swappedCount.toLocaleString()} of ${total.toLocaleString()} non-IBS sites SSV approved`;
+            document.getElementById('dash-remaining-sub').innerText = `${pendingCount.toLocaleString()} non-IBS pending SSV cutover`;
+
+            document.getElementById('dash-kpi-total').innerText = total.toLocaleString();
+            document.getElementById('dash-kpi-swapped').innerText = swappedCount.toLocaleString();
+            document.getElementById('dash-kpi-pending').innerText = pendingCount.toLocaleString();
+
+            // Status counts for non-IBS dataset for dynamic donut chart
+            const statusCounts = {};
+            nonIbsDataset.forEach(d => {
+                const st = String(d[colGroup] || 'Unclassified').trim();
+                statusCounts[st] = (statusCounts[st] || 0) + 1;
+            });
+
+            document.getElementById('dash-kpi-grid').innerHTML = Object.entries(statusCounts).map(([st, cnt]) => `
+                <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
+                    <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase truncate" title="${st}">${st}</div>
+                    <div class="text-xl font-black text-slate-900 dark:text-white">${cnt.toLocaleString()}</div>
+                </div>
+            `).join('');
+
+            renderDonutChart(statusCounts);
+
+            // Regional SSV Pivot Table includes ALL sites (both Macro & IBS)
+            const pivotCol = document.getElementById('dash-pivot-col').value;
+            const pivotMap = {};
+
+            rawDataset.forEach(d => {
+                const region = String(d[pivotCol] || 'Unspecified').trim();
+                const st = String(d[colGroup] || 'Unclassified').trim();
+
+                if (!pivotMap[region]) pivotMap[region] = {};
+                pivotMap[region][st] = (pivotMap[region][st] || 0) + 1;
+            });
+
+            const allStatusCounts = {};
+            rawDataset.forEach(d => {
+                const st = String(d[colGroup] || 'Unclassified').trim();
+                allStatusCounts[st] = (allStatusCounts[st] || 0) + 1;
+            });
+            const statuses = Object.keys(allStatusCounts).sort();
+
+            // Rank & sort regions by SSV Completion Percentage descending
+            const pivotRows = Object.entries(pivotMap).map(([reg, stMap]) => {
+                const regTotal = Object.values(stMap).reduce((a, b) => a + b, 0);
+
+                let regApproved = 0;
+                Object.keys(stMap).forEach(stKey => {
+                    if (stKey.toLowerCase().includes('approved') || stKey.toLowerCase().includes('swapped') || stKey.toLowerCase().includes('done')) {
+                        regApproved += stMap[stKey];
+                    }
+                });
+                const regPct = regTotal > 0 ? (regApproved / regTotal) * 100 : 0;
+
+                return { reg, regTotal, regApproved, regPct, stMap };
+            });
+
+            // Rank completion descending
+            pivotRows.sort((a, b) => b.regPct - a.regPct || b.regTotal - a.regTotal);
+
+            document.getElementById('dash-pivot-thead').innerHTML = `
+                <tr>
+                    <th class="p-2 border border-slate-200 dark:border-slate-800 text-center w-12">Rank</th>
+                    <th class="p-2 border border-slate-200 dark:border-slate-800">${pivotCol}</th>
+                    <th class="p-2 border border-slate-200 dark:border-slate-800 text-center">Total</th>
+                    <th class="p-2 border border-slate-200 dark:border-slate-800 text-center">SSV Completion %</th>
+                    ${statuses.map(s => `<th class="p-2 border border-slate-200 dark:border-slate-800 text-center">${s}</th>`).join('')}
+                </tr>
+            `;
+
+            document.getElementById('dash-pivot-tbody').innerHTML = pivotRows.map((row, idx) => {
+                const formattedPct = row.regPct.toFixed(1);
+                return `
+                    <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/40 transition">
+                        <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold text-slate-500 dark:text-slate-400">#${idx + 1}</td>
+                        <td class="p-2 border border-slate-200 dark:border-slate-800 font-bold text-slate-800 dark:text-slate-200">${row.reg}</td>
+                        <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold text-blue-600 dark:text-blue-400">${row.regTotal}</td>
+                        <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold">
+                            <div class="flex items-center justify-center gap-2">
+                                <div class="w-12 bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-emerald-500 h-full" style="width: ${formattedPct}%"></div>
+                                </div>
+                                <span class="text-emerald-600 dark:text-emerald-400 font-mono text-[11px]">${formattedPct}%</span>
+                            </div>
+                        </td>
+                        ${statuses.map(s => `<td class="p-2 border border-slate-200 dark:border-slate-800 text-center ${row.stMap[s] ? 'text-slate-800 dark:text-slate-200 font-bold' : 'text-slate-400 dark:text-slate-600'}">${row.stMap[s] || 0}</td>`).join('')}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderDonutChart(statusCounts) {
+            const ctx = document.getElementById('dash-donut-chart');
+            if (!ctx) return;
+
+            if (donutChartInstance) {
+                donutChartInstance.destroy();
+            }
+
+            const labels = Object.keys(statusCounts);
+            const dataVals = Object.values(statusCounts);
+            const bgColors = labels.map(l => categoryColors[l] || '#3b82f6');
+
+            donutChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataVals,
+                        backgroundColor: bgColors,
+                        borderWidth: 2,
+                        borderColor: isDarkMode ? '#0f172a' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function executeSearch() {
+            const col = document.getElementById('search-col-select').value;
+            const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+            if (!query) return;
+
+            const match = leafletMarkers.find(item => {
+                const site = rawDataset[item.index];
+                return site && String(site[col] || '').toLowerCase().includes(query);
+            });
+
+            if (match) {
+                map.setView([match.lat, match.lon], 15);
+                inspectSite(match.index);
+                if (match.marker) match.marker.openPopup();
+                document.getElementById('search-filter-status').innerText = `Targeted: ${rawDataset[match.index][colId]}`;
+            } else {
+                document.getElementById('search-filter-status').innerText = 'No matching site found.';
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('search-filter-status').innerText = '';
+        }
+
+        function exportToKML() {
+            if (rawDataset.length === 0) return;
+
+            let kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Geospatial Deck Export</name>
+    <Folder>
+      <name>Sites</name>
+`;
+
+            rawDataset.forEach(row => {
+                const lat = parseFloat(row[colLat]);
+                const lon = parseFloat(row[colLon]);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    kml += `
+      <Placemark>
+        <name>${row[colId] || 'Site'}</name>
+        <Point>
+          <coordinates>${lon},${lat},0</coordinates>
+        </Point>
+      </Placemark>`;
+                }
+            });
+
+            kml += `
+    </Folder>
+  </Document>
+</kml>`;
+
+            const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Geospatial_Deck_Export.kml`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
