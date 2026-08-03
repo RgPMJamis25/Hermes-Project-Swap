@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="dark h-full">
-<head>
+<html lang="en" class="dark h-full"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geospatial Modification Deck & Cross-Sheet SSV Lookup</title>
+    <title>Geospatial Modification Deck &amp; Cross-Sheet SSV Lookup</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,16 +20,13 @@
     </script>
 
     <!-- Leaflet CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- PapaParse CSV -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Chart.js for Executive Dashboard Visualization -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -108,18 +104,18 @@
         .leaflet-popup-tip { background: #0f172a !important; }
         html:not(.dark) .leaflet-popup-tip { background: #ffffff !important; }
     </style>
-</head>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.left-0{left:0px}.right-4{right:1rem}.top-0{top:0px}.top-16{top:4rem}.top-full{top:100%}.z-0{z-index:0}.z-10{z-index:10}.z-20{z-index:20}.z-30{z-index:30}.z-50{z-index:50}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-1\.5{margin-top:0.375rem}.mr-1{margin-right:0.25rem}.mb-0\.5{margin-bottom:0.125rem}.mt-2{margin-top:0.5rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-1{height:0.25rem}.h-14{height:3.5rem}.h-2{height:0.5rem}.h-3{height:0.75rem}.h-3\.5{height:0.875rem}.h-4{height:1rem}.h-48{height:12rem}.h-5{height:1.25rem}.h-full{height:100%}.h-2\.5{height:0.625rem}.h-6{height:1.5rem}.max-h-48{max-height:12rem}.max-h-52{max-height:13rem}.max-h-60{max-height:15rem}.w-1{width:0.25rem}.w-2{width:0.5rem}.w-28{width:7rem}.w-3{width:0.75rem}.w-3\.5{width:0.875rem}.w-4{width:1rem}.w-48{width:12rem}.w-5{width:1.25rem}.w-64{width:16rem}.w-80{width:20rem}.w-full{width:100%}.w-2\.5{width:0.625rem}.w-6{width:1.5rem}.min-w-\[120px\]{min-width:120px}.min-w-\[210px\]{min-width:210px}.max-w-\[180px\]{max-width:180px}.max-w-xs{max-width:20rem}.max-w-\[130px\]{max-width:130px}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.border-collapse{border-collapse:collapse}.translate-x-0{--tw-translate-x:0px;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-6{gap:1.5rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-slate-200 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(226 232 240 / var(--tw-divide-opacity, 1))}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-0{border-width:0px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-blue-500\/30{border-color:rgb(59 130 246 / 0.3)}.border-purple-500\/30{border-color:rgb(168 85 247 / 0.3)}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.border-slate-400{--tw-border-opacity:1;border-color:rgb(148 163 184 / var(--tw-border-opacity, 1))}.border-purple-400{--tw-border-opacity:1;border-color:rgb(192 132 252 / var(--tw-border-opacity, 1))}.border-white\/50{border-color:rgb(255 255 255 / 0.5)}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-blue-600\/20{background-color:rgb(37 99 235 / 0.2)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-purple-600{--tw-bg-opacity:1;background-color:rgb(147 51 234 / var(--tw-bg-opacity, 1))}.bg-purple-600\/20{background-color:rgb(147 51 234 / 0.2)}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-400{--tw-bg-opacity:1;background-color:rgb(148 163 184 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-950{--tw-bg-opacity:1;background-color:rgb(2 6 23 / var(--tw-bg-opacity, 1))}.bg-slate-950\/80{background-color:rgb(2 6 23 / 0.8)}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/90{background-color:rgb(255 255 255 / 0.9)}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255 / var(--tw-bg-opacity, 1))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-blue-500{--tw-gradient-from:#3b82f6 var(--tw-gradient-from-position);--tw-gradient-to:rgb(59 130 246 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-emerald-500{--tw-gradient-to:rgb(16 185 129 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #10b981 var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-emerald-400{--tw-gradient-to:#34d399 var(--tw-gradient-to-position)}.p-0\.5{padding:0.125rem}.p-1\.5{padding:0.375rem}.p-2{padding:0.5rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-1{padding:0.25rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-1{padding-bottom:0.25rem}.pb-1\.5{padding-bottom:0.375rem}.pb-3{padding-bottom:0.75rem}.pr-1{padding-right:0.25rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-sans{font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:0.05em}.text-amber-500{--tw-text-opacity:1;color:rgb(245 158 11 / var(--tw-text-opacity, 1))}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6 / var(--tw-text-opacity, 1))}.text-blue-500{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-cyan-500{--tw-text-opacity:1;color:rgb(6 182 212 / var(--tw-text-opacity, 1))}.text-emerald-500{--tw-text-opacity:1;color:rgb(16 185 129 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-indigo-500{--tw-text-opacity:1;color:rgb(99 102 241 / var(--tw-text-opacity, 1))}.text-purple-500{--tw-text-opacity:1;color:rgb(168 85 247 / var(--tw-text-opacity, 1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234 / var(--tw-text-opacity, 1))}.text-rose-500{--tw-text-opacity:1;color:rgb(244 63 94 / var(--tw-text-opacity, 1))}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-purple-700{--tw-text-opacity:1;color:rgb(126 34 206 / var(--tw-text-opacity, 1))}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.accent-blue-500{accent-color:#3b82f6}.opacity-100{opacity:1}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.backdrop-blur{--tw-backdrop-blur:blur(8px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.duration-700{transition-duration:700ms}.hover\:scale-125:hover{--tw-scale-x:1.25;--tw-scale-y:1.25;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-blue-500:hover{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-500:hover{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-500:hover{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.hover\:bg-purple-500:hover{--tw-bg-opacity:1;background-color:rgb(168 85 247 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.hover\:text-slate-800:hover{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.hover\:text-rose-500:hover{--tw-text-opacity:1;color:rgb(244 63 94 / var(--tw-text-opacity, 1))}.hover\:text-slate-900:hover{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.focus\:ring-1:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-0:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(59 130 246 / var(--tw-ring-opacity, 1))}.dark\:divide-slate-800\/60:is(.dark *) > :not([hidden]) ~ :not([hidden]){border-color:rgb(30 41 59 / 0.6)}.dark\:border-slate-700:is(.dark *){--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.dark\:border-slate-700\/60:is(.dark *){border-color:rgb(51 65 85 / 0.6)}.dark\:border-slate-800:is(.dark *){--tw-border-opacity:1;border-color:rgb(30 41 59 / var(--tw-border-opacity, 1))}.dark\:border-slate-800\/80:is(.dark *){border-color:rgb(30 41 59 / 0.8)}.dark\:border-slate-600:is(.dark *){--tw-border-opacity:1;border-color:rgb(71 85 105 / var(--tw-border-opacity, 1))}.dark\:border-slate-800\/60:is(.dark *){border-color:rgb(30 41 59 / 0.6)}.dark\:border-purple-600:is(.dark *){--tw-border-opacity:1;border-color:rgb(147 51 234 / var(--tw-border-opacity, 1))}.dark\:bg-slate-600:is(.dark *){--tw-bg-opacity:1;background-color:rgb(71 85 105 / var(--tw-bg-opacity, 1))}.dark\:bg-slate-800:is(.dark *){--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.dark\:bg-slate-900:is(.dark *){--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.dark\:bg-slate-900\/80:is(.dark *){background-color:rgb(15 23 42 / 0.8)}.dark\:bg-slate-900\/90:is(.dark *){background-color:rgb(15 23 42 / 0.9)}.dark\:bg-slate-950:is(.dark *){--tw-bg-opacity:1;background-color:rgb(2 6 23 / var(--tw-bg-opacity, 1))}.dark\:bg-purple-950\/60:is(.dark *){background-color:rgb(59 7 100 / 0.6)}.dark\:text-amber-300:is(.dark *){--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.dark\:text-amber-400:is(.dark *){--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.dark\:text-blue-400:is(.dark *){--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.dark\:text-emerald-400:is(.dark *){--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.dark\:text-purple-400:is(.dark *){--tw-text-opacity:1;color:rgb(192 132 252 / var(--tw-text-opacity, 1))}.dark\:text-slate-100:is(.dark *){--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.dark\:text-slate-200:is(.dark *){--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.dark\:text-slate-300:is(.dark *){--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.dark\:text-slate-400:is(.dark *){--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.dark\:text-slate-500:is(.dark *){--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.dark\:text-white:is(.dark *){--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.dark\:text-purple-300:is(.dark *){--tw-text-opacity:1;color:rgb(216 180 254 / var(--tw-text-opacity, 1))}.dark\:hover\:bg-slate-700:hover:is(.dark *){--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.dark\:hover\:bg-slate-800:hover:is(.dark *){--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.dark\:hover\:text-white:hover:is(.dark *){--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}@media (min-width: 640px){.sm\:block{display:block}.sm\:inline{display:inline}.sm\:w-36{width:9rem}.sm\:w-96{width:24rem}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.sm\:p-8{padding:2rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}}@media (min-width: 768px){.md\:inline{display:inline}.md\:grid-cols-6{grid-template-columns:repeat(6, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:col-span-2{grid-column:span 2 / span 2}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style></head>
 
 <body class="h-full flex flex-col font-sans antialiased bg-slate-950 text-slate-100 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200 overflow-hidden">
 
     <header class="h-14 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur sticky top-0 z-30 px-4 flex items-center justify-between shrink-0 transition-colors">
         <div class="flex items-center gap-3">
             <button id="toggle-sidebar-btn" onclick="toggleSidebar()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-700 transition" title="Toggle Sidebar">
-                <i data-lucide="panel-left" class="w-4 h-4"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="panel-left" aria-hidden="true" class="lucide lucide-panel-left w-4 h-4"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg>
             </button>
             <div class="flex items-center gap-2">
                 <div class="p-1.5 bg-blue-600/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-500/30">
-                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="map-pin" aria-hidden="true" class="lucide lucide-map-pin w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
                 </div>
                 <div>
                     <h1 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">Geospatial Modification Deck</h1>
@@ -128,9 +124,7 @@
                         <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
                         <span>SSV Tracker: <strong class="text-slate-700 dark:text-slate-300">Sheet1</strong></span>
                         <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
-                        <span id="sync-status" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Syncing...
-                        </span>
+                        <span id="sync-status" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Synced 1,880 Sites (476 SSV Lookups)</span>
                     </p>
                 </div>
             </div>
@@ -138,24 +132,24 @@
 
         <div class="flex items-center gap-2">
             <button onclick="toggleTheme()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-500 dark:text-amber-300 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5" title="Toggle Light / Dark Theme">
-                <i id="theme-icon" data-lucide="sun" class="w-4 h-4"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sun" aria-hidden="true" id="theme-icon" class="lucide lucide-sun w-4 h-4"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
                 <span id="theme-label" class="text-xs font-semibold text-slate-800 dark:text-slate-200 hidden md:inline">Light Mode</span>
             </button>
 
             <button onclick="downloadIndexHTML()" class="px-2.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition flex items-center gap-1.5 shadow-sm">
-                <i data-lucide="file-code" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Save index.html</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="file-code" aria-hidden="true" class="lucide lucide-file-code w-3.5 h-3.5"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 12.5 8 15l2 2.5"></path><path d="m14 12.5 2 2.5-2 2.5"></path></svg> <span class="hidden sm:inline">Save index.html</span>
             </button>
             <button onclick="fetchSheetData()" class="px-2.5 py-1.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Sync Sheets</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="refresh-cw" aria-hidden="true" class="lucide lucide-refresh-cw w-3.5 h-3.5"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg> <span class="hidden sm:inline">Sync Sheets</span>
             </button>
             <button onclick="openTableModal()" class="px-2.5 py-1.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5">
-                <i data-lucide="table" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Data Matrix</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="table" aria-hidden="true" class="lucide lucide-table w-3.5 h-3.5"><path d="M12 3v18"></path><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 9h18"></path><path d="M3 15h18"></path></svg> <span class="hidden sm:inline">Data Matrix</span>
             </button>
             <button onclick="openDashboardModal()" class="px-2.5 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition flex items-center gap-1.5 shadow-sm">
-                <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Analytics</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bar-chart-2" aria-hidden="true" class="lucide lucide-bar-chart-2 w-3.5 h-3.5"><path d="M5 21v-6"></path><path d="M12 21V3"></path><path d="M19 21V9"></path></svg> <span class="hidden sm:inline">Analytics</span>
             </button>
             <button onclick="exportToKML()" class="px-2.5 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition flex items-center gap-1.5 shadow-sm">
-                <i data-lucide="download" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Export KML</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="download" aria-hidden="true" class="lucide lucide-download w-3.5 h-3.5"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg> <span class="hidden sm:inline">Export KML</span>
             </button>
         </div>
     </header>
@@ -168,7 +162,7 @@
                 <!-- 1. Database Sources -->
                 <div class="space-y-3">
                     <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        <span class="flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4 text-blue-500"></i> Google Sheet Sources</span>
+                        <span class="flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="database" aria-hidden="true" class="lucide lucide-database w-4 h-4 text-blue-500"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg> Google Sheet Sources</span>
                     </div>
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
                         <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="Swap Sheet: 12amb34jsOrqkkeKST2-0uxiYYg6M-IGmsM_z-jojy4M">
@@ -179,7 +173,7 @@
                         </div>
                         <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800">
                             <span class="text-slate-500 dark:text-slate-400">Loaded Sites / Lookups:</span>
-                            <span id="sidebar-record-count" class="font-bold text-slate-900 dark:text-white">0</span>
+                            <span id="sidebar-record-count" class="font-bold text-slate-900 dark:text-white">1,880 (476 Physical Lookups)</span>
                         </div>
                     </div>
                 </div>
@@ -187,26 +181,26 @@
                 <!-- 2. Database Field Mapping -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                        <i data-lucide="sliders" class="w-4 h-4 text-indigo-500"></i> Database Field Mapping
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sliders" aria-hidden="true" class="lucide lucide-sliders w-4 h-4 text-indigo-500"><path d="M10 8h4"></path><path d="M12 21v-9"></path><path d="M12 8V3"></path><path d="M17 16h4"></path><path d="M19 12V3"></path><path d="M19 21v-5"></path><path d="M3 14h4"></path><path d="M5 10V3"></path><path d="M5 21v-7"></path></svg> Database Field Mapping
                     </div>
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
                         <div>
                             <label class="block text-slate-600 dark:text-slate-400 mb-1">PLAID / Site ID Column</label>
-                            <select id="map-col-id" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                            <select id="map-col-id" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"><option value="PLAID" selected="">PLAID</option><option value="BCF NAME">BCF NAME</option><option value="OLD BCF NAME">OLD BCF NAME</option><option value="CL NUMBER">CL NUMBER</option><option value="Sub Cluster">Sub Cluster</option><option value="SWAP STATUS">SWAP STATUS</option><option value="SSV STATUS">SSV STATUS</option><option value="CUTOVER DATE">CUTOVER DATE</option><option value="CLUSTER TAGGING">CLUSTER TAGGING</option><option value="STATUS">STATUS</option><option value="TOWERCO">TOWERCO</option><option value="DOABILITY">DOABILITY</option><option value="REMARKS">REMARKS</option><option value="PROVINCE">PROVINCE</option><option value="TOWN">TOWN</option><option value="SITE SOLUTION">SITE SOLUTION</option><option value="SITE TYPE">SITE TYPE</option><option value="VENDOR">VENDOR</option><option value="LAT">LAT</option><option value="LON">LON</option><option value="CLASSIFICATION">CLASSIFICATION</option><option value="LOOKED_UP_SSV_STATUS">LOOKED_UP_SSV_STATUS</option></select>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-slate-600 dark:text-slate-400 mb-1">Latitude (Y)</label>
-                                <select id="map-col-lat" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                                <select id="map-col-lat" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"><option value="PLAID">PLAID</option><option value="BCF NAME">BCF NAME</option><option value="OLD BCF NAME">OLD BCF NAME</option><option value="CL NUMBER">CL NUMBER</option><option value="Sub Cluster">Sub Cluster</option><option value="SWAP STATUS">SWAP STATUS</option><option value="SSV STATUS">SSV STATUS</option><option value="CUTOVER DATE">CUTOVER DATE</option><option value="CLUSTER TAGGING">CLUSTER TAGGING</option><option value="STATUS">STATUS</option><option value="TOWERCO">TOWERCO</option><option value="DOABILITY">DOABILITY</option><option value="REMARKS">REMARKS</option><option value="PROVINCE">PROVINCE</option><option value="TOWN">TOWN</option><option value="SITE SOLUTION">SITE SOLUTION</option><option value="SITE TYPE">SITE TYPE</option><option value="VENDOR">VENDOR</option><option value="LAT" selected="">LAT</option><option value="LON">LON</option><option value="CLASSIFICATION">CLASSIFICATION</option><option value="LOOKED_UP_SSV_STATUS">LOOKED_UP_SSV_STATUS</option></select>
                             </div>
                             <div>
                                 <label class="block text-slate-600 dark:text-slate-400 mb-1">Longitude (X)</label>
-                                <select id="map-col-lon" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                                <select id="map-col-lon" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"><option value="PLAID">PLAID</option><option value="BCF NAME">BCF NAME</option><option value="OLD BCF NAME">OLD BCF NAME</option><option value="CL NUMBER">CL NUMBER</option><option value="Sub Cluster">Sub Cluster</option><option value="SWAP STATUS">SWAP STATUS</option><option value="SSV STATUS">SSV STATUS</option><option value="CUTOVER DATE">CUTOVER DATE</option><option value="CLUSTER TAGGING">CLUSTER TAGGING</option><option value="STATUS">STATUS</option><option value="TOWERCO">TOWERCO</option><option value="DOABILITY">DOABILITY</option><option value="REMARKS">REMARKS</option><option value="PROVINCE">PROVINCE</option><option value="TOWN">TOWN</option><option value="SITE SOLUTION">SITE SOLUTION</option><option value="SITE TYPE">SITE TYPE</option><option value="VENDOR">VENDOR</option><option value="LAT">LAT</option><option value="LON" selected="">LON</option><option value="CLASSIFICATION">CLASSIFICATION</option><option value="LOOKED_UP_SSV_STATUS">LOOKED_UP_SSV_STATUS</option></select>
                             </div>
                         </div>
                         <div>
                             <label class="block text-slate-600 dark:text-slate-400 mb-1">Pin Display Label Column</label>
-                            <select id="map-col-label" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                            <select id="map-col-label" onchange="updateFieldMappings()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"><option value="PLAID" selected="">PLAID</option><option value="BCF NAME">BCF NAME</option><option value="OLD BCF NAME">OLD BCF NAME</option><option value="CL NUMBER">CL NUMBER</option><option value="Sub Cluster">Sub Cluster</option><option value="SWAP STATUS">SWAP STATUS</option><option value="SSV STATUS">SSV STATUS</option><option value="CUTOVER DATE">CUTOVER DATE</option><option value="CLUSTER TAGGING">CLUSTER TAGGING</option><option value="STATUS">STATUS</option><option value="TOWERCO">TOWERCO</option><option value="DOABILITY">DOABILITY</option><option value="REMARKS">REMARKS</option><option value="PROVINCE">PROVINCE</option><option value="TOWN">TOWN</option><option value="SITE SOLUTION">SITE SOLUTION</option><option value="SITE TYPE">SITE TYPE</option><option value="VENDOR">VENDOR</option><option value="LAT">LAT</option><option value="LON">LON</option><option value="CLASSIFICATION">CLASSIFICATION</option><option value="LOOKED_UP_SSV_STATUS">LOOKED_UP_SSV_STATUS</option></select>
                         </div>
                     </div>
                 </div>
@@ -214,12 +208,12 @@
                 <!-- 3. Map Display Settings -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                        <i data-lucide="layers" class="w-4 h-4 text-emerald-500"></i> Map Display Settings
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layers" aria-hidden="true" class="lucide lucide-layers w-4 h-4 text-emerald-500"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"></path><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"></path><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"></path></svg> Map Display Settings
                     </div>
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 text-xs">
                         <div class="grid grid-cols-2 gap-2">
                             <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
-                                <input type="checkbox" id="chk-show-pins" checked onchange="togglePinsVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Show Pins
+                                <input type="checkbox" id="chk-show-pins" checked="" onchange="togglePinsVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Show Pins
                             </label>
                             <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
                                 <input type="checkbox" id="chk-show-labels" onchange="toggleLabelsVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Labels
@@ -237,11 +231,11 @@
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-slate-600 dark:text-slate-400 mb-1">Pin Size: <span id="pin-size-val">14px</span></label>
-                                <input type="range" id="slider-pin-size" min="8" max="28" value="14" oninput="updatePinSize(this.value)" class="w-full accent-blue-500">
+                                <input type="range" id="slider-pin-size" min="8" max="28" value="14" class="w-full accent-blue-500">
                             </div>
                             <div>
                                 <label class="block text-slate-600 dark:text-slate-400 mb-1">Font Size: <span id="font-size-val">11px</span></label>
-                                <input type="range" id="slider-font-size" min="8" max="16" value="11" oninput="updateFontSize(this.value)" class="w-full accent-blue-500">
+                                <input type="range" id="slider-font-size" min="8" max="16" value="11" class="w-full accent-blue-500">
                             </div>
                         </div>
                     </div>
@@ -250,47 +244,322 @@
                 <!-- 4. Color Legend Panel -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5"><i data-lucide="palette" class="w-4 h-4 text-purple-500"></i> Color Legend Column</span>
+                        <span class="flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="palette" aria-hidden="true" class="lucide lucide-palette w-4 h-4 text-purple-500"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"></path><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle></svg> Color Legend Column</span>
                     </div>
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 text-xs">
-                        <select id="map-col-group" onchange="onGroupColumnChanged()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                        <select id="map-col-group" onchange="onGroupColumnChanged()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"><option value="PLAID">PLAID</option><option value="BCF NAME">BCF NAME</option><option value="OLD BCF NAME">OLD BCF NAME</option><option value="CL NUMBER">CL NUMBER</option><option value="Sub Cluster">Sub Cluster</option><option value="SWAP STATUS">SWAP STATUS</option><option value="SSV STATUS" selected="">SSV STATUS</option><option value="CUTOVER DATE">CUTOVER DATE</option><option value="CLUSTER TAGGING">CLUSTER TAGGING</option><option value="STATUS">STATUS</option><option value="TOWERCO">TOWERCO</option><option value="DOABILITY">DOABILITY</option><option value="REMARKS">REMARKS</option><option value="PROVINCE">PROVINCE</option><option value="TOWN">TOWN</option><option value="SITE SOLUTION">SITE SOLUTION</option><option value="SITE TYPE">SITE TYPE</option><option value="VENDOR">VENDOR</option><option value="LAT">LAT</option><option value="LON">LON</option><option value="CLASSIFICATION">CLASSIFICATION</option><option value="LOOKED_UP_SSV_STATUS">LOOKED_UP_SSV_STATUS</option></select>
 
-                        <!-- Saved Column Schemes Manager (Max 2 Slots) -->
+                        <!-- Saved Column Schemes Manager -->
                         <div class="p-2.5 bg-slate-50 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800/80 space-y-2">
                             <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
                                 <span>Saved Color Schemes (2 Slots)</span>
                                 <button onclick="saveCurrentColumnPalette()" class="px-2 py-0.5 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-md transition shadow-sm flex items-center gap-1">
-                                    <i data-lucide="save" class="w-3 h-3"></i> Save Current
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" aria-hidden="true" class="lucide lucide-save w-3 h-3"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> Save Current
                                 </button>
                             </div>
                             <div id="saved-palettes-slots" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                                <!-- Dynamic Palette Slot Buttons Render Here -->
-                            </div>
+                    <div class="p-1.5 bg-purple-100 dark:bg-purple-950/60 border-purple-400 dark:border-purple-600 border rounded-lg flex items-center justify-between gap-1 transition">
+                        <button onclick="loadSavedColumnPalette('SWAP STATUS')" class="truncate text-[10px] font-bold text-purple-700 dark:text-purple-300 hover:underline text-left" title="Load SWAP STATUS">
+                            Slot 1: SWAP STATUS
+                        </button>
+                        <button onclick="removeSavedColumnPalette('SWAP STATUS')" class="text-slate-400 hover:text-rose-500 text-[10px] px-1" title="Remove slot">✕</button>
+                    </div>
+                </div>
                         </div>
 
-                        <div id="color-swatches-container" class="space-y-2 max-h-52 overflow-y-auto custom-scrollbar pr-1"></div>
+                        <div id="color-swatches-container" class="space-y-2 max-h-52 overflow-y-auto custom-scrollbar pr-1">
+                    <div class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer truncate">
+                                <input type="checkbox" checked="" onchange="toggleCategoryVisibility('DEFERRED')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                                <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs" title="DEFERRED">DEFERRED</span>
+                            </label>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <input type="color" value="#f73b3b" onchange="updateCategoryColor('DEFERRED', this.value)" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 pt-1 border-t border-slate-200 dark:border-slate-800/60 overflow-x-auto custom-scrollbar">
+                            <span class="text-[10px] text-slate-500 mr-1 shrink-0">Preset:</span>
+                            
+                    <button onclick="updateCategoryColor('DEFERRED', '#10b981')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #10b981;" title="Set to #10b981"></button>
+                
+                    <button onclick="updateCategoryColor('DEFERRED', '#f59e0b')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #f59e0b;" title="Set to #f59e0b"></button>
+                
+                    <button onclick="updateCategoryColor('DEFERRED', '#ef4444')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #ef4444;" title="Set to #ef4444"></button>
+                
+                    <button onclick="updateCategoryColor('DEFERRED', '#3b82f6')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #3b82f6;" title="Set to #3b82f6"></button>
+                
+                    <button onclick="updateCategoryColor('DEFERRED', '#8b5cf6')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #8b5cf6;" title="Set to #8b5cf6"></button>
+                
+                    <button onclick="updateCategoryColor('DEFERRED', '#a855f7')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #a855f7;" title="Set to #a855f7"></button>
+                
+                    <button onclick="updateCategoryColor('DEFERRED', '#06b6d4')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #06b6d4;" title="Set to #06b6d4"></button>
+                
+                    <button onclick="updateCategoryColor('DEFERRED', '#64748b')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #64748b;" title="Set to #64748b"></button>
+                
+                        </div>
+                    </div>
+                
+                    <div class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer truncate">
+                                <input type="checkbox" checked="" onchange="toggleCategoryVisibility('DONE')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                                <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs" title="DONE">DONE</span>
+                            </label>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <input type="color" value="#1e00ff" onchange="updateCategoryColor('DONE', this.value)" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 pt-1 border-t border-slate-200 dark:border-slate-800/60 overflow-x-auto custom-scrollbar">
+                            <span class="text-[10px] text-slate-500 mr-1 shrink-0">Preset:</span>
+                            
+                    <button onclick="updateCategoryColor('DONE', '#10b981')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #10b981;" title="Set to #10b981"></button>
+                
+                    <button onclick="updateCategoryColor('DONE', '#f59e0b')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #f59e0b;" title="Set to #f59e0b"></button>
+                
+                    <button onclick="updateCategoryColor('DONE', '#ef4444')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #ef4444;" title="Set to #ef4444"></button>
+                
+                    <button onclick="updateCategoryColor('DONE', '#3b82f6')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #3b82f6;" title="Set to #3b82f6"></button>
+                
+                    <button onclick="updateCategoryColor('DONE', '#8b5cf6')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #8b5cf6;" title="Set to #8b5cf6"></button>
+                
+                    <button onclick="updateCategoryColor('DONE', '#a855f7')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #a855f7;" title="Set to #a855f7"></button>
+                
+                    <button onclick="updateCategoryColor('DONE', '#06b6d4')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #06b6d4;" title="Set to #06b6d4"></button>
+                
+                    <button onclick="updateCategoryColor('DONE', '#64748b')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #64748b;" title="Set to #64748b"></button>
+                
+                        </div>
+                    </div>
+                
+                    <div class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer truncate">
+                                <input type="checkbox" checked="" onchange="toggleCategoryVisibility('IBS')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                                <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs" title="IBS">IBS</span>
+                            </label>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <input type="color" value="#e1f73b" onchange="updateCategoryColor('IBS', this.value)" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 pt-1 border-t border-slate-200 dark:border-slate-800/60 overflow-x-auto custom-scrollbar">
+                            <span class="text-[10px] text-slate-500 mr-1 shrink-0">Preset:</span>
+                            
+                    <button onclick="updateCategoryColor('IBS', '#10b981')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #10b981;" title="Set to #10b981"></button>
+                
+                    <button onclick="updateCategoryColor('IBS', '#f59e0b')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #f59e0b;" title="Set to #f59e0b"></button>
+                
+                    <button onclick="updateCategoryColor('IBS', '#ef4444')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #ef4444;" title="Set to #ef4444"></button>
+                
+                    <button onclick="updateCategoryColor('IBS', '#3b82f6')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #3b82f6;" title="Set to #3b82f6"></button>
+                
+                    <button onclick="updateCategoryColor('IBS', '#8b5cf6')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #8b5cf6;" title="Set to #8b5cf6"></button>
+                
+                    <button onclick="updateCategoryColor('IBS', '#a855f7')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #a855f7;" title="Set to #a855f7"></button>
+                
+                    <button onclick="updateCategoryColor('IBS', '#06b6d4')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #06b6d4;" title="Set to #06b6d4"></button>
+                
+                    <button onclick="updateCategoryColor('IBS', '#64748b')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #64748b;" title="Set to #64748b"></button>
+                
+                        </div>
+                    </div>
+                
+                    <div class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer truncate">
+                                <input type="checkbox" checked="" onchange="toggleCategoryVisibility('NOT YET STARTED')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                                <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs" title="NOT YET STARTED">NOT YET STARTED</span>
+                            </label>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <input type="color" value="#d3d7df" onchange="updateCategoryColor('NOT YET STARTED', this.value)" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 pt-1 border-t border-slate-200 dark:border-slate-800/60 overflow-x-auto custom-scrollbar">
+                            <span class="text-[10px] text-slate-500 mr-1 shrink-0">Preset:</span>
+                            
+                    <button onclick="updateCategoryColor('NOT YET STARTED', '#10b981')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #10b981;" title="Set to #10b981"></button>
+                
+                    <button onclick="updateCategoryColor('NOT YET STARTED', '#f59e0b')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #f59e0b;" title="Set to #f59e0b"></button>
+                
+                    <button onclick="updateCategoryColor('NOT YET STARTED', '#ef4444')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #ef4444;" title="Set to #ef4444"></button>
+                
+                    <button onclick="updateCategoryColor('NOT YET STARTED', '#3b82f6')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #3b82f6;" title="Set to #3b82f6"></button>
+                
+                    <button onclick="updateCategoryColor('NOT YET STARTED', '#8b5cf6')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #8b5cf6;" title="Set to #8b5cf6"></button>
+                
+                    <button onclick="updateCategoryColor('NOT YET STARTED', '#a855f7')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #a855f7;" title="Set to #a855f7"></button>
+                
+                    <button onclick="updateCategoryColor('NOT YET STARTED', '#06b6d4')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #06b6d4;" title="Set to #06b6d4"></button>
+                
+                    <button onclick="updateCategoryColor('NOT YET STARTED', '#64748b')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #64748b;" title="Set to #64748b"></button>
+                
+                        </div>
+                    </div>
+                
+                    <div class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer truncate">
+                                <input type="checkbox" checked="" onchange="toggleCategoryVisibility('NSB_DONE')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                                <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs" title="NSB_DONE">NSB_DONE</span>
+                            </label>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <input type="color" value="#a855f7" onchange="updateCategoryColor('NSB_DONE', this.value)" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 pt-1 border-t border-slate-200 dark:border-slate-800/60 overflow-x-auto custom-scrollbar">
+                            <span class="text-[10px] text-slate-500 mr-1 shrink-0">Preset:</span>
+                            
+                    <button onclick="updateCategoryColor('NSB_DONE', '#10b981')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #10b981;" title="Set to #10b981"></button>
+                
+                    <button onclick="updateCategoryColor('NSB_DONE', '#f59e0b')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #f59e0b;" title="Set to #f59e0b"></button>
+                
+                    <button onclick="updateCategoryColor('NSB_DONE', '#ef4444')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #ef4444;" title="Set to #ef4444"></button>
+                
+                    <button onclick="updateCategoryColor('NSB_DONE', '#3b82f6')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #3b82f6;" title="Set to #3b82f6"></button>
+                
+                    <button onclick="updateCategoryColor('NSB_DONE', '#8b5cf6')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #8b5cf6;" title="Set to #8b5cf6"></button>
+                
+                    <button onclick="updateCategoryColor('NSB_DONE', '#a855f7')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #a855f7;" title="Set to #a855f7"></button>
+                
+                    <button onclick="updateCategoryColor('NSB_DONE', '#06b6d4')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #06b6d4;" title="Set to #06b6d4"></button>
+                
+                    <button onclick="updateCategoryColor('NSB_DONE', '#64748b')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: #64748b;" title="Set to #64748b"></button>
+                
+                        </div>
+                    </div>
+                </div>
                     </div>
                 </div>
 
                 <!-- 5. Pin Tooltip Fields Settings -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5"><i data-lucide="message-square" class="w-4 h-4 text-cyan-500"></i> Pin Click Tooltip Fields</span>
+                        <span class="flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="message-square" aria-hidden="true" class="lucide lucide-message-square w-4 h-4 text-cyan-500"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path></svg> Pin Click Tooltip Fields</span>
                     </div>
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
                         <p class="text-slate-500 dark:text-slate-400 text-[11px] mb-2">Check the fields displayed when clicking pins on the map:</p>
-                        <div id="tooltip-fields-container" class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1"></div>
+                        <div id="tooltip-fields-container" class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="PLAID" checked="" onchange="toggleTooltipField('PLAID')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="PLAID">PLAID</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="BCF NAME" onchange="toggleTooltipField('BCF NAME')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="BCF NAME">BCF NAME</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="OLD BCF NAME" onchange="toggleTooltipField('OLD BCF NAME')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="OLD BCF NAME">OLD BCF NAME</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="CL NUMBER" onchange="toggleTooltipField('CL NUMBER')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="CL NUMBER">CL NUMBER</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="Sub Cluster" onchange="toggleTooltipField('Sub Cluster')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="Sub Cluster">Sub Cluster</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="SWAP STATUS" checked="" onchange="toggleTooltipField('SWAP STATUS')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="SWAP STATUS">SWAP STATUS</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="SSV STATUS" checked="" onchange="toggleTooltipField('SSV STATUS')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="SSV STATUS">SSV STATUS</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="CUTOVER DATE" onchange="toggleTooltipField('CUTOVER DATE')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="CUTOVER DATE">CUTOVER DATE</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="CLUSTER TAGGING" onchange="toggleTooltipField('CLUSTER TAGGING')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="CLUSTER TAGGING">CLUSTER TAGGING</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="STATUS" onchange="toggleTooltipField('STATUS')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="STATUS">STATUS</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="TOWERCO" onchange="toggleTooltipField('TOWERCO')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="TOWERCO">TOWERCO</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="DOABILITY" onchange="toggleTooltipField('DOABILITY')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="DOABILITY">DOABILITY</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="REMARKS" onchange="toggleTooltipField('REMARKS')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="REMARKS">REMARKS</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="PROVINCE" onchange="toggleTooltipField('PROVINCE')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="PROVINCE">PROVINCE</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="TOWN" onchange="toggleTooltipField('TOWN')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="TOWN">TOWN</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="SITE SOLUTION" onchange="toggleTooltipField('SITE SOLUTION')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="SITE SOLUTION">SITE SOLUTION</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="SITE TYPE" onchange="toggleTooltipField('SITE TYPE')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="SITE TYPE">SITE TYPE</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="VENDOR" checked="" onchange="toggleTooltipField('VENDOR')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="VENDOR">VENDOR</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="LAT" onchange="toggleTooltipField('LAT')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="LAT">LAT</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="LON" onchange="toggleTooltipField('LON')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="LON">LON</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="CLASSIFICATION" onchange="toggleTooltipField('CLASSIFICATION')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="CLASSIFICATION">CLASSIFICATION</span>
+                </label>
+            
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
+                    <input type="checkbox" value="LOOKED_UP_SSV_STATUS" onchange="toggleTooltipField('LOOKED_UP_SSV_STATUS')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate" title="LOOKED_UP_SSV_STATUS">LOOKED_UP_SSV_STATUS</span>
+                </label>
+            </div>
                     </div>
                 </div>
 
                 <!-- 6. Geospatial Tools & Distance Ruler -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                        <i data-lucide="ruler" class="w-4 h-4 text-amber-500"></i> Distance Ruler Tool
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="ruler" aria-hidden="true" class="lucide lucide-ruler w-4 h-4 text-amber-500"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"></path><path d="m14.5 12.5 2-2"></path><path d="m11.5 9.5 2-2"></path><path d="m8.5 6.5 2-2"></path><path d="m17.5 15.5 2-2"></path></svg> Distance Ruler Tool
                     </div>
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
                         <button id="btn-ruler" onclick="toggleRulerMode()" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg font-medium transition flex items-center justify-center gap-1.5">
-                            <i data-lucide="ruler" class="w-4 h-4"></i> Activate Distance Ruler
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="ruler" aria-hidden="true" class="lucide lucide-ruler w-4 h-4"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"></path><path d="m14.5 12.5 2-2"></path><path d="m11.5 9.5 2-2"></path><path d="m8.5 6.5 2-2"></path><path d="m17.5 15.5 2-2"></path></svg> Activate Distance Ruler
                         </button>
                         <div id="ruler-result" class="hidden p-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-[11px] text-amber-600 dark:text-amber-400 font-mono text-center">
                             Click on the map to add distance points
@@ -301,12 +570,127 @@
                 <!-- 7. Inspector Panel / Detail Editor -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5"><i data-lucide="info" class="w-4 h-4 text-rose-500"></i> Site Inspector Panel</span>
-                        <span id="inspect-site-id" class="text-blue-600 dark:text-blue-400 font-mono text-[10px]">None Selected</span>
+                        <span class="flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="info" aria-hidden="true" class="lucide lucide-info w-4 h-4 text-rose-500"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg> Site Inspector Panel</span>
+                        <span id="inspect-site-id" class="text-blue-600 dark:text-blue-400 font-mono text-[10px]">MIN860</span>
                     </div>
                     <div id="inspector-container" class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
-                        <div class="text-slate-500 italic text-center py-4">Click any site pin on the map to inspect or edit details.</div>
-                    </div>
+                <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">PLAID</label>
+                            <input type="text" id="inspect-field-PLAID" value="MIN860" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">BCF NAME</label>
+                            <input type="text" id="inspect-field-BCF NAME" value="PDSMCDOMORPC" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">OLD BCF NAME</label>
+                            <input type="text" id="inspect-field-OLD BCF NAME" value="" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">CL NUMBER</label>
+                            <input type="text" id="inspect-field-CL NUMBER" value="CL035" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">Sub Cluster</label>
+                            <input type="text" id="inspect-field-Sub Cluster" value="" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">SWAP STATUS</label>
+                            <input type="text" id="inspect-field-SWAP STATUS" value="IBS" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">SSV STATUS</label>
+                            <input type="text" id="inspect-field-SSV STATUS" value="NOT YET SWAPPED" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">CUTOVER DATE</label>
+                            <input type="text" id="inspect-field-CUTOVER DATE" value="" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">CLUSTER TAGGING</label>
+                            <input type="text" id="inspect-field-CLUSTER TAGGING" value="Massive" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">STATUS</label>
+                            <input type="text" id="inspect-field-STATUS" value="On-Air" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">TOWERCO</label>
+                            <input type="text" id="inspect-field-TOWERCO" value="GLOBE" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">DOABILITY</label>
+                            <input type="text" id="inspect-field-DOABILITY" value="" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">REMARKS</label>
+                            <input type="text" id="inspect-field-REMARKS" value="INDOOR" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">PROVINCE</label>
+                            <input type="text" id="inspect-field-PROVINCE" value="MISAMIS ORIENTAL" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">TOWN</label>
+                            <input type="text" id="inspect-field-TOWN" value="CAGAYAN DE ORO CITY (CAPITAL)" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">SITE SOLUTION</label>
+                            <input type="text" id="inspect-field-SITE SOLUTION" value="SMALLCELL-INDOOR" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">SITE TYPE</label>
+                            <input type="text" id="inspect-field-SITE TYPE" value="" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">VENDOR</label>
+                            <input type="text" id="inspect-field-VENDOR" value="ERICSSON" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">LAT</label>
+                            <input type="text" id="inspect-field-LAT" value="8.455928" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">LON</label>
+                            <input type="text" id="inspect-field-LON" value="124.6233" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">CLASSIFICATION</label>
+                            <input type="text" id="inspect-field-CLASSIFICATION" value="SMALLCELL-PICOCELL" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">LOOKED_UP_SSV_STATUS</label>
+                            <input type="text" id="inspect-field-LOOKED_UP_SSV_STATUS" value="NOT YET SWAPPED" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    
+                </div>
+                <button onclick="saveSiteDetails()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition text-xs shadow-sm mt-2">
+                    Save Changes
+                </button>
+            </div>
                 </div>
 
             </div>
@@ -318,37 +702,112 @@
             <div class="p-2.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 z-10 flex flex-wrap items-center justify-between gap-3 text-xs">
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1">
-                        <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="search" aria-hidden="true" class="lucide lucide-search w-3.5 h-3.5 text-slate-400"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
                         <span class="text-slate-500 dark:text-slate-400 font-medium">Search:</span>
-                        <select id="search-col-select" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold"></select>
-                        <input type="text" id="search-input" onkeyup="if(event.key==='Enter') executeSearch()" placeholder="Value..." class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 w-28 sm:w-36">
+                        <select id="search-col-select" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold"><option value="PLAID" selected="">PLAID</option><option value="BCF NAME">BCF NAME</option><option value="OLD BCF NAME">OLD BCF NAME</option><option value="CL NUMBER">CL NUMBER</option><option value="Sub Cluster">Sub Cluster</option><option value="SWAP STATUS">SWAP STATUS</option><option value="SSV STATUS">SSV STATUS</option><option value="CUTOVER DATE">CUTOVER DATE</option><option value="CLUSTER TAGGING">CLUSTER TAGGING</option><option value="STATUS">STATUS</option><option value="TOWERCO">TOWERCO</option><option value="DOABILITY">DOABILITY</option><option value="REMARKS">REMARKS</option><option value="PROVINCE">PROVINCE</option><option value="TOWN">TOWN</option><option value="SITE SOLUTION">SITE SOLUTION</option><option value="SITE TYPE">SITE TYPE</option><option value="VENDOR">VENDOR</option><option value="LAT">LAT</option><option value="LON">LON</option><option value="CLASSIFICATION">CLASSIFICATION</option><option value="LOOKED_UP_SSV_STATUS">LOOKED_UP_SSV_STATUS</option></select>
+                        <input type="text" id="search-input" placeholder="Value..." class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 w-28 sm:w-36">
                         <button onclick="executeSearch()" class="px-2 py-0.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded transition">Find</button>
                         <button onclick="clearSearch()" class="px-1.5 py-0.5 text-slate-400 hover:text-slate-800 dark:hover:text-white">✕</button>
                     </div>
 
-                    <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1">
-                        <i data-lucide="filter" class="w-3.5 h-3.5 text-emerald-500"></i>
+                    <!-- FEATURE: Multi-Select Filter Dropdown Container -->
+                    <div class="relative flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="filter" aria-hidden="true" class="lucide lucide-filter w-3.5 h-3.5 text-emerald-500"><path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"></path></svg>
                         <span class="text-slate-500 dark:text-slate-400 font-medium">Filter:</span>
-                        <select id="filter-col-select" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold"></select>
-                        <input type="text" id="filter-input" onkeyup="if(event.key==='Enter') executeFilter()" placeholder="Value..." class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 w-28 sm:w-36">
-                        <button onclick="executeFilter()" class="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded transition">Filter</button>
-                        <button onclick="clearFilter()" class="px-1.5 py-0.5 text-slate-400 hover:text-slate-800 dark:hover:text-white">✕</button>
+                        <select id="filter-col-select" onchange="onFilterColumnChanged()" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold cursor-pointer"><option value="PLAID">PLAID</option><option value="BCF NAME">BCF NAME</option><option value="OLD BCF NAME">OLD BCF NAME</option><option value="CL NUMBER">CL NUMBER</option><option value="Sub Cluster">Sub Cluster</option><option value="SWAP STATUS">SWAP STATUS</option><option value="SSV STATUS" selected="">SSV STATUS</option><option value="CUTOVER DATE">CUTOVER DATE</option><option value="CLUSTER TAGGING">CLUSTER TAGGING</option><option value="STATUS">STATUS</option><option value="TOWERCO">TOWERCO</option><option value="DOABILITY">DOABILITY</option><option value="REMARKS">REMARKS</option><option value="PROVINCE">PROVINCE</option><option value="TOWN">TOWN</option><option value="SITE SOLUTION">SITE SOLUTION</option><option value="SITE TYPE">SITE TYPE</option><option value="VENDOR">VENDOR</option><option value="LAT">LAT</option><option value="LON">LON</option><option value="CLASSIFICATION">CLASSIFICATION</option><option value="LOOKED_UP_SSV_STATUS">LOOKED_UP_SSV_STATUS</option></select>
+
+                        <!-- Custom Multi-Select Dropdown Button & Panel -->
+                        <div class="relative">
+                            <button id="filter-multiselect-btn" onclick="toggleFilterDropdown()" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2.5 py-0.5 text-xs outline-none flex items-center justify-between gap-2 min-w-[120px] max-w-[180px] font-mono">
+                                <span id="filter-multiselect-label" class="truncate">2 of 3 Selected</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-down" aria-hidden="true" class="lucide lucide-chevron-down w-3 h-3 text-slate-400"><path d="m6 9 6 6 6-6"></path></svg>
+                            </button>
+
+                            <div id="filter-multiselect-panel" class="absolute top-full left-0 mt-1.5 w-64 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2 hidden">
+                                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5 px-1">
+                                    <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Select Values</span>
+                                    <div class="flex items-center gap-2 text-[10px]">
+                                        <button onclick="selectAllFilterValues()" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">All</button>
+                                        <span class="text-slate-400">|</span>
+                                        <button onclick="clearAllFilterValues()" class="text-rose-500 hover:underline font-semibold">Clear</button>
+                                    </div>
+                                </div>
+                                <div id="filter-checkbox-list" class="max-h-48 overflow-y-auto custom-scrollbar space-y-1 pr-1 text-xs">
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1 rounded transition">
+                        <input type="checkbox" value="ERICSSON" checked="" onchange="toggleFilterValue('ERICSSON')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-0">
+                        <span class="truncate text-slate-800 dark:text-slate-200" title="ERICSSON">ERICSSON</span>
+                    </label>
+                
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1 rounded transition">
+                        <input type="checkbox" value="HUAWEI" checked="" onchange="toggleFilterValue('HUAWEI')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-0">
+                        <span class="truncate text-slate-800 dark:text-slate-200" title="HUAWEI">HUAWEI</span>
+                    </label>
+                
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1 rounded transition">
+                        <input type="checkbox" value="NOKIA" checked="" onchange="toggleFilterValue('NOKIA')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-0">
+                        <span class="truncate text-slate-800 dark:text-slate-200" title="NOKIA">NOKIA</span>
+                    </label>
+                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="clearFilter()" class="px-1.5 py-0.5 text-slate-400 hover:text-slate-800 dark:hover:text-white" title="Clear Filter">✕</button>
                     </div>
                 </div>
 
-                <div id="search-filter-status" class="text-[11px] text-blue-600 dark:text-blue-400 font-medium truncate"></div>
+                <div id="search-filter-status" class="text-[11px] text-blue-600 dark:text-blue-400 font-medium truncate">Filtered (VENDOR): Showing 1,677 sites</div>
             </div>
 
             <!-- Leaflet Map Element -->
-            <div id="map" class="flex-1 w-full h-full z-0"></div>
+            <div id="map" class="flex-1 w-full h-full z-0 leaflet-container leaflet-touch leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0" style="position: relative;"><div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(-395px, 336px, 0px);"><div class="leaflet-pane leaflet-tile-pane"><div class="leaflet-layer " style="z-index: 1; opacity: 1;"><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 18; transform: translate3d(952px, 126px, 0px) scale(0.5);"></div><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 19; transform: translate3d(632px, 96px, 0px) scale(1);"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/214/121.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-11px, -248px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/215/121.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(245px, -248px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/214/122.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-11px, 8px, 0px); opacity: 1;"><img alt="" src="https://b.basemaps.cartocdn.com/dark_all/8/215/122.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(245px, 8px, 0px); opacity: 1;"><img alt="" src="https://b.basemaps.cartocdn.com/dark_all/8/213/121.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-267px, -248px, 0px); opacity: 1;"><img alt="" src="https://b.basemaps.cartocdn.com/dark_all/8/216/121.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(501px, -248px, 0px); opacity: 1;"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/213/122.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-267px, 8px, 0px); opacity: 1;"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/216/122.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(501px, 8px, 0px); opacity: 1;"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/215/120.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(245px, -504px, 0px); opacity: 1;"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/215/123.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(245px, 264px, 0px); opacity: 1;"><img alt="" src="https://b.basemaps.cartocdn.com/dark_all/8/214/120.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-11px, -504px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/216/120.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(501px, -504px, 0px); opacity: 1;"><img alt="" src="https://b.basemaps.cartocdn.com/dark_all/8/214/123.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-11px, 264px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/216/123.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(501px, 264px, 0px); opacity: 1;"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/217/121.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(757px, -248px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/217/122.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(757px, 8px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/213/120.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-267px, -504px, 0px); opacity: 1;"><img alt="" src="https://b.basemaps.cartocdn.com/dark_all/8/217/120.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(757px, -504px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/213/123.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-267px, 264px, 0px); opacity: 1;"><img alt="" src="https://b.basemaps.cartocdn.com/dark_all/8/217/123.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(757px, 264px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/212/121.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-523px, -248px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/218/121.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(1013px, -248px, 0px); opacity: 1;"><img alt="" src="https://b.basemaps.cartocdn.com/dark_all/8/212/122.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-523px, 8px, 0px); opacity: 1;"><img alt="" src="https://b.basemaps.cartocdn.com/dark_all/8/218/122.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(1013px, 8px, 0px); opacity: 1;"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/212/120.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-523px, -504px, 0px); opacity: 1;"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/218/120.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(1013px, -504px, 0px); opacity: 1;"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/212/123.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-523px, 264px, 0px); opacity: 1;"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/218/123.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(1013px, 264px, 0px); opacity: 1;"><img alt="" src="https://b.basemaps.cartocdn.com/dark_all/8/219/121.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(1269px, -248px, 0px); opacity: 1;"><img alt="" src="https://c.basemaps.cartocdn.com/dark_all/8/219/122.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(1269px, 8px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/219/120.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(1269px, -504px, 0px); opacity: 1;"><img alt="" src="https://a.basemaps.cartocdn.com/dark_all/8/219/123.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(1269px, 264px, 0px); opacity: 1;"></div></div></div><div class="leaflet-pane leaflet-overlay-pane"><canvas class="leaflet-zoom-animated" width="3072" height="1760" style="transform: translate3d(-373px, -776px, 0px); width: 3072px; height: 1760px;"></canvas></div><div class="leaflet-pane leaflet-shadow-pane"></div><div class="leaflet-pane leaflet-marker-pane"></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(55326px, 31232px, 0px) scale(128);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"></div><div class="leaflet-top leaflet-right"></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="#" title="Zoom in" role="button" aria-label="Zoom in" aria-disabled="false"><span aria-hidden="true">+</span></a><a class="leaflet-control-zoom-out" href="#" title="Zoom out" role="button" aria-label="Zoom out" aria-disabled="false"><span aria-hidden="true">−</span></a></div><div class="leaflet-control-attribution leaflet-control"><a href="https://leafletjs.com" title="A JavaScript library for interactive maps"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"></path><path fill="#FFD500" d="M0 4h12v3H0z"></path><path fill="#E0BC00" d="M0 7h12v1H0z"></path></svg> Leaflet</a> <span aria-hidden="true">|</span> © OpenStreetMap &amp; CartoDB</div></div></div></div>
 
             <!-- Floating On-Map Legend Overlay -->
             <div id="floating-map-legend" class="absolute top-16 right-4 z-10 glass-card rounded-xl p-3 max-w-xs shadow-2xl border border-slate-300 dark:border-slate-700/60 hidden sm:block">
                 <div class="flex items-center justify-between mb-2 text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800/80 pb-1">
-                    <span class="flex items-center gap-1"><i data-lucide="layers" class="w-3.5 h-3.5 text-blue-500"></i> Map Legend</span>
+                    <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layers" aria-hidden="true" class="lucide lucide-layers w-3.5 h-3.5 text-blue-500"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"></path><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"></path><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"></path></svg> Map Legend</span>
                     <button onclick="document.getElementById('floating-map-legend').classList.toggle('hidden')" class="text-slate-400 hover:text-slate-800 dark:hover:text-white">✕</button>
                 </div>
-                <div id="floating-legend-content" class="space-y-1 text-xs max-h-48 overflow-y-auto custom-scrollbar"></div>
+                <div id="floating-legend-content" class="space-y-1 text-xs max-h-48 overflow-y-auto custom-scrollbar">
+                    <div class="flex items-center justify-between gap-3 opacity-100">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-color: #1e00ff"></span>
+                            <span class="text-slate-700 dark:text-slate-300 truncate" title="DONE">DONE</span>
+                        </div>
+                        <span class="font-bold text-slate-500 dark:text-slate-400 font-mono">452</span>
+                    </div>
+                
+                    <div class="flex items-center justify-between gap-3 opacity-100">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-color: #e1f73b"></span>
+                            <span class="text-slate-700 dark:text-slate-300 truncate" title="IBS">IBS</span>
+                        </div>
+                        <span class="font-bold text-slate-500 dark:text-slate-400 font-mono">45</span>
+                    </div>
+                
+                    <div class="flex items-center justify-between gap-3 opacity-100">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-color: #d3d7df"></span>
+                            <span class="text-slate-700 dark:text-slate-300 truncate" title="NOT YET STARTED">NOT YET STARTED</span>
+                        </div>
+                        <span class="font-bold text-slate-500 dark:text-slate-400 font-mono">1298</span>
+                    </div>
+                
+                    <div class="flex items-center justify-between gap-3 opacity-100">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-color: #f73b3b"></span>
+                            <span class="text-slate-700 dark:text-slate-300 truncate" title="DEFERRED">DEFERRED</span>
+                        </div>
+                        <span class="font-bold text-slate-500 dark:text-slate-400 font-mono">63</span>
+                    </div>
+                
+                    <div class="flex items-center justify-between gap-3 opacity-100">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-color: #a855f7"></span>
+                            <span class="text-slate-700 dark:text-slate-300 truncate" title="NSB_DONE">NSB_DONE</span>
+                        </div>
+                        <span class="font-bold text-slate-500 dark:text-slate-400 font-mono">22</span>
+                    </div>
+                </div>
             </div>
 
         </main>
@@ -360,25 +819,25 @@
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
                 <div class="flex items-center gap-3">
                     <div class="p-2 bg-blue-600/20 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/30">
-                        <i data-lucide="table" class="w-5 h-5"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="table" aria-hidden="true" class="lucide lucide-table w-5 h-5"><path d="M12 3v18"></path><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 9h18"></path><path d="M3 15h18"></path></svg>
                     </div>
                     <div>
-                        <h2 class="font-bold text-base text-slate-900 dark:text-white">Merged Spreadsheet Matrix (Includes All Sites & IBS)</h2>
+                        <h2 class="font-bold text-base text-slate-900 dark:text-white">Merged Spreadsheet Matrix (Includes All Sites &amp; IBS)</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">Search and filter enriched dataset records with SSV lookup status</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="exportFilteredTableCSV()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5">
-                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="download" aria-hidden="true" class="lucide lucide-download w-3.5 h-3.5"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg> Export CSV
                     </button>
                     <button onclick="closeTableModal()" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
-                        <i data-lucide="x" class="w-5 h-5"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-5 h-5"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
                     </button>
                 </div>
             </div>
 
             <div class="p-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 text-xs">
-                <input type="text" id="grid-global-search" oninput="renderTableGrid()" placeholder="Quick filter table rows..." class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                <input type="text" id="grid-global-search" placeholder="Quick filter table rows..." class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 w-64">
                 <span id="grid-status-count" class="text-slate-500 dark:text-slate-400 font-mono">Showing 0 rows</span>
             </div>
 
@@ -397,15 +856,15 @@
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
                 <div class="flex items-center gap-3">
                     <div class="p-2 bg-purple-600/20 text-purple-600 dark:text-purple-400 rounded-xl border border-purple-500/30">
-                        <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bar-chart-2" aria-hidden="true" class="lucide lucide-bar-chart-2 w-5 h-5"><path d="M5 21v-6"></path><path d="M12 21V3"></path><path d="M19 21V9"></path></svg>
                     </div>
                     <div>
-                        <h2 class="font-bold text-base text-slate-900 dark:text-white">Cluster Rollout & Looked-Up SSV Status Analytics</h2>
+                        <h2 class="font-bold text-base text-slate-900 dark:text-white">Cluster Rollout &amp; Looked-Up SSV Status Analytics</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">Dynamic completion metrics exclude IBS on SWAP STATUS; Tables include all sites</p>
                     </div>
                 </div>
                 <button onclick="closeDashboardModal()" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-5 h-5"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
                 </button>
             </div>
 
@@ -460,11 +919,11 @@
                 <div class="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-5">
                     <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                         <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                            <i data-lucide="grid" class="w-4 h-4 text-blue-500"></i> Region / Province SSV Pivot Matrix (Ranked by Completion %, Includes IBS)
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="grid" aria-hidden="true" class="lucide lucide-grid w-4 h-4 text-blue-500"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 9h18"></path><path d="M3 15h18"></path><path d="M9 3v18"></path><path d="M15 3v18"></path></svg> Region / Province SSV Pivot Matrix (Ranked by Completion %, Includes IBS)
                         </h3>
                         <div class="flex items-center gap-2 text-xs">
                             <span class="text-slate-500 dark:text-slate-400">Group By:</span>
-                            <select id="dash-pivot-col" onchange="renderDashboard()" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2.5 py-1 outline-none"></select>
+                            <select id="dash-pivot-col" onchange="renderDashboard()" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2.5 py-1 outline-none"><option value="PLAID">PLAID</option><option value="BCF NAME">BCF NAME</option><option value="OLD BCF NAME">OLD BCF NAME</option><option value="CL NUMBER">CL NUMBER</option><option value="Sub Cluster">Sub Cluster</option><option value="SWAP STATUS">SWAP STATUS</option><option value="SSV STATUS">SSV STATUS</option><option value="CUTOVER DATE">CUTOVER DATE</option><option value="CLUSTER TAGGING">CLUSTER TAGGING</option><option value="STATUS">STATUS</option><option value="TOWERCO">TOWERCO</option><option value="DOABILITY">DOABILITY</option><option value="REMARKS">REMARKS</option><option value="PROVINCE" selected="">PROVINCE</option><option value="TOWN">TOWN</option><option value="SITE SOLUTION">SITE SOLUTION</option><option value="SITE TYPE">SITE TYPE</option><option value="VENDOR">VENDOR</option><option value="LAT">LAT</option><option value="LON">LON</option><option value="CLASSIFICATION">CLASSIFICATION</option><option value="LOOKED_UP_SSV_STATUS">LOOKED_UP_SSV_STATUS</option></select>
                         </div>
                     </div>
 
@@ -481,21 +940,22 @@
     </div>
 
     <script>
-        const PRIMARY_PROXY_URL = '/api/sheet-data';
-        const SSV_PROXY_URL = '/api/ssv-data';
-
-        const PRIMARY_SHEET_ID = '12amb34jsOrqkkeKST2-0uxiYYg6M-IGmsM_z-jojy4M';
-        const SSV_SHEET_ID = '15owO_lt9EltLfAVh5CEfOObWBGqR_HsT0GnzmRFpc6I';
-
-        const PRIMARY_DIRECT_URL = `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Main`;
-        const SSV_DIRECT_URL = `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/export?format=csv&gid=0`;
-
         let rawDataset = [];
-        let ssvLookupMap = {}; // Key: PLAID / Lookup Key -> SSV Status Record
+        let ssvLookupCount = 0;
         let map = null;
+        let canvasRenderer = null;
         let markersLayerGroup = null;
         let activeTileLayer = null;
         let leafletMarkers = [];
+
+        let isInitialLoad = true;
+
+        // Category visibility toggles state for legend
+        let categoryVisibility = {};
+
+        // FEATURE: Multi-Select Filter State
+        let filterSelectedValues = new Set();
+        let filterAvailableValues = [];
 
         // Mapped Columns
         let colId = 'Site_ID';
@@ -506,11 +966,8 @@
 
         let categoryColors = {};
         let selectedSiteIndex = null;
-
-        // Custom Tooltip Configuration
         let userTooltipFields = [];
 
-        // Saved Column Color Palettes (Persisted in localStorage for up to 2 columns)
         let savedColumnPalettes = {};
         try {
             savedColumnPalettes = JSON.parse(localStorage.getItem('hermes_column_palettes') || '{}');
@@ -529,16 +986,13 @@
         let rulerLine = null;
         let rulerMarkers = [];
 
-        // Chart Instance
         let donutChartInstance = null;
 
-        // Preset Palette
         const presetPalette = [
             '#10b981', '#f59e0b', '#ef4444', '#3b82f6', 
             '#8b5cf6', '#a855f7', '#06b6d4', '#64748b'
         ];
 
-        // Tile Providers
         const tileProviders = {
             'carto-dark': 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
             'carto-light': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
@@ -546,11 +1000,40 @@
             'esri-sat': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
         };
 
+        function debounce(func, delay = 150) {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             try { lucide.createIcons(); } catch(e) {}
             initMap();
             renderSavedPaletteSlots();
             fetchSheetData();
+
+            // Close multi-select panel when clicking outside
+            document.addEventListener('click', (e) => {
+                const btn = document.getElementById('filter-multiselect-btn');
+                const panel = document.getElementById('filter-multiselect-panel');
+                if (panel && !panel.classList.contains('hidden')) {
+                    if (!panel.contains(e.target) && !btn.contains(e.target)) {
+                        panel.classList.add('hidden');
+                    }
+                }
+            });
+
+            document.getElementById('grid-global-search').addEventListener('input', debounce(renderTableGrid, 250));
+            document.getElementById('search-input').addEventListener('keyup', (e) => { if(e.key === 'Enter') executeSearch(); });
+
+            document.getElementById('slider-pin-size').addEventListener('input', (e) => {
+                updatePinSize(e.target.value);
+            });
+            document.getElementById('slider-font-size').addEventListener('input', debounce((e) => {
+                updateFontSize(e.target.value);
+            }, 100));
         });
 
         function toggleTheme() {
@@ -590,10 +1073,12 @@
         }
 
         function initMap() {
+            canvasRenderer = L.canvas({ padding: 0.5 });
             map = L.map('map', {
                 center: [14.5995, 120.9842],
                 zoom: 11,
-                zoomControl: false
+                zoomControl: false,
+                preferCanvas: true 
             });
 
             L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -603,7 +1088,7 @@
                 attribution: '&copy; OpenStreetMap & CartoDB'
             }).addTo(map);
 
-            markersLayerGroup = L.layerGroup().addTo(map);
+            markersLayerGroup = L.featureGroup().addTo(map);
 
             map.on('click', (e) => {
                 if (isRulerMode) {
@@ -613,203 +1098,155 @@
         }
 
         async function fetchSheetData() {
+            isInitialLoad = true;
             const syncStatus = document.getElementById('sync-status');
             if (syncStatus) {
-                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing Dual Sheets...';
+                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing Dual Sheets (Server Merging)...';
                 syncStatus.className = 'text-amber-500 flex items-center gap-1';
             }
 
-            // 1. Fetch SSV Tracker Data First
-            let ssvCsvText = await fetchCsvEndpoint([SSV_PROXY_URL, SSV_DIRECT_URL]);
-            if (ssvCsvText) {
-                parseSSVTracker(ssvCsvText);
-            }
+            try {
+                const res = await fetch('/api/merged-data');
+                if (res.ok) {
+                    const payload = await res.json();
+                    rawDataset = payload.data || [];
+                    ssvLookupCount = payload.ssvLookupCount || 0;
 
-            // 2. Fetch Primary Swap Data
-            let primaryCsvText = await fetchCsvEndpoint([PRIMARY_PROXY_URL, PRIMARY_DIRECT_URL]);
-            if (primaryCsvText) {
-                parsePrimarySwapSheet(primaryCsvText);
-            } else {
+                    if (rawDataset.length > 0) {
+                        autoDetectColumns(rawDataset[0]);
+                        updateDropdownControls();
+                        initTooltipFieldsConfig();
+                        initCategoryVisibility();
+                        onFilterColumnChanged(); // Build multi-select options
+                        plotPinsOnMap();
+                        updateLegendSwatches();
+
+                        if (syncStatus) {
+                            syncStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Synced ${rawDataset.length.toLocaleString()} Sites (${ssvLookupCount} SSV Lookups)`;
+                            syncStatus.className = 'text-emerald-600 dark:text-emerald-400 flex items-center gap-1';
+                        }
+                        document.getElementById('sidebar-record-count').innerText = `${rawDataset.length.toLocaleString()} (${ssvLookupCount} Physical Lookups)`;
+                    }
+                } else {
+                    throw new Error('Server respond error');
+                }
+            } catch(e) {
                 if (syncStatus) {
-                    syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Offline Mode';
+                    syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Offline / Connection Failed';
                     syncStatus.className = 'text-red-500 flex items-center gap-1';
                 }
             }
         }
 
-        async function fetchCsvEndpoint(urls) {
-            for (const url of urls) {
-                try {
-                    const res = await fetch(url);
-                    if (res.ok) {
-                        const text = await res.text();
-                        if (text && text.length > 50 && !text.startsWith('<!DOCTYPE html>')) {
-                            return text;
-                        }
-                    }
-                } catch (e) {
-                    console.warn(`Fetch error for ${url}:`, e);
-                }
+        // --- FEATURE: Multi-Select Filter Logic ---
+        function onFilterColumnChanged() {
+            const col = document.getElementById('filter-col-select').value;
+            if (!col || rawDataset.length === 0) return;
+
+            // Gather all distinct values for chosen column
+            const distinctVals = [...new Set(rawDataset.map(d => String(d[col] || '(Blank)').trim()))].sort();
+            filterAvailableValues = distinctVals;
+            filterSelectedValues = new Set(distinctVals); // Select all by default
+
+            renderFilterCheckboxes();
+            updateFilterButtonLabel();
+        }
+
+        function toggleFilterDropdown() {
+            const panel = document.getElementById('filter-multiselect-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        function renderFilterCheckboxes() {
+            const container = document.getElementById('filter-checkbox-list');
+            if (!container) return;
+
+            container.innerHTML = filterAvailableValues.map(val => {
+                const isChecked = filterSelectedValues.has(val);
+                return `
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1 rounded transition">
+                        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''} onchange="toggleFilterValue('${val}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-0">
+                        <span class="truncate text-slate-800 dark:text-slate-200" title="${val}">${val}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function toggleFilterValue(val) {
+            if (filterSelectedValues.has(val)) {
+                filterSelectedValues.delete(val);
+            } else {
+                filterSelectedValues.add(val);
             }
-            return null;
+            updateFilterButtonLabel();
+            applyMultiSelectFilter();
         }
 
-        function parseSSVTracker(csvText) {
-            ssvLookupMap = {};
-            Papa.parse(csvText, {
-                header: true,
-                skipEmptyLines: 'greedy',
-                complete: function (results) {
-                    if (results.data && results.data.length > 0) {
-                        const headers = Object.keys(results.data[0]);
-                        const colPlaid = headers.find(h => h.toUpperCase().includes('PLAID') || h.toUpperCase().includes('LOOKUP') || h.toUpperCase().includes('SITE')) || headers[0];
-                        const colStatus = headers.find(h => h.toUpperCase().includes('APPROVAL') || h.toUpperCase().includes('MILESTONE') || h.toUpperCase().includes('SSV') || h.toUpperCase().includes('STATUS')) || headers[0];
+        function selectAllFilterValues() {
+            filterSelectedValues = new Set(filterAvailableValues);
+            renderFilterCheckboxes();
+            updateFilterButtonLabel();
+            applyMultiSelectFilter();
+        }
 
-                        // Group all logical band records by unique physical site ID (PLAID)
-                        const plaidBandsMap = {};
-                        results.data.forEach(row => {
-                            const plaid = String(row[colPlaid] || '').trim().toUpperCase();
-                            const rawStatus = String(row[colStatus] || 'NOT YET TRFS').trim();
+        function clearAllFilterValues() {
+            filterSelectedValues.clear();
+            renderFilterCheckboxes();
+            updateFilterButtonLabel();
+            applyMultiSelectFilter();
+        }
 
-                            if (plaid) {
-                                if (!plaidBandsMap[plaid]) plaidBandsMap[plaid] = [];
-                                plaidBandsMap[plaid].push({ row, rawStatus });
-                            }
-                        });
+        function updateFilterButtonLabel() {
+            const label = document.getElementById('filter-multiselect-label');
+            if (!label) return;
 
-                        // Evaluates logical band status severity (Rank 5 = Worst / Highest Impediment, Rank 1 = Best / Milestone)
-                        function getStatusSeverity(statusStr) {
-                            const s = String(statusStr || '').toUpperCase().trim();
-                            if (s.includes('NOT') || s.includes('PENDING') || s.includes('UNSWAPPED')) {
-                                return { rank: 5, category: 'NOT YET TRFS' };
-                            }
-                            // Re-submit milestone mapped to FOR GT REVIEW
-                            if (s.includes('RE-SUBMIT') || s.includes('RESUBMIT') || s.includes('RE_SUBMIT')) {
-                                return { rank: 2, category: 'FOR GT REVIEW' };
-                            }
-                            if (s.includes('REJECT') || s.includes('REVISION') || s.includes('FAILED')) {
-                                return { rank: 4, category: 'REJECTED' };
-                            }
-                            if (s.includes('ONGOING') || s.includes('PROGRESS')) {
-                                return { rank: 3, category: 'ONGOING SSV' };
-                            }
-                            if (s.includes('REVIEW') || s.includes('SUBMIT')) {
-                                return { rank: 2, category: 'FOR GT REVIEW' };
-                            }
-                            if (s.includes('APPROV') || s.includes('DONE') || s.includes('PASS') || s.includes('COMPLET')) {
-                                return { rank: 1, category: 'SSV APPROVED' };
-                            }
-                            return { rank: 5, category: 'NOT YET TRFS' };
-                        }
+            if (filterSelectedValues.size === filterAvailableValues.length) {
+                label.innerText = "All Selected";
+            } else if (filterSelectedValues.size === 0) {
+                label.innerText = "None Selected";
+            } else {
+                label.innerText = `${filterSelectedValues.size} of ${filterAvailableValues.length} Selected`;
+            }
+        }
 
-                        // Consolidate physical site SSV status by ranking all bands from worst to milestone
-                        Object.keys(plaidBandsMap).forEach(plaid => {
-                            const bands = plaidBandsMap[plaid];
-                            let worstRank = 0;
-                            let consolidatedStatus = 'SSV APPROVED';
-                            let allApproved = true;
+        function applyMultiSelectFilter() {
+            plotPinsOnMap();
 
-                            bands.forEach(b => {
-                                const info = getStatusSeverity(b.rawStatus);
-                                if (info.category !== 'SSV APPROVED') {
-                                    allApproved = false;
-                                }
-                                if (info.rank > worstRank) {
-                                    worstRank = info.rank;
-                                    consolidatedStatus = info.category;
-                                }
-                            });
+            const col = document.getElementById('filter-col-select').value;
+            const statusEl = document.getElementById('search-filter-status');
 
-                            if (allApproved) {
-                                consolidatedStatus = 'SSV APPROVED';
-                            }
+            if (filterSelectedValues.size === filterAvailableValues.length) {
+                statusEl.innerText = '';
+            } else {
+                const visibleCount = leafletMarkers.length;
+                statusEl.innerText = `Filtered (${col}): Showing ${visibleCount.toLocaleString()} sites`;
+            }
+        }
 
-                            ssvLookupMap[plaid] = {
-                                SSV_Status: consolidatedStatus,
-                                Band_Count: bands.length,
-                                All_Bands_Approved: allApproved,
-                                Raw_SSV_Data: bands[0].row
-                            };
-                        });
-                    }
+        function clearFilter() {
+            selectAllFilterValues();
+            document.getElementById('search-filter-status').innerText = '';
+        }
+
+        function initCategoryVisibility() {
+            categoryVisibility = {};
+            rawDataset.forEach(d => {
+                const cat = String(d[colGroup] || 'Unclassified').trim();
+                if (!(cat in categoryVisibility)) {
+                    categoryVisibility[cat] = true;
                 }
             });
         }
 
-        function parsePrimarySwapSheet(csvText) {
-            const syncStatus = document.getElementById('sync-status');
-            Papa.parse(csvText, {
-                header: true,
-                skipEmptyLines: 'greedy',
-                complete: function (results) {
-                    if (results.data && results.data.length > 0) {
-                        autoDetectColumns(results.data[0]);
-
-                        // Helper to strictly identify Primary Swap Status column from 1st sheet
-                        const findSwapStatus = (r) => {
-                            const keys = Object.keys(r);
-                            const swapKey = keys.find(k => {
-                                const l = k.toLowerCase().trim();
-                                return l === 'swap status' || l === 'swap_status' || (l.includes('swap') && !l.includes('ssv')) || l === 'status';
-                            }) || 'Status';
-                            return String(r[swapKey] || '').trim().toUpperCase();
-                        };
-
-                        rawDataset = results.data.map(row => {
-                            const plaidVal = String(row[colId] || '').trim().toUpperCase();
-                            const primarySwapStatus = findSwapStatus(row);
-
-                            let lookedUpSSVStatus = 'NOT YET SWAPPED';
-
-                            // Lookup unique PLAID for sites tagged DONE or NSB_DONE using consolidated physical site SSV status from 2nd source
-                            if (primarySwapStatus.includes('DONE') || primarySwapStatus.includes('NSB') || primarySwapStatus.includes('SWAPPED')) {
-                                if (ssvLookupMap[plaidVal]) {
-                                    lookedUpSSVStatus = ssvLookupMap[plaidVal].SSV_Status;
-                                } else {
-                                    lookedUpSSVStatus = 'NOT YET TRFS'; // Swapped on site, but pending submission in SSV tracker
-                                }
-                            } else {
-                                lookedUpSSVStatus = 'NOT YET SWAPPED';
-                            }
-
-                            return {
-                                ...row,
-                                'SWAP STATUS': primarySwapStatus || 'PENDING',
-                                'SSV STATUS': lookedUpSSVStatus,
-                                'LOOKED_UP_SSV_STATUS': lookedUpSSVStatus
-                            };
-                        });
-
-                        if (syncStatus) {
-                            const lookupCount = Object.keys(ssvLookupMap).length;
-                            syncStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Synced ${rawDataset.length.toLocaleString()} Sites (${lookupCount} Physical SSV Lookups)`;
-                            syncStatus.className = 'text-emerald-600 dark:text-emerald-400 flex items-center gap-1';
-                        }
-                        document.getElementById('sidebar-record-count').innerText = `${rawDataset.length.toLocaleString()} (${Object.keys(ssvLookupMap).length} SSV Physical Lookups)`;
-
-                        try {
-                            fetch('/api/save-synced-data', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(rawDataset)
-                            }).then(res => {
-                                if (res.ok) console.log('Auto-saved synced primary swap dataset to local CSV');
-                            }).catch(err => console.warn('Auto-save request failed:', err));
-                        } catch(e) {}
-
-                        updateDropdownControls();
-                        initTooltipFieldsConfig();
-                        plotPinsOnMap();
-                        updateLegendSwatches();
-                    }
-                }
-            });
+        function toggleCategoryVisibility(cat) {
+            categoryVisibility[cat] = !categoryVisibility[cat];
+            plotPinsOnMap();
+            updateFloatingLegend();
         }
 
         function autoDetectColumns(sampleRow) {
             if (!sampleRow) return;
             const headers = Object.keys(sampleRow);
-
             const findHeader = (patterns) => headers.find(h => patterns.some(p => h.toLowerCase().includes(p))) || headers[0];
 
             colId = headers.find(h => h.toLowerCase() === 'site_id' || h.toLowerCase() === 'site id' || h.toLowerCase() === 'plaid') || findHeader(['site', 'plaid', 'id']);
@@ -855,7 +1292,6 @@
             if (!container || rawDataset.length === 0) return;
 
             const headers = Object.keys(rawDataset[0]);
-
             container.innerHTML = headers.map(field => `
                 <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
                     <input type="checkbox" value="${field}" ${userTooltipFields.includes(field) ? 'checked' : ''} onchange="toggleTooltipField('${field}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
@@ -878,7 +1314,6 @@
             colLat = document.getElementById('map-col-lat').value;
             colLon = document.getElementById('map-col-lon').value;
             colLabel = document.getElementById('map-col-label').value;
-
             plotPinsOnMap();
         }
 
@@ -900,10 +1335,23 @@
 
             if (!showPins || rawDataset.length === 0) return;
 
+            const filterCol = document.getElementById('filter-col-select').value;
             const latVals = [];
             const lonVals = [];
+            const radius = Math.max(4, pinSize / 2);
 
             rawDataset.forEach((row, index) => {
+                const groupVal = String(row[colGroup] || 'Unclassified').trim();
+
+                // 1. Legend Category Visibility Check
+                if (categoryVisibility[groupVal] === false) return;
+
+                // 2. Multi-Select Toolbar Filter Check
+                if (filterCol && filterSelectedValues.size > 0) {
+                    const rowVal = String(row[filterCol] || '(Blank)').trim();
+                    if (!filterSelectedValues.has(rowVal)) return;
+                }
+
                 const lat = parseFloat(row[colLat]);
                 const lon = parseFloat(row[colLon]);
 
@@ -911,20 +1359,20 @@
                     latVals.push(lat);
                     lonVals.push(lon);
 
-                    const groupVal = String(row[colGroup] || 'Unclassified').trim();
                     if (!categoryColors[groupVal]) {
                         categoryColors[groupVal] = cleanHexColor(groupVal);
                     }
                     const color = categoryColors[groupVal];
 
-                    const markerIcon = L.divIcon({
-                        className: 'custom-pin-marker',
-                        html: `<div style="background-color: ${color}; width: ${pinSize}px; height: ${pinSize}px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.5);"></div>`,
-                        iconSize: [pinSize, pinSize],
-                        iconAnchor: [pinSize / 2, pinSize / 2]
+                    const marker = L.circleMarker([lat, lon], {
+                        radius: radius,
+                        fillColor: color,
+                        color: '#ffffff',
+                        weight: 1.5,
+                        opacity: 1,
+                        fillOpacity: 0.9,
+                        renderer: canvasRenderer
                     });
-
-                    const marker = L.marker([lat, lon], { icon: markerIcon });
 
                     const popupHTML = `
                         <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[210px] text-xs font-sans border transition-colors">
@@ -943,7 +1391,7 @@
                         </div>
                     `;
 
-                    marker.bindPopup(popupHTML, { closeButton: false, offset: [0, -pinSize / 2] });
+                    marker.bindPopup(popupHTML, { closeButton: false, offset: [0, -radius] });
 
                     if (showLabels) {
                         const labelText = String(row[colLabel] || row[colId] || '');
@@ -960,10 +1408,11 @@
                 }
             });
 
-            if (latVals.length > 0 && !map._userPanned) {
+            if (latVals.length > 0 && isInitialLoad) {
                 const avgLat = latVals.reduce((a, b) => a + b, 0) / latVals.length;
                 const avgLon = lonVals.reduce((a, b) => a + b, 0) / lonVals.length;
                 map.setView([avgLat, avgLon], 10);
+                isInitialLoad = false;
             }
 
             updateFloatingLegend();
@@ -971,14 +1420,13 @@
 
         function onGroupColumnChanged() {
             colGroup = document.getElementById('map-col-group').value;
-
-            // Restore saved color scheme if available for selected column
             if (savedColumnPalettes[colGroup]) {
                 categoryColors = { ...savedColumnPalettes[colGroup] };
             } else {
                 categoryColors = {};
             }
 
+            initCategoryVisibility();
             plotPinsOnMap();
             updateLegendSwatches();
             renderSavedPaletteSlots();
@@ -1007,6 +1455,7 @@
             colGroup = colName;
             categoryColors = { ...savedColumnPalettes[colName] };
 
+            initCategoryVisibility();
             plotPinsOnMap();
             updateLegendSwatches();
             renderSavedPaletteSlots();
@@ -1023,7 +1472,6 @@
         function renderSavedPaletteSlots() {
             const container = document.getElementById('saved-palettes-slots');
             if (!container) return;
-
             const keys = Object.keys(savedColumnPalettes);
 
             if (keys.length === 0) {
@@ -1067,6 +1515,7 @@
             container.innerHTML = categories.map(cat => {
                 if (!categoryColors[cat]) categoryColors[cat] = cleanHexColor(cat);
                 const color = categoryColors[cat];
+                const isChecked = categoryVisibility[cat] !== false;
 
                 const presetChips = presetPalette.map(pColor => `
                     <button onclick="updateCategoryColor('${cat}', '${pColor}')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: ${pColor};" title="Set to ${pColor}"></button>
@@ -1075,8 +1524,11 @@
                 return `
                     <div class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5">
                         <div class="flex items-center justify-between gap-2">
-                            <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs" title="${cat}">${cat}</span>
-                            <div class="flex items-center gap-1.5">
+                            <label class="flex items-center gap-2 cursor-pointer truncate">
+                                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCategoryVisibility('${cat}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                                <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs" title="${cat}">${cat}</span>
+                            </label>
+                            <div class="flex items-center gap-1.5 shrink-0">
                                 <input type="color" value="${color}" onchange="updateCategoryColor('${cat}', this.value)" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
                             </div>
                         </div>
@@ -1099,15 +1551,18 @@
                 counts[cat] = (counts[cat] || 0) + 1;
             });
 
-            container.innerHTML = Object.entries(counts).map(([cat, count]) => `
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-1.5 truncate">
-                        <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-color: ${categoryColors[cat] || '#3b82f6'}"></span>
-                        <span class="text-slate-700 dark:text-slate-300 truncate" title="${cat}">${cat}</span>
+            container.innerHTML = Object.entries(counts).map(([cat, count]) => {
+                const isVisible = categoryVisibility[cat] !== false;
+                return `
+                    <div class="flex items-center justify-between gap-3 ${isVisible ? 'opacity-100' : 'opacity-40 line-through'}">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-color: ${categoryColors[cat] || '#3b82f6'}"></span>
+                            <span class="text-slate-700 dark:text-slate-300 truncate" title="${cat}">${cat}</span>
+                        </div>
+                        <span class="font-bold text-slate-500 dark:text-slate-400 font-mono">${count}</span>
                     </div>
-                    <span class="font-bold text-slate-500 dark:text-slate-400 font-mono">${count}</span>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function inspectSite(index) {
@@ -1116,7 +1571,6 @@
             if (!site) return;
 
             document.getElementById('inspect-site-id').innerText = site[colId] || `Row #${index + 1}`;
-
             const container = document.getElementById('inspector-container');
             const fields = Object.keys(site);
 
@@ -1154,7 +1608,11 @@
 
         function togglePinsVisibility() {
             showPins = document.getElementById('chk-show-pins').checked;
-            plotPinsOnMap();
+            if (showPins) {
+                if (!map.hasLayer(markersLayerGroup)) map.addLayer(markersLayerGroup);
+            } else {
+                if (map.hasLayer(markersLayerGroup)) map.removeLayer(markersLayerGroup);
+            }
         }
 
         function toggleLabelsVisibility() {
@@ -1171,7 +1629,13 @@
         function updatePinSize(val) {
             pinSize = parseInt(val);
             document.getElementById('pin-size-val').innerText = `${val}px`;
-            plotPinsOnMap();
+            const radius = Math.max(4, pinSize / 2);
+
+            leafletMarkers.forEach(item => {
+                if (item.marker && item.marker.setRadius) {
+                    item.marker.setRadius(radius);
+                }
+            });
         }
 
         function updateFontSize(val) {
@@ -1297,13 +1761,11 @@
         function renderDashboard() {
             if (rawDataset.length === 0) return;
 
-            // Helper to strictly identify IBS sites on SWAP STATUS
             const isIbsRow = (d) => {
                 const swapSt = String(d['SWAP STATUS'] || d['Swap Status'] || '').toUpperCase().trim();
                 return swapSt.includes('IBS');
             };
 
-            // Dynamic completion metrics and progress charts EXCLUDE IBS on SWAP STATUS
             const nonIbsDataset = rawDataset.filter(d => !isIbsRow(d));
 
             const total = nonIbsDataset.length;
@@ -1324,7 +1786,6 @@
             document.getElementById('dash-kpi-swapped').innerText = swappedCount.toLocaleString();
             document.getElementById('dash-kpi-pending').innerText = pendingCount.toLocaleString();
 
-            // Status counts for non-IBS dataset for dynamic donut chart
             const statusCounts = {};
             nonIbsDataset.forEach(d => {
                 const st = String(d[colGroup] || 'Unclassified').trim();
@@ -1340,7 +1801,6 @@
 
             renderDonutChart(statusCounts);
 
-            // Regional SSV Pivot Table includes ALL sites (both Macro & IBS)
             const pivotCol = document.getElementById('dash-pivot-col').value;
             const pivotMap = {};
 
@@ -1359,10 +1819,8 @@
             });
             const statuses = Object.keys(allStatusCounts).sort();
 
-            // Rank & sort regions by SSV Completion Percentage descending
             const pivotRows = Object.entries(pivotMap).map(([reg, stMap]) => {
                 const regTotal = Object.values(stMap).reduce((a, b) => a + b, 0);
-
                 let regApproved = 0;
                 Object.keys(stMap).forEach(stKey => {
                     if (stKey.toLowerCase().includes('approved') || stKey.toLowerCase().includes('swapped') || stKey.toLowerCase().includes('done')) {
@@ -1370,11 +1828,9 @@
                     }
                 });
                 const regPct = regTotal > 0 ? (regApproved / regTotal) * 100 : 0;
-
                 return { reg, regTotal, regApproved, regPct, stMap };
             });
 
-            // Rank completion descending
             pivotRows.sort((a, b) => b.regPct - a.regPct || b.regTotal - a.regTotal);
 
             document.getElementById('dash-pivot-thead').innerHTML = `
@@ -1506,5 +1962,6 @@
             URL.revokeObjectURL(url);
         }
     </script>
-</body>
-</html>
+
+
+</body></html>
