@@ -314,45 +314,100 @@
 
         <main class="flex-1 relative flex flex-col h-full bg-slate-100 dark:bg-slate-950">
 
-            <!-- Search & Filter Toolbar -->
-            <div class="p-2.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 z-10 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <!-- Search & 3 Multi-Select Filter Toolbar -->
+            <div class="p-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 z-10 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div class="flex flex-wrap items-center gap-2">
-                    <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1">
+                    <!-- Search Field -->
+                    <div class="flex items-center gap-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1">
                         <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
-                        <span class="text-slate-500 dark:text-slate-400 font-medium">Search:</span>
-                        <select id="search-col-select" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold"></select>
-                        <input type="text" id="search-input" placeholder="Value..." class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 w-28 sm:w-36">
-                        <button onclick="executeSearch()" class="px-2 py-0.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded transition">Find</button>
-                        <button onclick="clearSearch()" class="px-1.5 py-0.5 text-slate-400 hover:text-slate-800 dark:hover:text-white">✕</button>
+                        <select id="search-col-select" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold max-w-[90px] truncate"></select>
+                        <input type="text" id="search-input" placeholder="Value..." class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-1.5 py-0.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 w-24 sm:w-28">
+                        <button onclick="executeSearch()" class="px-1.5 py-0.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded transition">Find</button>
+                        <button onclick="clearSearch()" class="px-1 text-slate-400 hover:text-slate-800 dark:hover:text-white">✕</button>
                     </div>
 
-                    <!-- Multi-Select Filter Dropdown -->
-                    <div class="relative flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1">
+                    <!-- Filter 1 -->
+                    <div id="filter-container-0" class="relative flex items-center gap-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1">
                         <i data-lucide="filter" class="w-3.5 h-3.5 text-emerald-500"></i>
-                        <span class="text-slate-500 dark:text-slate-400 font-medium">Filter:</span>
-                        <select id="filter-col-select" onchange="onFilterColumnChanged()" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold cursor-pointer"></select>
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">F1:</span>
+                        <select id="filter-col-select-0" onchange="onFilterColumnChanged(0)" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold cursor-pointer max-w-[100px] truncate"></select>
 
                         <div class="relative">
-                            <button id="filter-multiselect-btn" onclick="toggleFilterDropdown()" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2.5 py-0.5 text-xs outline-none flex items-center justify-between gap-2 min-w-[120px] max-w-[180px] font-mono">
-                                <span id="filter-multiselect-label" class="truncate">All Selected</span>
-                                <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                            <button id="filter-multiselect-btn-0" onclick="toggleFilterDropdown(0)" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none flex items-center justify-between gap-1 min-w-[90px] max-w-[130px] font-mono">
+                                <span id="filter-multiselect-label-0" class="truncate">All</span>
+                                <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
                             </button>
 
-                            <div id="filter-multiselect-panel" class="hidden absolute top-full left-0 mt-1.5 w-64 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2">
+                            <div id="filter-multiselect-panel-0" class="hidden absolute top-full left-0 mt-1.5 w-60 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2">
                                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5 px-1">
-                                    <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Select Values</span>
+                                    <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Values</span>
                                     <div class="flex items-center gap-2 text-[10px]">
-                                        <button onclick="selectAllFilterValues()" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">All</button>
+                                        <button onclick="selectAllFilterValues(0)" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">All</button>
                                         <span class="text-slate-400">|</span>
-                                        <button onclick="clearAllFilterValues()" class="text-rose-500 hover:underline font-semibold">Clear</button>
+                                        <button onclick="clearAllFilterValues(0)" class="text-rose-500 hover:underline font-semibold">Clear</button>
                                     </div>
                                 </div>
-                                <div id="filter-checkbox-list" class="max-h-48 overflow-y-auto custom-scrollbar space-y-1 pr-1 text-xs"></div>
+                                <div id="filter-checkbox-list-0" class="max-h-48 overflow-y-auto custom-scrollbar space-y-1 pr-1 text-xs"></div>
                             </div>
                         </div>
-
-                        <button onclick="clearFilter()" class="px-1.5 py-0.5 text-slate-400 hover:text-slate-800 dark:hover:text-white" title="Clear Filter">✕</button>
+                        <button onclick="resetFilterSlot(0)" class="px-1 text-slate-400 hover:text-slate-800 dark:hover:text-white" title="Reset Filter 1">✕</button>
                     </div>
+
+                    <!-- Filter 2 -->
+                    <div id="filter-container-1" class="relative flex items-center gap-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1">
+                        <i data-lucide="filter" class="w-3.5 h-3.5 text-indigo-500"></i>
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">F2:</span>
+                        <select id="filter-col-select-1" onchange="onFilterColumnChanged(1)" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold cursor-pointer max-w-[100px] truncate"></select>
+
+                        <div class="relative">
+                            <button id="filter-multiselect-btn-1" onclick="toggleFilterDropdown(1)" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none flex items-center justify-between gap-1 min-w-[90px] max-w-[130px] font-mono">
+                                <span id="filter-multiselect-label-1" class="truncate">All</span>
+                                <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                            </button>
+
+                            <div id="filter-multiselect-panel-1" class="hidden absolute top-full left-0 mt-1.5 w-60 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2">
+                                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5 px-1">
+                                    <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Values</span>
+                                    <div class="flex items-center gap-2 text-[10px]">
+                                        <button onclick="selectAllFilterValues(1)" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">All</button>
+                                        <span class="text-slate-400">|</span>
+                                        <button onclick="clearAllFilterValues(1)" class="text-rose-500 hover:underline font-semibold">Clear</button>
+                                    </div>
+                                </div>
+                                <div id="filter-checkbox-list-1" class="max-h-48 overflow-y-auto custom-scrollbar space-y-1 pr-1 text-xs"></div>
+                            </div>
+                        </div>
+                        <button onclick="resetFilterSlot(1)" class="px-1 text-slate-400 hover:text-slate-800 dark:hover:text-white" title="Reset Filter 2">✕</button>
+                    </div>
+
+                    <!-- Filter 3 -->
+                    <div id="filter-container-2" class="relative flex items-center gap-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1">
+                        <i data-lucide="filter" class="w-3.5 h-3.5 text-purple-500"></i>
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">F3:</span>
+                        <select id="filter-col-select-2" onchange="onFilterColumnChanged(2)" class="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-semibold cursor-pointer max-w-[100px] truncate"></select>
+
+                        <div class="relative">
+                            <button id="filter-multiselect-btn-2" onclick="toggleFilterDropdown(2)" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none flex items-center justify-between gap-1 min-w-[90px] max-w-[130px] font-mono">
+                                <span id="filter-multiselect-label-2" class="truncate">All</span>
+                                <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                            </button>
+
+                            <div id="filter-multiselect-panel-2" class="hidden absolute top-full left-0 mt-1.5 w-60 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2">
+                                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5 px-1">
+                                    <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Values</span>
+                                    <div class="flex items-center gap-2 text-[10px]">
+                                        <button onclick="selectAllFilterValues(2)" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">All</button>
+                                        <span class="text-slate-400">|</span>
+                                        <button onclick="clearAllFilterValues(2)" class="text-rose-500 hover:underline font-semibold">Clear</button>
+                                    </div>
+                                </div>
+                                <div id="filter-checkbox-list-2" class="max-h-48 overflow-y-auto custom-scrollbar space-y-1 pr-1 text-xs"></div>
+                            </div>
+                        </div>
+                        <button onclick="resetFilterSlot(2)" class="px-1 text-slate-400 hover:text-slate-800 dark:hover:text-white" title="Reset Filter 3">✕</button>
+                    </div>
+
+                    <button onclick="clearAllFilterSlots()" class="px-2 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-lg transition text-[11px]">Clear All Filters</button>
                 </div>
 
                 <div id="search-filter-status" class="text-[11px] text-blue-600 dark:text-blue-400 font-medium truncate"></div>
@@ -525,11 +580,17 @@
 
         let isInitialLoad = true;
 
+        // Category visibility toggles state for legend
         let categoryVisibility = {};
 
-        let filterSelectedValues = new Set();
-        let filterAvailableValues = [];
+        // --- FEATURE: 3 Independent Multi-Select Map Filters ---
+        let filtersState = [
+            { col: 'SSV STATUS', available: [], selected: new Set() },
+            { col: 'SWAP STATUS', available: [], selected: new Set() },
+            { col: '', available: [], selected: new Set() }
+        ];
 
+        // Mapped Columns
         let colId = 'Site_ID';
         let colLat = 'Latitude';
         let colLon = 'Longitude';
@@ -584,14 +645,17 @@
             renderSavedPaletteSlots();
             fetchSheetData();
 
+            // Close multi-select panels when clicking outside
             document.addEventListener('click', (e) => {
-                const btn = document.getElementById('filter-multiselect-btn');
-                const panel = document.getElementById('filter-multiselect-panel');
-                if (panel && !panel.classList.contains('hidden')) {
-                    if (!panel.contains(e.target) && !btn.contains(e.target)) {
-                        panel.classList.add('hidden');
+                [0, 1, 2].forEach(idx => {
+                    const btn = document.getElementById(`filter-multiselect-btn-${idx}`);
+                    const panel = document.getElementById(`filter-multiselect-panel-${idx}`);
+                    if (panel && !panel.classList.contains('hidden')) {
+                        if (!panel.contains(e.target) && !btn.contains(e.target)) {
+                            panel.classList.add('hidden');
+                        }
                     }
-                }
+                });
             });
 
             document.getElementById('grid-global-search').addEventListener('input', debounce(renderTableGrid, 250));
@@ -684,7 +748,6 @@
             return null;
         }
 
-        // --- REPLICATED SYNC ARCHITECTURE ---
         async function fetchSheetData() {
             isInitialLoad = true;
             const syncStatus = document.getElementById('sync-status');
@@ -719,13 +782,11 @@
             let primaryCsvText = null;
             let ssvCsvText = null;
 
-            // Fetch Primary CSV
             for (const url of primaryEndpoints) {
                 const res = await fetchWithTimeout(url, 8000);
                 if (res) { primaryCsvText = res; break; }
             }
 
-            // Fetch SSV CSV
             for (const url of ssvEndpoints) {
                 const res = await fetchWithTimeout(url, 8000);
                 if (res) { ssvCsvText = res; break; }
@@ -822,7 +883,10 @@
             updateDropdownControls();
             initTooltipFieldsConfig();
             initCategoryVisibility();
-            onFilterColumnChanged();
+
+            // Build options for all 3 multi-select filter slots
+            [0, 1, 2].forEach(idx => onFilterColumnChanged(idx));
+
             plotPinsOnMap();
             updateLegendSwatches();
 
@@ -833,91 +897,121 @@
             document.getElementById('sidebar-record-count').innerText = `${rawDataset.length.toLocaleString()} (${detailNote})`;
         }
 
-        function onFilterColumnChanged() {
-            const col = document.getElementById('filter-col-select').value;
-            if (!col || rawDataset.length === 0) return;
+        // --- FEATURE: 3 Independent Multi-Select Filter Handlers ---
+        function onFilterColumnChanged(slotIdx) {
+            const selEl = document.getElementById(`filter-col-select-${slotIdx}`);
+            if (!selEl || rawDataset.length === 0) return;
+
+            const col = selEl.value;
+            filtersState[slotIdx].col = col;
+
+            if (!col) {
+                filtersState[slotIdx].available = [];
+                filtersState[slotIdx].selected = new Set();
+                renderFilterCheckboxes(slotIdx);
+                updateFilterButtonLabel(slotIdx);
+                applyMultiSelectFilter();
+                return;
+            }
 
             const distinctVals = [...new Set(rawDataset.map(d => String(d[col] || '(Blank)').trim()))].sort();
-            filterAvailableValues = distinctVals;
-            filterSelectedValues = new Set(distinctVals);
+            filtersState[slotIdx].available = distinctVals;
+            filtersState[slotIdx].selected = new Set(distinctVals);
 
-            renderFilterCheckboxes();
-            updateFilterButtonLabel();
+            renderFilterCheckboxes(slotIdx);
+            updateFilterButtonLabel(slotIdx);
+            applyMultiSelectFilter();
         }
 
-        function toggleFilterDropdown() {
-            const panel = document.getElementById('filter-multiselect-panel');
-            panel.classList.toggle('hidden');
+        function toggleFilterDropdown(slotIdx) {
+            const panel = document.getElementById(`filter-multiselect-panel-${slotIdx}`);
+            if (panel) panel.classList.toggle('hidden');
         }
 
-        function renderFilterCheckboxes() {
-            const container = document.getElementById('filter-checkbox-list');
+        function renderFilterCheckboxes(slotIdx) {
+            const container = document.getElementById(`filter-checkbox-list-${slotIdx}`);
             if (!container) return;
 
-            container.innerHTML = filterAvailableValues.map(val => {
-                const isChecked = filterSelectedValues.has(val);
+            const state = filtersState[slotIdx];
+            if (!state.col) {
+                container.innerHTML = `<div class="text-[11px] text-slate-400 italic p-2 text-center">No Column Selected</div>`;
+                return;
+            }
+
+            container.innerHTML = state.available.map(val => {
+                const isChecked = state.selected.has(val);
                 return `
                     <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1 rounded transition">
-                        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''} onchange="toggleFilterValue('${val}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-0">
+                        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''} onchange="toggleFilterValue(${slotIdx}, '${val}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-0">
                         <span class="truncate text-slate-800 dark:text-slate-200" title="${val}">${val}</span>
                     </label>
                 `;
             }).join('');
         }
 
-        function toggleFilterValue(val) {
-            if (filterSelectedValues.has(val)) {
-                filterSelectedValues.delete(val);
+        function toggleFilterValue(slotIdx, val) {
+            const state = filtersState[slotIdx];
+            if (state.selected.has(val)) {
+                state.selected.delete(val);
             } else {
-                filterSelectedValues.add(val);
+                state.selected.add(val);
             }
-            updateFilterButtonLabel();
+            updateFilterButtonLabel(slotIdx);
             applyMultiSelectFilter();
         }
 
-        function selectAllFilterValues() {
-            filterSelectedValues = new Set(filterAvailableValues);
-            renderFilterCheckboxes();
-            updateFilterButtonLabel();
+        function selectAllFilterValues(slotIdx) {
+            const state = filtersState[slotIdx];
+            state.selected = new Set(state.available);
+            renderFilterCheckboxes(slotIdx);
+            updateFilterButtonLabel(slotIdx);
             applyMultiSelectFilter();
         }
 
-        function clearAllFilterValues() {
-            filterSelectedValues.clear();
-            renderFilterCheckboxes();
-            updateFilterButtonLabel();
+        function clearAllFilterValues(slotIdx) {
+            const state = filtersState[slotIdx];
+            state.selected.clear();
+            renderFilterCheckboxes(slotIdx);
+            updateFilterButtonLabel(slotIdx);
             applyMultiSelectFilter();
         }
 
-        function updateFilterButtonLabel() {
-            const label = document.getElementById('filter-multiselect-label');
+        function updateFilterButtonLabel(slotIdx) {
+            const label = document.getElementById(`filter-multiselect-label-${slotIdx}`);
             if (!label) return;
 
-            if (filterSelectedValues.size === filterAvailableValues.length) {
-                label.innerText = "All Selected";
-            } else if (filterSelectedValues.size === 0) {
-                label.innerText = "None Selected";
+            const state = filtersState[slotIdx];
+            if (!state.col) {
+                label.innerText = "Disabled";
+            } else if (state.selected.size === state.available.length) {
+                label.innerText = "All";
+            } else if (state.selected.size === 0) {
+                label.innerText = "None";
             } else {
-                label.innerText = `${filterSelectedValues.size} of ${filterAvailableValues.length} Selected`;
+                label.innerText = `${state.selected.size} / ${state.available.length}`;
             }
         }
 
         function applyMultiSelectFilter() {
             plotPinsOnMap();
 
-            const col = document.getElementById('filter-col-select').value;
             const statusEl = document.getElementById('search-filter-status');
+            const activeFilterNames = filtersState.filter(f => f.col && f.selected.size < f.available.length).map(f => f.col);
 
-            if (filterSelectedValues.size === filterAvailableValues.length) {
+            if (activeFilterNames.length === 0) {
                 statusEl.innerText = '';
             } else {
                 const visibleCount = leafletMarkers.length;
-                statusEl.innerText = `Filtered (${col}): Showing ${visibleCount.toLocaleString()} sites`;
+                statusEl.innerText = `Filtered (${activeFilterNames.join(', ')}): Showing ${visibleCount.toLocaleString()} sites`;
             }
         }
 
-        function clearFilter() {
-            selectAllFilterValues();
+        function resetFilterSlot(slotIdx) {
+            selectAllFilterValues(slotIdx);
+        }
+
+        function clearAllFilterSlots() {
+            [0, 1, 2].forEach(idx => selectAllFilterValues(idx));
             document.getElementById('search-filter-status').innerText = '';
         }
 
@@ -934,7 +1028,6 @@
         function toggleCategoryVisibility(cat) {
             categoryVisibility[cat] = !categoryVisibility[cat];
             plotPinsOnMap();
-            updateFloatingLegend();
         }
 
         function autoDetectColumns(sampleRow) {
@@ -965,8 +1058,17 @@
             populateSelect('map-col-label', colLabel);
             populateSelect('map-col-group', 'SSV STATUS');
             populateSelect('search-col-select', colId);
-            populateSelect('filter-col-select', 'SSV STATUS');
             populateSelect('dash-pivot-col', headers.find(h => h.toLowerCase().includes('province') || h.toLowerCase().includes('region')) || headers[0]);
+
+            // Populate the 3 filter dropdown selects
+            const filterHeaders = ['', ...headers];
+            [0, 1, 2].forEach(idx => {
+                const sel = document.getElementById(`filter-col-select-${idx}`);
+                if (sel) {
+                    const activeVal = filtersState[idx].col;
+                    sel.innerHTML = filterHeaders.map(h => `<option value="${h}" ${h === activeVal ? 'selected' : ''}>${h ? h : '(None)'}</option>`).join('');
+                }
+            });
         }
 
         function initTooltipFieldsConfig() {
@@ -1028,7 +1130,6 @@
 
             if (!showPins || rawDataset.length === 0) return;
 
-            const filterCol = document.getElementById('filter-col-select').value;
             const latVals = [];
             const lonVals = [];
             const radius = Math.max(4, pinSize / 2);
@@ -1036,11 +1137,16 @@
             rawDataset.forEach((row, index) => {
                 const groupVal = String(row[colGroup] || 'Unclassified').trim();
 
+                // 1. Legend Category Visibility Check
                 if (categoryVisibility[groupVal] === false) return;
 
-                if (filterCol && filterSelectedValues.size > 0) {
-                    const rowVal = String(row[filterCol] || '(Blank)').trim();
-                    if (!filterSelectedValues.has(rowVal)) return;
+                // 2. Multi-Filter Combination Check (Logical AND across all 3 filters)
+                for (let idx = 0; idx < 3; idx++) {
+                    const fState = filtersState[idx];
+                    if (fState.col && fState.selected.size > 0) {
+                        const rowVal = String(row[fState.col] || '(Blank)').trim();
+                        if (!fState.selected.has(rowVal)) return;
+                    }
                 }
 
                 const lat = parseFloat(row[colLat]);
@@ -1095,7 +1201,7 @@
 
                     marker.on('click', () => inspectSite(index));
                     markersLayerGroup.addLayer(marker);
-                    leafletMarkers.push({ index, marker, lat, lon });
+                    leafletMarkers.push({ index, marker, lat, lon, groupVal });
                 }
             });
 
@@ -1106,6 +1212,8 @@
                 isInitialLoad = false;
             }
 
+            // FEATURE: Update legend counts based on active filtered pins
+            updateLegendSwatches();
             updateFloatingLegend();
         }
 
@@ -1119,7 +1227,6 @@
 
             initCategoryVisibility();
             plotPinsOnMap();
-            updateLegendSwatches();
             renderSavedPaletteSlots();
         }
 
@@ -1148,7 +1255,6 @@
 
             initCategoryVisibility();
             plotPinsOnMap();
-            updateLegendSwatches();
             renderSavedPaletteSlots();
         }
 
@@ -1194,12 +1300,18 @@
             }
 
             plotPinsOnMap();
-            updateLegendSwatches();
         }
 
+        // --- FEATURE: Dynamic Legend Counts based on Active Filtered Map Pins ---
         function updateLegendSwatches() {
             const container = document.getElementById('color-swatches-container');
             if (!container) return;
+
+            // Calculate filtered counts per category
+            const counts = {};
+            leafletMarkers.forEach(m => {
+                counts[m.groupVal] = (counts[m.groupVal] || 0) + 1;
+            });
 
             const categories = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
 
@@ -1207,6 +1319,7 @@
                 if (!categoryColors[cat]) categoryColors[cat] = cleanHexColor(cat);
                 const color = categoryColors[cat];
                 const isChecked = categoryVisibility[cat] !== false;
+                const count = counts[cat] || 0;
 
                 const presetChips = presetPalette.map(pColor => `
                     <button onclick="updateCategoryColor('${cat}', '${pColor}')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: ${pColor};" title="Set to ${pColor}"></button>
@@ -1220,6 +1333,7 @@
                                 <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs" title="${cat}">${cat}</span>
                             </label>
                             <div class="flex items-center gap-1.5 shrink-0">
+                                <span class="text-[10px] font-mono text-slate-400 font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">${count}</span>
                                 <input type="color" value="${color}" onchange="updateCategoryColor('${cat}', this.value)" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
                             </div>
                         </div>
@@ -1236,13 +1350,16 @@
             const container = document.getElementById('floating-legend-content');
             if (!container) return;
 
+            // Calculate filtered counts
             const counts = {};
-            rawDataset.forEach(d => {
-                const cat = String(d[colGroup] || 'Unclassified').trim();
-                counts[cat] = (counts[cat] || 0) + 1;
+            leafletMarkers.forEach(m => {
+                counts[m.groupVal] = (counts[m.groupVal] || 0) + 1;
             });
 
-            container.innerHTML = Object.entries(counts).map(([cat, count]) => {
+            const categories = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
+
+            container.innerHTML = categories.map(cat => {
+                const count = counts[cat] || 0;
                 const isVisible = categoryVisibility[cat] !== false;
                 return `
                     <div class="flex items-center justify-between gap-3 ${isVisible ? 'opacity-100' : 'opacity-40 line-through'}">
