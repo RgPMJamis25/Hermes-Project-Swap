@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- PapaParse CSV for Client-Side Sync -->
+    <!-- PapaParse CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <!-- Lucide Icons -->
@@ -129,7 +129,7 @@
                         <span>SSV Tracker: <strong class="text-slate-700 dark:text-slate-300">Sheet1</strong></span>
                         <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
                         <span id="sync-status" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Syncing...
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Connecting...
                         </span>
                     </p>
                 </div>
@@ -503,6 +503,18 @@
         const PRIMARY_SHEET_ID = '12amb34jsOrqkkeKST2-0uxiYYg6M-IGmsM_z-jojy4M';
         const SSV_SHEET_ID = '15owO_lt9EltLfAVh5CEfOObWBGqR_HsT0GnzmRFpc6I';
 
+        const API_PRIMARY_PROXY = '/api/sheet-data';
+        const API_SSV_PROXY = '/api/ssv-data';
+
+        const PRIMARY_EXPORT_URL = `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/export?format=csv&sheet=Main`;
+        const PRIMARY_GVIZ_URL = `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Main`;
+
+        const SSV_EXPORT_URL = `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/export?format=csv&gid=0`;
+        const SSV_GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/gviz/tq?tqx=out:csv&tq=select%20*`;
+
+        const CORS_PROXY_ALLORIGINS = 'https://api.allorigins.win/raw?url=';
+        const CORS_PROXY_CORSIO = 'https://corsproxy.io/?';
+
         let rawDataset = [];
         let ssvLookupCount = 0;
         let map = null;
@@ -513,14 +525,11 @@
 
         let isInitialLoad = true;
 
-        // Category visibility toggles state for legend
         let categoryVisibility = {};
 
-        // Multi-Select Filter State
         let filterSelectedValues = new Set();
         let filterAvailableValues = [];
 
-        // Mapped Columns
         let colId = 'Site_ID';
         let colLat = 'Latitude';
         let colLon = 'Longitude';
@@ -536,14 +545,12 @@
             savedColumnPalettes = JSON.parse(localStorage.getItem('hermes_column_palettes') || '{}');
         } catch(e) { savedColumnPalettes = {}; }
 
-        // Display Settings
         let showPins = true;
         let showLabels = false;
         let pinSize = 14;
         let labelFontSize = 11;
         let isDarkMode = true;
 
-        // Distance Ruler Tool State
         let isRulerMode = false;
         let rulerPoints = [];
         let rulerLine = null;
@@ -577,7 +584,6 @@
             renderSavedPaletteSlots();
             fetchSheetData();
 
-            // Close multi-select panel when clicking outside
             document.addEventListener('click', (e) => {
                 const btn = document.getElementById('filter-multiselect-btn');
                 const panel = document.getElementById('filter-multiselect-panel');
@@ -660,7 +666,25 @@
             });
         }
 
-        // --- HYBRID DATA SYNC ENGINE (Local Python Server First, GitHub Client-Side Fallback Second) ---
+        async function fetchWithTimeout(url, timeoutMs = 8000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                if (res && res.ok) {
+                    const text = await res.text();
+                    if (text && text.length > 50 && !text.includes('<!DOCTYPE html>')) {
+                        return text;
+                    }
+                }
+            } catch (e) {
+                clearTimeout(id);
+            }
+            return null;
+        }
+
+        // --- REPLICATED SYNC ARCHITECTURE ---
         async function fetchSheetData() {
             isInitialLoad = true;
             const syncStatus = document.getElementById('sync-status');
@@ -669,130 +693,127 @@
                 syncStatus.className = 'text-amber-500 flex items-center gap-1';
             }
 
-            // Method 1: Try Local Python Web Backend
-            try {
-                const res = await fetch('/api/merged-data');
-                if (res.ok) {
-                    const payload = await res.json();
-                    rawDataset = payload.data || [];
-                    ssvLookupCount = payload.ssvLookupCount || 0;
-                    if (rawDataset.length > 0) {
-                        onSyncDatasetReady(syncStatus, `${ssvLookupCount} Physical Server Lookups`);
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.warn("Backend API offline. Switching to GitHub Pages client-side CORS sync engine...");
+            const isStaticHost = window.location.protocol === 'https:' || 
+                (!window.location.hostname.includes('localhost') && 
+                 !window.location.hostname.includes('127.0.0.1') && 
+                 !window.location.hostname.startsWith('192.168.'));
+
+            const primaryEndpoints = isStaticHost 
+                ? [
+                    PRIMARY_GVIZ_URL,
+                    CORS_PROXY_ALLORIGINS + encodeURIComponent(PRIMARY_EXPORT_URL),
+                    CORS_PROXY_CORSIO + encodeURIComponent(PRIMARY_EXPORT_URL),
+                    PRIMARY_EXPORT_URL
+                  ]
+                : [API_PRIMARY_PROXY, PRIMARY_GVIZ_URL, PRIMARY_EXPORT_URL, CORS_PROXY_ALLORIGINS + encodeURIComponent(PRIMARY_EXPORT_URL)];
+
+            const ssvEndpoints = isStaticHost
+                ? [
+                    SSV_GVIZ_URL,
+                    CORS_PROXY_ALLORIGINS + encodeURIComponent(SSV_EXPORT_URL),
+                    CORS_PROXY_CORSIO + encodeURIComponent(SSV_EXPORT_URL),
+                    SSV_EXPORT_URL
+                  ]
+                : [API_SSV_PROXY, SSV_GVIZ_URL, SSV_EXPORT_URL, CORS_PROXY_ALLORIGINS + encodeURIComponent(SSV_EXPORT_URL)];
+
+            let primaryCsvText = null;
+            let ssvCsvText = null;
+
+            // Fetch Primary CSV
+            for (const url of primaryEndpoints) {
+                const res = await fetchWithTimeout(url, 8000);
+                if (res) { primaryCsvText = res; break; }
             }
 
-            // Method 2: Client-Side Fallback Engine (For GitHub Pages & Static Exports)
-            try {
-                // Reliable CORS Proxy for GitHub Pages
-                const corsProxy = 'https://api.allorigins.win/raw?url=';
+            // Fetch SSV CSV
+            for (const url of ssvEndpoints) {
+                const res = await fetchWithTimeout(url, 8000);
+                if (res) { ssvCsvText = res; break; }
+            }
 
-                const ssvExportUrl = `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/export?format=csv&gid=0`;
-                const primaryExportUrl = `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/export?format=csv&sheet=Main`;
-
-                const ssvUrl = corsProxy + encodeURIComponent(ssvExportUrl);
-                const primaryUrl = corsProxy + encodeURIComponent(primaryExportUrl);
-
-                // Dynamic Loader for PapaParse
-                if (typeof Papa === 'undefined') {
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = "https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js";
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    });
-                }
-
-                // Fetch SSV and Primary CSVs in Parallel
-                const [ssvRes, primaryRes] = await Promise.all([
-                    fetch(ssvUrl).then(r => { if(!r.ok) throw new Error(); return r.text(); }).catch(() => null),
-                    fetch(primaryUrl).then(r => { if(!r.ok) throw new Error(); return r.text(); }).catch(() => null)
-                ]);
-
-                if (!primaryRes) throw new Error("Could not fetch primary spreadsheet");
-
-                const ssvLookupMap = {};
-                if (ssvRes) {
-                    const parsedSSV = Papa.parse(ssvRes, { header: true, skipEmptyLines: true });
-                    if (parsedSSV.data && parsedSSV.data.length > 0) {
-                        const headers = Object.keys(parsedSSV.data[0]);
-                        const colPlaid = headers.find(h => h.toUpperCase().includes('PLAID') || h.toUpperCase().includes('LOOKUP') || h.toUpperCase().includes('SITE')) || headers[0];
-                        const colStatus = headers.find(h => h.toUpperCase().includes('APPROVAL') || h.toUpperCase().includes('MILESTONE') || h.toUpperCase().includes('SSV') || h.toUpperCase().includes('STATUS')) || headers[0];
-
-                        const plaidBandsMap = {};
-                        parsedSSV.data.forEach(row => {
-                            const plaid = String(row[colPlaid] || '').trim().toUpperCase();
-                            const rawStatus = String(row[colStatus] || 'NOT YET TRFS').trim();
-                            if (plaid) {
-                                if (!plaidBandsMap[plaid]) plaidBandsMap[plaid] = [];
-                                plaidBandsMap[plaid].push(rawStatus);
-                            }
-                        });
-
-                        Object.keys(plaidBandsMap).forEach(plaid => {
-                            const bands = plaidBandsMap[plaid];
-                            let worstRank = 0;
-                            let consolidatedStatus = 'SSV APPROVED';
-                            let allApproved = true;
-
-                            bands.forEach(st => {
-                                const s = String(st || '').toUpperCase().trim();
-                                let rank = 5, cat = 'NOT YET TRFS';
-                                if (s.includes('NOT') || s.includes('PENDING') || s.includes('UNSWAPPED')) { rank = 5; cat = 'NOT YET TRFS'; }
-                                else if (s.includes('RE-SUBMIT') || s.includes('RESUBMIT')) { rank = 2; cat = 'FOR GT REVIEW'; }
-                                else if (s.includes('REJECT') || s.includes('REVISION') || s.includes('FAILED')) { rank = 4; cat = 'REJECTED'; }
-                                else if (s.includes('ONGOING') || s.includes('PROGRESS')) { rank = 3; cat = 'ONGOING SSV'; }
-                                else if (s.includes('REVIEW') || s.includes('SUBMIT')) { rank = 2; cat = 'FOR GT REVIEW'; }
-                                else if (s.includes('APPROV') || s.includes('DONE') || s.includes('PASS') || s.includes('COMPLET')) { rank = 1; cat = 'SSV APPROVED'; }
-
-                                if (cat !== 'SSV APPROVED') allApproved = false;
-                                if (rank > worstRank) { worstRank = rank; consolidatedStatus = cat; }
-                            });
-
-                            if (allApproved) consolidatedStatus = 'SSV APPROVED';
-                            ssvLookupMap[plaid] = consolidatedStatus;
-                        });
-                    }
-                }
-
-                // Parse Primary CSV
-                const parsedPrimary = Papa.parse(primaryRes, { header: true, skipEmptyLines: true });
-                if (parsedPrimary.data && parsedPrimary.data.length > 0) {
-                    const headers = Object.keys(parsedPrimary.data[0]);
-                    const colIdLocal = headers.find(h => h.toLowerCase() === 'site_id' || h.toLowerCase() === 'site id' || h.toLowerCase() === 'plaid') || headers[0];
-
-                    rawDataset = parsedPrimary.data.map(row => {
-                        const plaidVal = String(row[colIdLocal] || '').trim().toUpperCase();
-                        const swapKeys = Object.keys(row);
-                        const swapKey = swapKeys.find(k => k.toLowerCase().trim() === 'swap status' || k.toLowerCase().includes('swap')) || 'Status';
-                        const primarySwapStatus = String(row[swapKey] || '').trim().toUpperCase();
-
-                        let lookedUpSSVStatus = 'NOT YET SWAPPED';
-                        if (['DONE', 'NSB', 'SWAPPED'].some(w => primarySwapStatus.includes(w))) {
-                            lookedUpSSVStatus = ssvLookupMap[plaidVal] || 'NOT YET TRFS';
-                        }
-
-                        return {
-                            ...row,
-                            'SWAP STATUS': primarySwapStatus || 'PENDING',
-                            'SSV STATUS': lookedUpSSVStatus,
-                            'LOOKED_UP_SSV_STATUS': lookedUpSSVStatus
-                        };
-                    });
-
-                    ssvLookupCount = Object.keys(ssvLookupMap).length;
-                    onSyncDatasetReady(syncStatus, `${ssvLookupCount} GitHub Client Lookups`);
-                }
-            } catch (err) {
-                console.error("Client-side fallback sync failed:", err);
+            if (!primaryCsvText) {
                 if (syncStatus) {
-                    syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed (Check Sheet Permissions)';
+                    syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed (Offline / Blocked)';
                     syncStatus.className = 'text-red-500 flex items-center gap-1';
                 }
+                return;
+            }
+
+            processCsvData(primaryCsvText, ssvCsvText, syncStatus);
+        }
+
+        function processCsvData(primaryCsv, ssvCsv, syncStatus) {
+            const ssvLookupMap = {};
+
+            if (ssvCsv) {
+                const parsedSSV = Papa.parse(ssvCsv, { header: true, skipEmptyLines: true });
+                if (parsedSSV.data && parsedSSV.data.length > 0) {
+                    const headers = Object.keys(parsedSSV.data[0]);
+                    const colPlaid = headers.find(h => h.toUpperCase().includes('PLAID') || h.toUpperCase().includes('LOOKUP') || h.toUpperCase().includes('SITE')) || headers[0];
+                    const colStatus = headers.find(h => h.toUpperCase().includes('APPROVAL') || h.toUpperCase().includes('MILESTONE') || h.toUpperCase().includes('SSV') || h.toUpperCase().includes('STATUS')) || headers[0];
+
+                    const plaidBandsMap = {};
+                    parsedSSV.data.forEach(row => {
+                        const plaid = String(row[colPlaid] || '').trim().toUpperCase();
+                        const rawStatus = String(row[colStatus] || 'NOT YET TRFS').trim();
+                        if (plaid) {
+                            if (!plaidBandsMap[plaid]) plaidBandsMap[plaid] = [];
+                            plaidBandsMap[plaid].push(rawStatus);
+                        }
+                    });
+
+                    Object.keys(plaidBandsMap).forEach(plaid => {
+                        const bands = plaidBandsMap[plaid];
+                        let worstRank = 0;
+                        let consolidatedStatus = 'SSV APPROVED';
+                        let allApproved = true;
+
+                        bands.forEach(st => {
+                            const s = String(st || '').toUpperCase().trim();
+                            let rank = 5, cat = 'NOT YET TRFS';
+                            if (s.includes('NOT') || s.includes('PENDING') || s.includes('UNSWAPPED')) { rank = 5; cat = 'NOT YET TRFS'; }
+                            else if (s.includes('RE-SUBMIT') || s.includes('RESUBMIT')) { rank = 2; cat = 'FOR GT REVIEW'; }
+                            else if (s.includes('REJECT') || s.includes('REVISION') || s.includes('FAILED')) { rank = 4; cat = 'REJECTED'; }
+                            else if (s.includes('ONGOING') || s.includes('PROGRESS')) { rank = 3; cat = 'ONGOING SSV'; }
+                            else if (s.includes('REVIEW') || s.includes('SUBMIT')) { rank = 2; cat = 'FOR GT REVIEW'; }
+                            else if (s.includes('APPROV') || s.includes('DONE') || s.includes('PASS') || s.includes('COMPLET')) { rank = 1; cat = 'SSV APPROVED'; }
+
+                            if (cat !== 'SSV APPROVED') allApproved = false;
+                            if (rank > worstRank) { worstRank = rank; consolidatedStatus = cat; }
+                        });
+
+                        if (allApproved) consolidatedStatus = 'SSV APPROVED';
+                        ssvLookupMap[plaid] = consolidatedStatus;
+                    });
+                }
+            }
+
+            const parsedPrimary = Papa.parse(primaryCsv, { header: true, skipEmptyLines: true });
+            if (parsedPrimary.data && parsedPrimary.data.length > 0) {
+                const headers = Object.keys(parsedPrimary.data[0]);
+                const colIdLocal = headers.find(h => h.toLowerCase() === 'site_id' || h.toLowerCase() === 'site id' || h.toLowerCase() === 'plaid') || headers[0];
+
+                rawDataset = parsedPrimary.data.map(row => {
+                    const plaidVal = String(row[colIdLocal] || '').trim().toUpperCase();
+                    const swapKeys = Object.keys(row);
+                    const swapKey = swapKeys.find(k => k.toLowerCase().trim() === 'swap status' || k.toLowerCase().includes('swap')) || 'Status';
+                    const primarySwapStatus = String(row[swapKey] || '').trim().toUpperCase();
+
+                    let lookedUpSSVStatus = 'NOT YET SWAPPED';
+                    if (['DONE', 'NSB', 'SWAPPED'].some(w => primarySwapStatus.includes(w))) {
+                        lookedUpSSVStatus = ssvLookupMap[plaidVal] || 'NOT YET TRFS';
+                    }
+
+                    return {
+                        ...row,
+                        'SWAP STATUS': primarySwapStatus || 'PENDING',
+                        'SSV STATUS': lookedUpSSVStatus,
+                        'LOOKED_UP_SSV_STATUS': lookedUpSSVStatus
+                    };
+                });
+
+                ssvLookupCount = Object.keys(ssvLookupMap).length;
+                onSyncDatasetReady(syncStatus, `${ssvLookupCount} Physical Lookups`);
             }
         }
 
