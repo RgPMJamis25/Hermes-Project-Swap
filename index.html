@@ -184,10 +184,28 @@
                     </div>
                 </div>
 
+                <!-- View Presets Manager -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        <span class="flex items-center gap-1.5"><i data-lucide="bookmark" class="w-4 h-4 text-amber-500"></i> View Presets (Row & Col)</span>
+                    </div>
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2.5 text-xs">
+                        <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                            <span>Saved Column & Row Presets</span>
+                            <button onclick="saveCurrentViewPreset()" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white text-[10px] font-bold rounded-md transition shadow-sm flex items-center gap-1">
+                                <i data-lucide="save" class="w-3 h-3"></i> Save View Preset
+                            </button>
+                        </div>
+                        <div id="view-preset-slots" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                            <!-- Dynamic View Preset Slots -->
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 2. Database Field Mapping -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                        <i data-lucide="sliders" class="w-4 h-4 text-indigo-500"></i> Database Field Mapping
+                        <i data-lucide="sliders" class="w-4 h-4 text-indigo-500"></i> Row Field Mapping
                     </div>
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
                         <div>
@@ -247,7 +265,7 @@
                     </div>
                 </div>
 
-                <!-- 4. Color Legend Panel -->
+                <!-- 4. Color Legend Column Preset -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
                         <span class="flex items-center gap-1.5"><i data-lucide="palette" class="w-4 h-4 text-purple-500"></i> Color Legend Column</span>
@@ -255,7 +273,7 @@
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 text-xs">
                         <select id="map-col-group" onchange="onGroupColumnChanged()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"></select>
 
-                        <!-- Saved Column Schemes Manager -->
+                        <!-- Saved Column Color Palette Slots -->
                         <div class="p-2.5 bg-slate-50 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800/80 space-y-2">
                             <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
                                 <span>Saved Color Schemes (2 Slots)</span>
@@ -264,7 +282,7 @@
                                 </button>
                             </div>
                             <div id="saved-palettes-slots" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                                <!-- Dynamic Palette Slot Buttons -->
+                                <!-- Dynamic Color Palette Slots -->
                             </div>
                         </div>
 
@@ -468,19 +486,31 @@
     <!-- Analytics Dashboard Modal -->
     <div id="dashboard-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex flex-col p-4 sm:p-8">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden custom-scrollbar">
-            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+
+            <!-- In-Modal Column Identifier Control -->
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-50 dark:bg-slate-950">
                 <div class="flex items-center gap-3">
                     <div class="p-2 bg-purple-600/20 text-purple-600 dark:text-purple-400 rounded-xl border border-purple-500/30">
                         <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h2 class="font-bold text-base text-slate-900 dark:text-white">Cluster Rollout & Looked-Up SSV Status Analytics</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Dynamic completion metrics exclude IBS on SWAP STATUS; Tables include all sites</p>
+                        <h2 class="font-bold text-base text-slate-900 dark:text-white leading-tight">Cluster Rollout Analytics</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Dynamic completion metrics exclude IBS on SWAP STATUS</p>
                     </div>
                 </div>
-                <button onclick="closeDashboardModal()" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+
+                <div class="flex items-center gap-3">
+                    <!-- Column Identifier Dropdown inside Analytics Panel -->
+                    <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 shadow-sm">
+                        <i data-lucide="palette" class="w-4 h-4 text-purple-500"></i>
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Column Identifier:</span>
+                        <select id="modal-col-group" onchange="onModalColumnGroupChanged()" class="bg-transparent text-xs font-bold text-blue-600 dark:text-blue-400 outline-none cursor-pointer max-w-[180px] truncate"></select>
+                    </div>
+
+                    <button onclick="closeDashboardModal()" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="flex-1 p-6 space-y-6 overflow-y-auto custom-scrollbar">
@@ -489,8 +519,8 @@
                     <div class="lg:col-span-2 p-6 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-4 flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <div>
-                                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Overall SSV Completion Rate (Excludes IBS)</span>
-                                <p class="text-xs text-slate-500 dark:text-slate-500 mt-0.5">Calculated from non-IBS SSV Approved sites vs. non-IBS total swapped sites</p>
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Overall Completion Rate (Excludes IBS)</span>
+                                <p class="text-xs text-slate-500 dark:text-slate-500 mt-0.5">Calculated in reference to column identifier: <strong id="dash-completion-ref-col" class="text-blue-400">SSV STATUS</strong></p>
                             </div>
                             <span id="dash-completion-pct" class="text-3xl font-black text-emerald-600 dark:text-emerald-400">0.0%</span>
                         </div>
@@ -500,8 +530,8 @@
                                 <div id="dash-progress-bar" class="bg-gradient-to-r from-blue-500 via-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
                             </div>
                             <div class="flex justify-between text-xs font-medium">
-                                <span id="dash-completion-sub" class="text-slate-700 dark:text-slate-300">0 of 0 sites SSV approved</span>
-                                <span id="dash-remaining-sub" class="text-amber-600 dark:text-amber-400">0 sites pending SSV</span>
+                                <span id="dash-completion-sub" class="text-slate-700 dark:text-slate-300">0 of 0 sites completed</span>
+                                <span id="dash-remaining-sub" class="text-amber-600 dark:text-amber-400">0 sites pending</span>
                             </div>
                         </div>
 
@@ -511,7 +541,7 @@
                                 <div id="dash-kpi-total" class="text-lg font-black text-slate-900 dark:text-white mt-1">0</div>
                             </div>
                             <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                                <div class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">SSV Approved</div>
+                                <div class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">Approved / Completed</div>
                                 <div id="dash-kpi-swapped" class="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-1">0</div>
                             </div>
                             <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -522,7 +552,7 @@
                     </div>
 
                     <div class="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col items-center justify-center space-y-3">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">SSV Status Distribution (Excl. IBS)</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category Distribution (Excl. IBS)</span>
                         <div class="w-48 h-48 relative flex items-center justify-center">
                             <canvas id="dash-donut-chart"></canvas>
                         </div>
@@ -534,7 +564,7 @@
                 <div class="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-5">
                     <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                         <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                            <i data-lucide="grid" class="w-4 h-4 text-blue-500"></i> Region / Province SSV Pivot Matrix (Ranked by Completion %, Includes IBS)
+                            <i data-lucide="grid" class="w-4 h-4 text-blue-500"></i> Region / Province Pivot Matrix (Ranked by Completion %, Includes IBS)
                         </h3>
                         <div class="flex items-center gap-2 text-xs">
                             <span class="text-slate-500 dark:text-slate-400">Group By:</span>
@@ -580,10 +610,9 @@
 
         let isInitialLoad = true;
 
-        // Category visibility toggles state for legend
         let categoryVisibility = {};
 
-        // --- FEATURE: 3 Independent Multi-Select Map Filters ---
+        // 3 Multi-Select Map Filters State
         let filtersState = [
             { col: 'SSV STATUS', available: [], selected: new Set() },
             { col: 'SWAP STATUS', available: [], selected: new Set() },
@@ -600,6 +629,12 @@
         let categoryColors = {};
         let selectedSiteIndex = null;
         let userTooltipFields = [];
+
+        // View Presets Manager (Row & Column Configurations)
+        let savedViewPresets = {};
+        try {
+            savedViewPresets = JSON.parse(localStorage.getItem('hermes_view_presets') || '{}');
+        } catch(e) { savedViewPresets = {}; }
 
         let savedColumnPalettes = {};
         try {
@@ -643,9 +678,9 @@
             try { lucide.createIcons(); } catch(e) {}
             initMap();
             renderSavedPaletteSlots();
+            renderSavedViewPresetSlots();
             fetchSheetData();
 
-            // Close multi-select panels when clicking outside
             document.addEventListener('click', (e) => {
                 [0, 1, 2].forEach(idx => {
                     const btn = document.getElementById(`filter-multiselect-btn-${idx}`);
@@ -884,7 +919,6 @@
             initTooltipFieldsConfig();
             initCategoryVisibility();
 
-            // Build options for all 3 multi-select filter slots
             [0, 1, 2].forEach(idx => onFilterColumnChanged(idx));
 
             plotPinsOnMap();
@@ -897,7 +931,6 @@
             document.getElementById('sidebar-record-count').innerText = `${rawDataset.length.toLocaleString()} (${detailNote})`;
         }
 
-        // --- FEATURE: 3 Independent Multi-Select Filter Handlers ---
         function onFilterColumnChanged(slotIdx) {
             const selEl = document.getElementById(`filter-col-select-${slotIdx}`);
             if (!selEl || rawDataset.length === 0) return;
@@ -1015,6 +1048,99 @@
             document.getElementById('search-filter-status').innerText = '';
         }
 
+        function saveCurrentViewPreset() {
+            const presetName = prompt("Enter a name for this View Preset (Captures Row Mapping & Column Legend):");
+            if (!presetName) return;
+
+            const presetData = {
+                colId,
+                colLat,
+                colLon,
+                colLabel,
+                colGroup,
+                pivotCol: document.getElementById('dash-pivot-col')?.value || '',
+                palettes: { ...categoryColors }
+            };
+
+            const currentKeys = Object.keys(savedViewPresets);
+            if (!savedViewPresets[presetName] && currentKeys.length >= 2) {
+                delete savedViewPresets[currentKeys[0]];
+            }
+
+            savedViewPresets[presetName] = presetData;
+            try {
+                localStorage.setItem('hermes_view_presets', JSON.stringify(savedViewPresets));
+            } catch(e) {}
+
+            renderSavedViewPresetSlots();
+            alert(`View Preset "${presetName}" saved successfully!`);
+        }
+
+        function loadSavedViewPreset(presetName) {
+            const preset = savedViewPresets[presetName];
+            if (!preset) return;
+
+            colId = preset.colId;
+            colLat = preset.colLat;
+            colLon = preset.colLon;
+            colLabel = preset.colLabel;
+            colGroup = preset.colGroup;
+
+            if (preset.palettes) {
+                categoryColors = { ...preset.palettes };
+            }
+
+            document.getElementById('map-col-id').value = colId;
+            document.getElementById('map-col-lat').value = colLat;
+            document.getElementById('map-col-lon').value = colLon;
+            document.getElementById('map-col-label').value = colLabel;
+            document.getElementById('map-col-group').value = colGroup;
+            if (document.getElementById('modal-col-group')) {
+                document.getElementById('modal-col-group').value = colGroup;
+            }
+
+            if (preset.pivotCol && document.getElementById('dash-pivot-col')) {
+                document.getElementById('dash-pivot-col').value = preset.pivotCol;
+            }
+
+            initCategoryVisibility();
+            plotPinsOnMap();
+            updateLegendSwatches();
+            renderSavedViewPresetSlots();
+        }
+
+        function removeSavedViewPreset(presetName) {
+            delete savedViewPresets[presetName];
+            try {
+                localStorage.setItem('hermes_view_presets', JSON.stringify(savedViewPresets));
+            } catch(e) {}
+            renderSavedViewPresetSlots();
+        }
+
+        function renderSavedViewPresetSlots() {
+            const container = document.getElementById('view-preset-slots');
+            if (!container) return;
+
+            const keys = Object.keys(savedViewPresets);
+            if (keys.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-[10px] text-slate-400 italic text-center py-1">No saved presets. Click "Save View Preset".</div>`;
+                return;
+            }
+
+            container.innerHTML = keys.slice(0, 2).map((key, idx) => {
+                const preset = savedViewPresets[key];
+                const isActive = (preset.colGroup === colGroup && preset.colId === colId);
+                return `
+                    <div class="p-1.5 ${isActive ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-400 dark:border-amber-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'} border rounded-lg flex items-center justify-between gap-1 transition">
+                        <button onclick="loadSavedViewPreset('${key}')" class="truncate text-[10px] font-bold ${isActive ? 'text-amber-700 dark:text-amber-300' : 'text-slate-700 dark:text-slate-300'} hover:underline text-left" title="Load Preset: ${key}">
+                            Preset ${idx + 1}: ${key}
+                        </button>
+                        <button onclick="removeSavedViewPreset('${key}')" class="text-slate-400 hover:text-rose-500 text-[10px] px-1" title="Remove preset">✕</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function initCategoryVisibility() {
             categoryVisibility = {};
             rawDataset.forEach(d => {
@@ -1056,11 +1182,11 @@
             populateSelect('map-col-lat', colLat);
             populateSelect('map-col-lon', colLon);
             populateSelect('map-col-label', colLabel);
-            populateSelect('map-col-group', 'SSV STATUS');
+            populateSelect('map-col-group', colGroup);
+            populateSelect('modal-col-group', colGroup);
             populateSelect('search-col-select', colId);
             populateSelect('dash-pivot-col', headers.find(h => h.toLowerCase().includes('province') || h.toLowerCase().includes('region')) || headers[0]);
 
-            // Populate the 3 filter dropdown selects
             const filterHeaders = ['', ...headers];
             [0, 1, 2].forEach(idx => {
                 const sel = document.getElementById(`filter-col-select-${idx}`);
@@ -1137,10 +1263,8 @@
             rawDataset.forEach((row, index) => {
                 const groupVal = String(row[colGroup] || 'Unclassified').trim();
 
-                // 1. Legend Category Visibility Check
                 if (categoryVisibility[groupVal] === false) return;
 
-                // 2. Multi-Filter Combination Check (Logical AND across all 3 filters)
                 for (let idx = 0; idx < 3; idx++) {
                     const fState = filtersState[idx];
                     if (fState.col && fState.selected.size > 0) {
@@ -1212,13 +1336,15 @@
                 isInitialLoad = false;
             }
 
-            // FEATURE: Update legend counts based on active filtered pins
             updateLegendSwatches();
             updateFloatingLegend();
         }
 
         function onGroupColumnChanged() {
             colGroup = document.getElementById('map-col-group').value;
+            if (document.getElementById('modal-col-group')) {
+                document.getElementById('modal-col-group').value = colGroup;
+            }
             if (savedColumnPalettes[colGroup]) {
                 categoryColors = { ...savedColumnPalettes[colGroup] };
             } else {
@@ -1228,6 +1354,24 @@
             initCategoryVisibility();
             plotPinsOnMap();
             renderSavedPaletteSlots();
+            renderDashboard();
+        }
+
+        function onModalColumnGroupChanged() {
+            colGroup = document.getElementById('modal-col-group').value;
+            if (document.getElementById('map-col-group')) {
+                document.getElementById('map-col-group').value = colGroup;
+            }
+            if (savedColumnPalettes[colGroup]) {
+                categoryColors = { ...savedColumnPalettes[colGroup] };
+            } else {
+                categoryColors = {};
+            }
+
+            initCategoryVisibility();
+            plotPinsOnMap();
+            renderSavedPaletteSlots();
+            renderDashboard();
         }
 
         function saveCurrentColumnPalette() {
@@ -1250,12 +1394,16 @@
         function loadSavedColumnPalette(colName) {
             if (!savedColumnPalettes[colName]) return;
             document.getElementById('map-col-group').value = colName;
+            if (document.getElementById('modal-col-group')) {
+                document.getElementById('modal-col-group').value = colName;
+            }
             colGroup = colName;
             categoryColors = { ...savedColumnPalettes[colName] };
 
             initCategoryVisibility();
             plotPinsOnMap();
             renderSavedPaletteSlots();
+            renderDashboard();
         }
 
         function removeSavedColumnPalette(colName) {
@@ -1302,15 +1450,14 @@
             plotPinsOnMap();
         }
 
-        // --- FEATURE: Dynamic Legend Counts based on Active Filtered Map Pins ---
         function updateLegendSwatches() {
             const container = document.getElementById('color-swatches-container');
             if (!container) return;
 
-            // Calculate filtered counts per category
             const counts = {};
-            leafletMarkers.forEach(m => {
-                counts[m.groupVal] = (counts[m.groupVal] || 0) + 1;
+            rawDataset.forEach(d => {
+                const val = String(d[colGroup] || 'Unclassified').trim();
+                counts[val] = (counts[val] || 0) + 1;
             });
 
             const categories = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
@@ -1350,10 +1497,10 @@
             const container = document.getElementById('floating-legend-content');
             if (!container) return;
 
-            // Calculate filtered counts
             const counts = {};
-            leafletMarkers.forEach(m => {
-                counts[m.groupVal] = (counts[m.groupVal] || 0) + 1;
+            rawDataset.forEach(d => {
+                const val = String(d[colGroup] || 'Unclassified').trim();
+                counts[val] = (counts[val] || 0) + 1;
             });
 
             const categories = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
@@ -1559,6 +1706,18 @@
 
         function openDashboardModal() {
             document.getElementById('dashboard-modal').classList.remove('hidden');
+
+            // Populate modal dropdown control if needed
+            if (rawDataset.length > 0) {
+                const headers = Object.keys(rawDataset[0]);
+                const modalSelect = document.getElementById('modal-col-group');
+                if (modalSelect && modalSelect.options.length === 0) {
+                    modalSelect.innerHTML = headers.map(h => `<option value="${h}" ${h === colGroup ? 'selected' : ''}>${h}</option>`).join('');
+                } else if (modalSelect) {
+                    modalSelect.value = colGroup;
+                }
+            }
+
             renderDashboard();
         }
 
@@ -1566,33 +1725,74 @@
             document.getElementById('dashboard-modal').classList.add('hidden');
         }
 
+        // --- FULLY DECOUPLED ANALYTICS ENGINE WITH AUTO-RECOVERY ---
         function renderDashboard() {
-            if (rawDataset.length === 0) return;
+            if (!rawDataset || rawDataset.length === 0) {
+                console.warn("Analytics: Dataset is empty.");
+                return;
+            }
+
+            const sampleRow = rawDataset[0];
+            const validColGroup = (colGroup && colGroup in sampleRow) 
+                ? colGroup 
+                : ('SSV STATUS' in sampleRow ? 'SSV STATUS' : Object.keys(sampleRow)[0]);
+
+            colGroup = validColGroup; // Lock validated column key
+
+            const refLabel = document.getElementById('dash-reference-col-label');
+            const refSubLabel = document.getElementById('dash-completion-ref-col');
+            const modalSelect = document.getElementById('modal-col-group');
+
+            if (refLabel) refLabel.innerText = colGroup;
+            if (refSubLabel) refSubLabel.innerText = colGroup;
+            if (modalSelect) modalSelect.value = colGroup;
 
             const isIbsRow = (d) => {
-                const swapSt = String(d['SWAP STATUS'] || d['Swap Status'] || '').toUpperCase().trim();
+                const swapSt = String(d['SWAP STATUS'] || d['Swap Status'] || d['Status'] || '').toUpperCase().trim();
                 return swapSt.includes('IBS');
             };
 
             const nonIbsDataset = rawDataset.filter(d => !isIbsRow(d));
-
             const total = nonIbsDataset.length;
-            const swappedList = nonIbsDataset.filter(d => {
-                const val = String(d[colGroup] || '').toLowerCase();
-                return val.includes('approved') || val.includes('swapped') || val.includes('done') || val.includes('completed');
-            });
-            const swappedCount = swappedList.length;
-            const pendingCount = total - swappedCount;
-            const pct = total > 0 ? ((swappedCount / total) * 100).toFixed(1) : '0.0';
 
-            document.getElementById('dash-completion-pct').innerText = `${pct}%`;
-            document.getElementById('dash-progress-bar').style.width = `${pct}%`;
-            document.getElementById('dash-completion-sub').innerText = `${swappedCount.toLocaleString()} of ${total.toLocaleString()} non-IBS sites SSV approved`;
-            document.getElementById('dash-remaining-sub').innerText = `${pendingCount.toLocaleString()} non-IBS pending SSV cutover`;
+            const isCompletedValue = (val) => {
+                const v = String(val || '').toLowerCase().trim();
+                if (!v) return false;
 
-            document.getElementById('dash-kpi-total').innerText = total.toLocaleString();
-            document.getElementById('dash-kpi-swapped').innerText = swappedCount.toLocaleString();
-            document.getElementById('dash-kpi-pending').innerText = pendingCount.toLocaleString();
+                if (colGroup === 'SSV STATUS') {
+                    return v.includes('approved') || v.includes('done') || v.includes('pass') || v.includes('completed');
+                }
+                if (colGroup === 'SWAP STATUS') {
+                    return v.includes('done') || v.includes('swapped') || v.includes('nsb');
+                }
+
+                return v.includes('approved') || v.includes('completed') || v.includes('done') || 
+                       v.includes('swapped') || v.includes('pass') || v.includes('met') || 
+                       v === 'yes' || v === 'true' || v === '1';
+            };
+
+            const completedList = nonIbsDataset.filter(d => isCompletedValue(d[colGroup]));
+            const completedCount = completedList.length;
+            const pendingCount = total - completedCount;
+            const pct = total > 0 ? ((completedCount / total) * 100).toFixed(1) : '0.0';
+
+            const pctEl = document.getElementById('dash-completion-pct');
+            const barEl = document.getElementById('dash-progress-bar');
+            const subEl = document.getElementById('dash-completion-sub');
+            const remEl = document.getElementById('dash-remaining-sub');
+
+            if (pctEl) pctEl.innerText = `${pct}%`;
+            if (barEl) barEl.style.width = `${pct}%`;
+            if (subEl) subEl.innerText = `${completedCount.toLocaleString()} of ${total.toLocaleString()} non-IBS sites completed (${colGroup})`;
+            if (remEl) remEl.innerText = `${pendingCount.toLocaleString()} non-IBS pending`;
+
+            const kpiTotal = document.getElementById('dash-kpi-total');
+            const kpiSwapped = document.getElementById('dash-kpi-swapped');
+            const kpiPending = document.getElementById('dash-kpi-pending');
+
+            if (kpiTotal) kpiTotal.innerText = total.toLocaleString();
+            if (kpiSwapped) kpiSwapped.innerText = completedCount.toLocaleString();
+            if (kpiPending) kpiPending.innerText = pendingCount.toLocaleString();
 
             const statusCounts = {};
             nonIbsDataset.forEach(d => {
@@ -1600,18 +1800,28 @@
                 statusCounts[st] = (statusCounts[st] || 0) + 1;
             });
 
-            document.getElementById('dash-kpi-grid').innerHTML = Object.entries(statusCounts).map(([st, cnt]) => `
-                <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
-                    <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase truncate" title="${st}">${st}</div>
-                    <div class="text-xl font-black text-slate-900 dark:text-white">${cnt.toLocaleString()}</div>
-                </div>
-            `).join('');
+            const kpiGrid = document.getElementById('dash-kpi-grid');
+            if (kpiGrid) {
+                kpiGrid.innerHTML = Object.entries(statusCounts).map(([st, cnt]) => `
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
+                        <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase truncate" title="${st}">${st}</div>
+                        <div class="text-xl font-black text-slate-900 dark:text-white">${cnt.toLocaleString()}</div>
+                    </div>
+                `).join('');
+            }
 
             renderDonutChart(statusCounts);
 
-            const pivotCol = document.getElementById('dash-pivot-col').value;
-            const pivotMap = {};
+            const pivotSelect = document.getElementById('dash-pivot-col');
+            let pivotCol = pivotSelect ? pivotSelect.value : '';
 
+            if (!pivotCol || !(pivotCol in sampleRow)) {
+                const headers = Object.keys(sampleRow);
+                pivotCol = headers.find(h => h.toLowerCase().includes('province') || h.toLowerCase().includes('region')) || headers[0];
+                if (pivotSelect) pivotSelect.value = pivotCol;
+            }
+
+            const pivotMap = {};
             rawDataset.forEach(d => {
                 const region = String(d[pivotCol] || 'Unspecified').trim();
                 const st = String(d[colGroup] || 'Unclassified').trim();
@@ -1631,7 +1841,7 @@
                 const regTotal = Object.values(stMap).reduce((a, b) => a + b, 0);
                 let regApproved = 0;
                 Object.keys(stMap).forEach(stKey => {
-                    if (stKey.toLowerCase().includes('approved') || stKey.toLowerCase().includes('swapped') || stKey.toLowerCase().includes('done')) {
+                    if (isCompletedValue(stKey)) {
                         regApproved += stMap[stKey];
                     }
                 });
@@ -1641,35 +1851,42 @@
 
             pivotRows.sort((a, b) => b.regPct - a.regPct || b.regTotal - a.regTotal);
 
-            document.getElementById('dash-pivot-thead').innerHTML = `
-                <tr>
-                    <th class="p-2 border border-slate-200 dark:border-slate-800 text-center w-12">Rank</th>
-                    <th class="p-2 border border-slate-200 dark:border-slate-800">${pivotCol}</th>
-                    <th class="p-2 border border-slate-200 dark:border-slate-800 text-center">Total</th>
-                    <th class="p-2 border border-slate-200 dark:border-slate-800 text-center">SSV Completion %</th>
-                    ${statuses.map(s => `<th class="p-2 border border-slate-200 dark:border-slate-800 text-center">${s}</th>`).join('')}
-                </tr>
-            `;
+            const pThead = document.getElementById('dash-pivot-thead');
+            const pTbody = document.getElementById('dash-pivot-tbody');
 
-            document.getElementById('dash-pivot-tbody').innerHTML = pivotRows.map((row, idx) => {
-                const formattedPct = row.regPct.toFixed(1);
-                return `
-                    <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/40 transition">
-                        <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold text-slate-500 dark:text-slate-400">#${idx + 1}</td>
-                        <td class="p-2 border border-slate-200 dark:border-slate-800 font-bold text-slate-800 dark:text-slate-200">${row.reg}</td>
-                        <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold text-blue-600 dark:text-blue-400">${row.regTotal}</td>
-                        <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold">
-                            <div class="flex items-center justify-center gap-2">
-                                <div class="w-12 bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                                    <div class="bg-emerald-500 h-full" style="width: ${formattedPct}%"></div>
-                                </div>
-                                <span class="text-emerald-600 dark:text-emerald-400 font-mono text-[11px]">${formattedPct}%</span>
-                            </div>
-                        </td>
-                        ${statuses.map(s => `<td class="p-2 border border-slate-200 dark:border-slate-800 text-center ${row.stMap[s] ? 'text-slate-800 dark:text-slate-200 font-bold' : 'text-slate-400 dark:text-slate-600'}">${row.stMap[s] || 0}</td>`).join('')}
+            if (pThead) {
+                pThead.innerHTML = `
+                    <tr>
+                        <th class="p-2 border border-slate-200 dark:border-slate-800 text-center w-12">Rank</th>
+                        <th class="p-2 border border-slate-200 dark:border-slate-800">${pivotCol}</th>
+                        <th class="p-2 border border-slate-200 dark:border-slate-800 text-center">Total</th>
+                        <th class="p-2 border border-slate-200 dark:border-slate-800 text-center">Completion % (${colGroup})</th>
+                        ${statuses.map(s => `<th class="p-2 border border-slate-200 dark:border-slate-800 text-center">${s}</th>`).join('')}
                     </tr>
                 `;
-            }).join('');
+            }
+
+            if (pTbody) {
+                pTbody.innerHTML = pivotRows.map((row, idx) => {
+                    const formattedPct = row.regPct.toFixed(1);
+                    return `
+                        <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/40 transition">
+                            <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold text-slate-500 dark:text-slate-400">#${idx + 1}</td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-800 font-bold text-slate-800 dark:text-slate-200">${row.reg}</td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold text-blue-600 dark:text-blue-400">${row.regTotal}</td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold">
+                                <div class="flex items-center justify-center gap-2">
+                                    <div class="w-12 bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                        <div class="bg-emerald-500 h-full" style="width: ${formattedPct}%"></div>
+                                    </div>
+                                    <span class="text-emerald-600 dark:text-emerald-400 font-mono text-[11px]">${formattedPct}%</span>
+                                </div>
+                            </td>
+                            ${statuses.map(s => `<td class="p-2 border border-slate-200 dark:border-slate-800 text-center ${row.stMap[s] ? 'text-slate-800 dark:text-slate-200 font-bold' : 'text-slate-400 dark:text-slate-600'}">${row.stMap[s] || 0}</td>`).join('')}
+                        </tr>
+                    `;
+                }).join('');
+            }
         }
 
         function renderDonutChart(statusCounts) {
