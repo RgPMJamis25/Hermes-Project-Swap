@@ -687,10 +687,14 @@
 
             // Method 2: Client-Side Fallback Engine (For GitHub Pages & Static Exports)
             try {
-                const corsProxy = 'https://corsproxy.io/?';
+                // Reliable CORS Proxy for GitHub Pages
+                const corsProxy = 'https://api.allorigins.win/raw?url=';
 
-                const ssvUrl = corsProxy + encodeURIComponent(`https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/export?format=csv&gid=0`);
-                const primaryUrl = corsProxy + encodeURIComponent(`https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Main`);
+                const ssvExportUrl = `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/export?format=csv&gid=0`;
+                const primaryExportUrl = `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/export?format=csv&sheet=Main`;
+
+                const ssvUrl = corsProxy + encodeURIComponent(ssvExportUrl);
+                const primaryUrl = corsProxy + encodeURIComponent(primaryExportUrl);
 
                 // Dynamic Loader for PapaParse
                 if (typeof Papa === 'undefined') {
@@ -705,8 +709,8 @@
 
                 // Fetch SSV and Primary CSVs in Parallel
                 const [ssvRes, primaryRes] = await Promise.all([
-                    fetch(ssvUrl).then(r => r.text()).catch(() => null),
-                    fetch(primaryUrl).then(r => r.text()).catch(() => null)
+                    fetch(ssvUrl).then(r => { if(!r.ok) throw new Error(); return r.text(); }).catch(() => null),
+                    fetch(primaryUrl).then(r => { if(!r.ok) throw new Error(); return r.text(); }).catch(() => null)
                 ]);
 
                 if (!primaryRes) throw new Error("Could not fetch primary spreadsheet");
@@ -764,7 +768,7 @@
                     rawDataset = parsedPrimary.data.map(row => {
                         const plaidVal = String(row[colIdLocal] || '').trim().toUpperCase();
                         const swapKeys = Object.keys(row);
-                        const swapKey = swapKeys.find(k => k.toLowerCase().strip ? k.toLowerCase().strip() === 'swap status' : k.toLowerCase().includes('swap')) || 'Status';
+                        const swapKey = swapKeys.find(k => k.toLowerCase().trim() === 'swap status' || k.toLowerCase().includes('swap')) || 'Status';
                         const primarySwapStatus = String(row[swapKey] || '').trim().toUpperCase();
 
                         let lookedUpSSVStatus = 'NOT YET SWAPPED';
@@ -781,12 +785,12 @@
                     });
 
                     ssvLookupCount = Object.keys(ssvLookupMap).length;
-                    onSyncDatasetReady(syncStatus, `${ssvLookupCount} Client Lookups`);
+                    onSyncDatasetReady(syncStatus, `${ssvLookupCount} GitHub Client Lookups`);
                 }
             } catch (err) {
                 console.error("Client-side fallback sync failed:", err);
                 if (syncStatus) {
-                    syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed (Offline Mode)';
+                    syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed (Check Sheet Permissions)';
                     syncStatus.className = 'text-red-500 flex items-center gap-1';
                 }
             }
