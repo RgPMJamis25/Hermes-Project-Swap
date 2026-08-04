@@ -487,7 +487,7 @@
     <div id="dashboard-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex flex-col p-4 sm:p-8">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden custom-scrollbar">
 
-            <!-- In-Modal Column Identifier Control -->
+            <!-- In-Modal Header Controls -->
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-50 dark:bg-slate-950">
                 <div class="flex items-center gap-3">
                     <div class="p-2 bg-purple-600/20 text-purple-600 dark:text-purple-400 rounded-xl border border-purple-500/30">
@@ -499,12 +499,45 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3">
                     <!-- Column Identifier Dropdown inside Analytics Panel -->
                     <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 shadow-sm">
                         <i data-lucide="palette" class="w-4 h-4 text-purple-500"></i>
                         <span class="text-xs font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Column Identifier:</span>
-                        <select id="modal-col-group" onchange="onModalColumnGroupChanged()" class="bg-transparent text-xs font-bold text-blue-600 dark:text-blue-400 outline-none cursor-pointer max-w-[180px] truncate"></select>
+                        <select id="modal-col-group" onchange="onModalColumnGroupChanged()" class="bg-transparent text-xs font-bold text-blue-600 dark:text-blue-400 outline-none cursor-pointer max-w-[150px] truncate"></select>
+                    </div>
+
+                    <!-- Analytics Province Filter -->
+                    <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 shadow-sm">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-emerald-500"></i>
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Province:</span>
+                        <select id="modal-prov-filter" onchange="onModalProvinceChanged()" class="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer max-w-[130px] truncate">
+                            <option value="ALL">All Provinces</option>
+                        </select>
+                    </div>
+
+                    <!-- Analytics Town / City Filter -->
+                    <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 shadow-sm">
+                        <i data-lucide="building" class="w-4 h-4 text-amber-500"></i>
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Town / City:</span>
+                        <select id="modal-town-filter" onchange="renderDashboard()" class="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer max-w-[130px] truncate">
+                            <option value="ALL">All Towns / Cities</option>
+                        </select>
+                    </div>
+
+                    <!-- Dynamic Milestone Sort Control -->
+                    <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 shadow-sm">
+                        <i data-lucide="arrow-up-down" class="w-4 h-4 text-indigo-500"></i>
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Sort By:</span>
+                        <select id="modal-sort-col" onchange="renderDashboard()" class="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer max-w-[160px] truncate">
+                            <option value="COMPLETION_PCT">Completion %</option>
+                            <option value="TOTAL">Total Sites</option>
+                            <option value="NAME">Region/Province Name</option>
+                        </select>
+                        <select id="modal-sort-order" onchange="renderDashboard()" class="bg-transparent text-xs font-bold text-indigo-500 outline-none cursor-pointer">
+                            <option value="DESC" selected>Highest to Lowest (DESC ▼)</option>
+                            <option value="ASC">Lowest to Highest (ASC ▲)</option>
+                        </select>
                     </div>
 
                     <button onclick="closeDashboardModal()" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
@@ -564,7 +597,7 @@
                 <div class="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-5">
                     <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                         <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                            <i data-lucide="grid" class="w-4 h-4 text-blue-500"></i> Region / Province Pivot Matrix (Ranked by Completion %, Includes IBS)
+                            <i data-lucide="grid" class="w-4 h-4 text-blue-500"></i> Region / Province Pivot Matrix (Includes IBS)
                         </h3>
                         <div class="flex items-center gap-2 text-xs">
                             <span class="text-slate-500 dark:text-slate-400">Group By:</span>
@@ -591,11 +624,18 @@
         const API_PRIMARY_PROXY = '/api/sheet-data';
         const API_SSV_PROXY = '/api/ssv-data';
 
-        const PRIMARY_EXPORT_URL = `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/export?format=csv&sheet=Main`;
-        const PRIMARY_GVIZ_URL = `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Main`;
+        function getClientExportUrls() {
+            const ts = Date.now();
+            const primaryQ = encodeURIComponent("SELECT * LIMIT 500000");
+            const ssvQ = encodeURIComponent("SELECT * LIMIT 500000");
 
-        const SSV_EXPORT_URL = `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/export?format=csv&gid=0`;
-        const SSV_GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/gviz/tq?tqx=out:csv&tq=select%20*`;
+            return {
+                primaryExport: `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Main&tq=${primaryQ}&_cb=${ts}`,
+                primaryGviz: `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/gviz/tq?tqx=out:csv&gid=0&tq=${primaryQ}&_cb=${ts}`,
+                ssvExport: `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1&tq=${ssvQ}&_cb=${ts}`,
+                ssvGviz: `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/gviz/tq?tqx=out:csv&gid=0&tq=${ssvQ}&_cb=${ts}`
+            };
+        }
 
         const CORS_PROXY_ALLORIGINS = 'https://api.allorigins.win/raw?url=';
         const CORS_PROXY_CORSIO = 'https://corsproxy.io/?';
@@ -791,6 +831,8 @@
                 syncStatus.className = 'text-amber-500 flex items-center gap-1';
             }
 
+            const clientUrls = getClientExportUrls();
+
             const isStaticHost = window.location.protocol === 'https:' || 
                 (!window.location.hostname.includes('localhost') && 
                  !window.location.hostname.includes('127.0.0.1') && 
@@ -798,21 +840,21 @@
 
             const primaryEndpoints = isStaticHost 
                 ? [
-                    PRIMARY_GVIZ_URL,
-                    CORS_PROXY_ALLORIGINS + encodeURIComponent(PRIMARY_EXPORT_URL),
-                    CORS_PROXY_CORSIO + encodeURIComponent(PRIMARY_EXPORT_URL),
-                    PRIMARY_EXPORT_URL
+                    clientUrls.primaryGviz,
+                    CORS_PROXY_ALLORIGINS + encodeURIComponent(clientUrls.primaryExport),
+                    CORS_PROXY_CORSIO + encodeURIComponent(clientUrls.primaryExport),
+                    clientUrls.primaryExport
                   ]
-                : [API_PRIMARY_PROXY, PRIMARY_GVIZ_URL, PRIMARY_EXPORT_URL, CORS_PROXY_ALLORIGINS + encodeURIComponent(PRIMARY_EXPORT_URL)];
+                : [API_PRIMARY_PROXY, clientUrls.primaryGviz, clientUrls.primaryExport, CORS_PROXY_ALLORIGINS + encodeURIComponent(clientUrls.primaryExport)];
 
             const ssvEndpoints = isStaticHost
                 ? [
-                    SSV_GVIZ_URL,
-                    CORS_PROXY_ALLORIGINS + encodeURIComponent(SSV_EXPORT_URL),
-                    CORS_PROXY_CORSIO + encodeURIComponent(SSV_EXPORT_URL),
-                    SSV_EXPORT_URL
+                    clientUrls.ssvGviz,
+                    CORS_PROXY_ALLORIGINS + encodeURIComponent(clientUrls.ssvExport),
+                    CORS_PROXY_CORSIO + encodeURIComponent(clientUrls.ssvExport),
+                    clientUrls.ssvExport
                   ]
-                : [API_SSV_PROXY, SSV_GVIZ_URL, SSV_EXPORT_URL, CORS_PROXY_ALLORIGINS + encodeURIComponent(SSV_EXPORT_URL)];
+                : [API_SSV_PROXY, clientUrls.ssvGviz, clientUrls.ssvExport, CORS_PROXY_ALLORIGINS + encodeURIComponent(clientUrls.ssvExport)];
 
             let primaryCsvText = null;
             let ssvCsvText = null;
@@ -918,6 +960,7 @@
             updateDropdownControls();
             initTooltipFieldsConfig();
             initCategoryVisibility();
+            populateModalLocationFilters();
 
             [0, 1, 2].forEach(idx => onFilterColumnChanged(idx));
 
@@ -929,6 +972,94 @@
                 syncStatus.className = 'text-emerald-600 dark:text-emerald-400 flex items-center gap-1';
             }
             document.getElementById('sidebar-record-count').innerText = `${rawDataset.length.toLocaleString()} (${detailNote})`;
+        }
+
+        function getProvColName() {
+            if (!rawDataset || rawDataset.length === 0) return '';
+            const headers = Object.keys(rawDataset[0]);
+            return headers.find(h => h.toLowerCase() === 'province' || h.toLowerCase().includes('province') || h.toLowerCase().includes('region')) || '';
+        }
+
+        function getTownColName() {
+            if (!rawDataset || rawDataset.length === 0) return '';
+            const headers = Object.keys(rawDataset[0]);
+            return headers.find(h => h.toLowerCase() === 'town' || h.toLowerCase().includes('town') || h.toLowerCase().includes('city')) || '';
+        }
+
+        function populateModalLocationFilters() {
+            if (!rawDataset || rawDataset.length === 0) return;
+            const provCol = getProvColName();
+
+            const provSelect = document.getElementById('modal-prov-filter');
+            if (provSelect) {
+                const selectedProv = provSelect.value || 'ALL';
+                if (provCol) {
+                    const provinces = [...new Set(rawDataset.map(d => String(d[provCol] || '').trim()).filter(Boolean))].sort();
+                    provSelect.innerHTML = '<option value="ALL">All Provinces</option>' + 
+                        provinces.map(p => `<option value="${p}" ${p === selectedProv ? 'selected' : ''}>${p}</option>`).join('');
+                } else {
+                    provSelect.innerHTML = '<option value="ALL">All Provinces</option>';
+                }
+            }
+
+            updateModalSortDropdown();
+            updateModalTownFilter();
+        }
+
+        function updateModalSortDropdown() {
+            const sortColSelect = document.getElementById('modal-sort-col');
+            if (!sortColSelect || rawDataset.length === 0) return;
+
+            const activeSort = sortColSelect.value || 'COMPLETION_PCT';
+
+            // Extract unique status milestone categories from the active Column Identifier (colGroup)
+            const milestones = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
+
+            let options = `
+                <option value="COMPLETION_PCT" ${activeSort === 'COMPLETION_PCT' ? 'selected' : ''}>Completion %</option>
+                <option value="TOTAL" ${activeSort === 'TOTAL' ? 'selected' : ''}>Total Sites</option>
+                <option value="NAME" ${activeSort === 'NAME' ? 'selected' : ''}>Region / Province Name</option>
+            `;
+
+            options += `<optgroup label="${colGroup} Milestones">`;
+            milestones.forEach(m => {
+                const val = `MILESTONE:${m}`;
+                options += `<option value="${val}" ${activeSort === val ? 'selected' : ''}>${m} (Count)</option>`;
+            });
+            options += `</optgroup>`;
+
+            sortColSelect.innerHTML = options;
+        }
+
+        function updateModalTownFilter() {
+            if (!rawDataset || rawDataset.length === 0) return;
+            const provCol = getProvColName();
+            const townCol = getTownColName();
+
+            const provSelect = document.getElementById('modal-prov-filter');
+            const townSelect = document.getElementById('modal-town-filter');
+            if (!townSelect) return;
+
+            const selectedProv = provSelect ? provSelect.value : 'ALL';
+            const selectedTown = townSelect.value || 'ALL';
+
+            let filtered = rawDataset;
+            if (selectedProv !== 'ALL' && provCol) {
+                filtered = rawDataset.filter(d => String(d[provCol] || '').trim().toUpperCase() === selectedProv.toUpperCase());
+            }
+
+            if (townCol) {
+                const towns = [...new Set(filtered.map(d => String(d[townCol] || '').trim()).filter(Boolean))].sort();
+                townSelect.innerHTML = '<option value="ALL">All Towns / Cities</option>' + 
+                    towns.map(t => `<option value="${t}" ${t === selectedTown ? 'selected' : ''}>${t}</option>`).join('');
+            } else {
+                townSelect.innerHTML = '<option value="ALL">All Towns / Cities</option>';
+            }
+        }
+
+        function onModalProvinceChanged() {
+            updateModalTownFilter();
+            renderDashboard();
         }
 
         function onFilterColumnChanged(slotIdx) {
@@ -1354,6 +1485,7 @@
             initCategoryVisibility();
             plotPinsOnMap();
             renderSavedPaletteSlots();
+            updateModalSortDropdown();
             renderDashboard();
         }
 
@@ -1371,6 +1503,7 @@
             initCategoryVisibility();
             plotPinsOnMap();
             renderSavedPaletteSlots();
+            updateModalSortDropdown();
             renderDashboard();
         }
 
@@ -1403,6 +1536,7 @@
             initCategoryVisibility();
             plotPinsOnMap();
             renderSavedPaletteSlots();
+            updateModalSortDropdown();
             renderDashboard();
         }
 
@@ -1707,7 +1841,6 @@
         function openDashboardModal() {
             document.getElementById('dashboard-modal').classList.remove('hidden');
 
-            // Populate modal dropdown control if needed
             if (rawDataset.length > 0) {
                 const headers = Object.keys(rawDataset[0]);
                 const modalSelect = document.getElementById('modal-col-group');
@@ -1716,6 +1849,7 @@
                 } else if (modalSelect) {
                     modalSelect.value = colGroup;
                 }
+                populateModalLocationFilters();
             }
 
             renderDashboard();
@@ -1725,7 +1859,7 @@
             document.getElementById('dashboard-modal').classList.add('hidden');
         }
 
-        // --- FULLY DECOUPLED ANALYTICS ENGINE WITH AUTO-RECOVERY ---
+        // --- FULLY DECOUPLED ANALYTICS ENGINE WITH PIVOT MATRIX MILESTONE SORTING ---
         function renderDashboard() {
             if (!rawDataset || rawDataset.length === 0) {
                 console.warn("Analytics: Dataset is empty.");
@@ -1747,12 +1881,27 @@
             if (refSubLabel) refSubLabel.innerText = colGroup;
             if (modalSelect) modalSelect.value = colGroup;
 
+            // Province & Town Filtering for Analytics
+            const provCol = getProvColName();
+            const townCol = getTownColName();
+            const modalProv = document.getElementById('modal-prov-filter')?.value || 'ALL';
+            const modalTown = document.getElementById('modal-town-filter')?.value || 'ALL';
+
+            let analyticsDataset = [...rawDataset];
+
+            if (modalProv !== 'ALL' && provCol) {
+                analyticsDataset = analyticsDataset.filter(d => String(d[provCol] || '').trim().toUpperCase() === modalProv.toUpperCase());
+            }
+            if (modalTown !== 'ALL' && townCol) {
+                analyticsDataset = analyticsDataset.filter(d => String(d[townCol] || '').trim().toUpperCase() === modalTown.toUpperCase());
+            }
+
             const isIbsRow = (d) => {
                 const swapSt = String(d['SWAP STATUS'] || d['Swap Status'] || d['Status'] || '').toUpperCase().trim();
                 return swapSt.includes('IBS');
             };
 
-            const nonIbsDataset = rawDataset.filter(d => !isIbsRow(d));
+            const nonIbsDataset = analyticsDataset.filter(d => !isIbsRow(d));
             const total = nonIbsDataset.length;
 
             const isCompletedValue = (val) => {
@@ -1822,7 +1971,7 @@
             }
 
             const pivotMap = {};
-            rawDataset.forEach(d => {
+            analyticsDataset.forEach(d => {
                 const region = String(d[pivotCol] || 'Unspecified').trim();
                 const st = String(d[colGroup] || 'Unclassified').trim();
 
@@ -1831,7 +1980,7 @@
             });
 
             const allStatusCounts = {};
-            rawDataset.forEach(d => {
+            analyticsDataset.forEach(d => {
                 const st = String(d[colGroup] || 'Unclassified').trim();
                 allStatusCounts[st] = (allStatusCounts[st] || 0) + 1;
             });
@@ -1849,7 +1998,37 @@
                 return { reg, regTotal, regApproved, regPct, stMap };
             });
 
-            pivotRows.sort((a, b) => b.regPct - a.regPct || b.regTotal - a.regTotal);
+            // Apply Milestone / Field Sort for Pivot Matrix
+            const sortCol = document.getElementById('modal-sort-col')?.value || 'COMPLETION_PCT';
+            const sortOrder = document.getElementById('modal-sort-order')?.value || 'DESC';
+
+            pivotRows.sort((a, b) => {
+                let valA = 0;
+                let valB = 0;
+
+                if (sortCol === 'COMPLETION_PCT') {
+                    valA = a.regPct;
+                    valB = b.regPct;
+                } else if (sortCol === 'TOTAL') {
+                    valA = a.regTotal;
+                    valB = b.regTotal;
+                } else if (sortCol === 'NAME') {
+                    valA = a.reg.toLowerCase();
+                    valB = b.reg.toLowerCase();
+                    if (sortOrder === 'ASC') return valA.localeCompare(valB);
+                    return valB.localeCompare(valA);
+                } else if (sortCol.startsWith('MILESTONE:')) {
+                    const milestoneKey = sortCol.replace('MILESTONE:', '');
+                    valA = a.stMap[milestoneKey] || 0;
+                    valB = b.stMap[milestoneKey] || 0;
+                }
+
+                if (sortOrder === 'ASC') {
+                    return valA - valB || a.regTotal - b.regTotal;
+                } else {
+                    return valB - valA || b.regTotal - a.regTotal;
+                }
+            });
 
             const pThead = document.getElementById('dash-pivot-thead');
             const pTbody = document.getElementById('dash-pivot-tbody');
@@ -1861,7 +2040,10 @@
                         <th class="p-2 border border-slate-200 dark:border-slate-800">${pivotCol}</th>
                         <th class="p-2 border border-slate-200 dark:border-slate-800 text-center">Total</th>
                         <th class="p-2 border border-slate-200 dark:border-slate-800 text-center">Completion % (${colGroup})</th>
-                        ${statuses.map(s => `<th class="p-2 border border-slate-200 dark:border-slate-800 text-center">${s}</th>`).join('')}
+                        ${statuses.map(s => {
+                            const isSortedMilestone = (sortCol === `MILESTONE:${s}`);
+                            return `<th class="p-2 border border-slate-200 dark:border-slate-800 text-center ${isSortedMilestone ? 'bg-indigo-900/40 text-indigo-300 font-black border-indigo-500' : ''}">${s} ${isSortedMilestone ? (sortOrder === 'DESC' ? '▼' : '▲') : ''}</th>`;
+                        }).join('')}
                     </tr>
                 `;
             }
@@ -1882,7 +2064,11 @@
                                     <span class="text-emerald-600 dark:text-emerald-400 font-mono text-[11px]">${formattedPct}%</span>
                                 </div>
                             </td>
-                            ${statuses.map(s => `<td class="p-2 border border-slate-200 dark:border-slate-800 text-center ${row.stMap[s] ? 'text-slate-800 dark:text-slate-200 font-bold' : 'text-slate-400 dark:text-slate-600'}">${row.stMap[s] || 0}</td>`).join('')}
+                            ${statuses.map(s => {
+                                const isSortedMilestone = (sortCol === `MILESTONE:${s}`);
+                                const countVal = row.stMap[s] || 0;
+                                return `<td class="p-2 border border-slate-200 dark:border-slate-800 text-center ${isSortedMilestone ? 'bg-indigo-900/20 text-indigo-300 font-black' : (countVal ? 'text-slate-800 dark:text-slate-200 font-bold' : 'text-slate-400 dark:text-slate-600')}">${countVal}</td>`;
+                            }).join('')}
                         </tr>
                     `;
                 }).join('');
