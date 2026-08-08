@@ -762,7 +762,6 @@
             const sidebar = document.getElementById('sidebar-deck');
             sidebar.classList.toggle('sidebar-collapsed');
 
-            // Allow layout DOM updates then refresh Leaflet map sizing cleanly
             setTimeout(() => {
                 if (map) map.invalidateSize();
             }, 300);
@@ -819,8 +818,22 @@
                 syncStatus.className = 'text-amber-500 flex items-center gap-1';
             }
 
-            const primaryEndpoints = [API_PRIMARY_PROXY, PRIMARY_WEBAPP_URL];
-            const ssvEndpoints = [API_SSV_PROXY, SSV_WEBAPP_URL];
+            // Detect if running on GitHub Pages / Static Hosting where Python backend API isn't present
+            const isStaticHost = window.location.hostname.includes('github.io') || 
+                                 window.location.protocol === 'file:' || 
+                                 (!window.location.hostname.includes('localhost') && 
+                                  !window.location.hostname.includes('127.0.0.1'));
+
+            // Use public CORS proxies to allow direct GitHub Pages fetches across domains
+            const corsProxy = 'https://corsproxy.io/?';
+
+            const primaryEndpoints = isStaticHost 
+                ? [PRIMARY_WEBAPP_URL, corsProxy + encodeURIComponent(PRIMARY_WEBAPP_URL)]
+                : [API_PRIMARY_PROXY, PRIMARY_WEBAPP_URL, corsProxy + encodeURIComponent(PRIMARY_WEBAPP_URL)];
+
+            const ssvEndpoints = isStaticHost 
+                ? [SSV_WEBAPP_URL, corsProxy + encodeURIComponent(SSV_WEBAPP_URL)]
+                : [API_SSV_PROXY, SSV_WEBAPP_URL, corsProxy + encodeURIComponent(SSV_WEBAPP_URL)];
 
             let primaryCsvText = null;
             let ssvCsvText = null;
