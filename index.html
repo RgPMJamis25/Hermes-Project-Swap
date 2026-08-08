@@ -107,6 +107,16 @@
         }
         .leaflet-popup-tip { background: #0f172a !important; }
         html:not(.dark) .leaflet-popup-tip { background: #ffffff !important; }
+
+        /* Smooth Collapsible Sidebar Styles */
+        .sidebar-collapsed {
+            margin-left: -20rem !important; /* -w-80 default */
+        }
+        @media (min-width: 640px) {
+            .sidebar-collapsed {
+                margin-left: -24rem !important; /* -w-96 for sm breakpoint */
+            }
+        }
     </style>
 </head>
 
@@ -142,9 +152,6 @@
                 <span id="theme-label" class="text-xs font-semibold text-slate-800 dark:text-slate-200 hidden md:inline">Light Mode</span>
             </button>
 
-            <button onclick="downloadIndexHTML()" class="px-2.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition flex items-center gap-1.5 shadow-sm">
-                <i data-lucide="file-code" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Save index.html</span>
-            </button>
             <button onclick="fetchSheetData()" class="px-2.5 py-1.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5">
                 <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Sync Sheets</span>
             </button>
@@ -162,20 +169,20 @@
 
     <div class="flex-1 flex overflow-hidden relative">
 
-        <aside id="sidebar-deck" class="w-80 sm:w-96 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-20 shrink-0 transition-all duration-300 transform translate-x-0 custom-scrollbar overflow-y-auto">
+        <aside id="sidebar-deck" class="w-80 sm:w-96 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-20 shrink-0 transition-all duration-300 custom-scrollbar overflow-y-auto">
             <div class="p-4 space-y-5">
 
                 <!-- 1. Database Sources -->
                 <div class="space-y-3">
                     <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        <span class="flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4 text-blue-500"></i> Google Sheet Sources</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4 text-blue-500"></i> Apps Script Endpoints</span>
                     </div>
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
-                        <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="Swap Sheet: 12amb34jsOrqkkeKST2-0uxiYYg6M-IGmsM_z-jojy4M">
-                            Primary Swap: <span class="text-blue-600 dark:text-blue-400">12amb34jsOrqkke...</span>
+                        <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="Swap Sheet Apps Script Endpoint">
+                            Primary Swap: <span class="text-blue-600 dark:text-blue-400">AKfycbxxn6Gxb28...</span>
                         </div>
-                        <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="SSV Sheet: 15owO_lt9EltLfAVh5CEfOObWBGqR_HsT0GnzmRFpc6I">
-                            SSV Tracker: <span class="text-purple-600 dark:text-purple-400">15owO_lt9EltLfA...</span>
+                        <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="SSV Sheet Apps Script Endpoint">
+                            SSV Tracker: <span class="text-purple-600 dark:text-purple-400">AKfycbx-JSY8Luq...</span>
                         </div>
                         <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800">
                             <span class="text-slate-500 dark:text-slate-400">Loaded Sites / Lookups:</span>
@@ -330,7 +337,7 @@
             </div>
         </aside>
 
-        <main class="flex-1 relative flex flex-col h-full bg-slate-100 dark:bg-slate-950">
+        <main class="flex-1 relative flex flex-col h-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
 
             <!-- Search & 3 Multi-Select Filter Toolbar -->
             <div class="p-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 z-10 flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -618,27 +625,11 @@
     </div>
 
     <script>
-        const PRIMARY_SHEET_ID = '12amb34jsOrqkkeKST2-0uxiYYg6M-IGmsM_z-jojy4M';
-        const SSV_SHEET_ID = '15owO_lt9EltLfAVh5CEfOObWBGqR_HsT0GnzmRFpc6I';
+        const PRIMARY_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxxn6Gxb28-E5Eu6WlCkPMi9vYnF_C12fTglt8CurPFd0YO-ldcYjesS0l3qRXqei5_QA/exec';
+        const SSV_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbx-JSY8LuqG3lxcmqJGdhG6WXXE0xgUqFcSBbU40aA-S33BS46ZWJT_x7nZ-4gTACcQkw/exec';
 
         const API_PRIMARY_PROXY = '/api/sheet-data';
         const API_SSV_PROXY = '/api/ssv-data';
-
-        function getClientExportUrls() {
-            const ts = Date.now();
-            const primaryQ = encodeURIComponent("SELECT * LIMIT 500000");
-            const ssvQ = encodeURIComponent("SELECT * LIMIT 500000");
-
-            return {
-                primaryExport: `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Main&tq=${primaryQ}&_cb=${ts}`,
-                primaryGviz: `https://docs.google.com/spreadsheets/d/${PRIMARY_SHEET_ID}/gviz/tq?tqx=out:csv&gid=0&tq=${primaryQ}&_cb=${ts}`,
-                ssvExport: `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1&tq=${ssvQ}&_cb=${ts}`,
-                ssvGviz: `https://docs.google.com/spreadsheets/d/${SSV_SHEET_ID}/gviz/tq?tqx=out:csv&gid=0&tq=${ssvQ}&_cb=${ts}`
-            };
-        }
-
-        const CORS_PROXY_ALLORIGINS = 'https://api.allorigins.win/raw?url=';
-        const CORS_PROXY_CORSIO = 'https://corsproxy.io/?';
 
         let rawDataset = [];
         let ssvLookupCount = 0;
@@ -767,17 +758,14 @@
             plotPinsOnMap();
         }
 
-        function downloadIndexHTML() {
-            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'index.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar-deck');
+            sidebar.classList.toggle('sidebar-collapsed');
+
+            // Allow layout DOM updates then refresh Leaflet map sizing cleanly
+            setTimeout(() => {
+                if (map) map.invalidateSize();
+            }, 300);
         }
 
         function initMap() {
@@ -805,7 +793,7 @@
             });
         }
 
-        async function fetchWithTimeout(url, timeoutMs = 8000) {
+        async function fetchWithTimeout(url, timeoutMs = 30000) {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeoutMs);
             try {
@@ -813,7 +801,7 @@
                 clearTimeout(id);
                 if (res && res.ok) {
                     const text = await res.text();
-                    if (text && text.length > 50 && !text.includes('<!DOCTYPE html>')) {
+                    if (text && text.length > 10 && !text.includes('<!DOCTYPE html>') && !text.toLowerCase().includes('<html')) {
                         return text;
                     }
                 }
@@ -827,51 +815,29 @@
             isInitialLoad = true;
             const syncStatus = document.getElementById('sync-status');
             if (syncStatus) {
-                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing Dual Sheets...';
+                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing Web App Data...';
                 syncStatus.className = 'text-amber-500 flex items-center gap-1';
             }
 
-            const clientUrls = getClientExportUrls();
-
-            const isStaticHost = window.location.protocol === 'https:' || 
-                (!window.location.hostname.includes('localhost') && 
-                 !window.location.hostname.includes('127.0.0.1') && 
-                 !window.location.hostname.startsWith('192.168.'));
-
-            const primaryEndpoints = isStaticHost 
-                ? [
-                    clientUrls.primaryGviz,
-                    CORS_PROXY_ALLORIGINS + encodeURIComponent(clientUrls.primaryExport),
-                    CORS_PROXY_CORSIO + encodeURIComponent(clientUrls.primaryExport),
-                    clientUrls.primaryExport
-                  ]
-                : [API_PRIMARY_PROXY, clientUrls.primaryGviz, clientUrls.primaryExport, CORS_PROXY_ALLORIGINS + encodeURIComponent(clientUrls.primaryExport)];
-
-            const ssvEndpoints = isStaticHost
-                ? [
-                    clientUrls.ssvGviz,
-                    CORS_PROXY_ALLORIGINS + encodeURIComponent(clientUrls.ssvExport),
-                    CORS_PROXY_CORSIO + encodeURIComponent(clientUrls.ssvExport),
-                    clientUrls.ssvExport
-                  ]
-                : [API_SSV_PROXY, clientUrls.ssvGviz, clientUrls.ssvExport, CORS_PROXY_ALLORIGINS + encodeURIComponent(clientUrls.ssvExport)];
+            const primaryEndpoints = [API_PRIMARY_PROXY, PRIMARY_WEBAPP_URL];
+            const ssvEndpoints = [API_SSV_PROXY, SSV_WEBAPP_URL];
 
             let primaryCsvText = null;
             let ssvCsvText = null;
 
             for (const url of primaryEndpoints) {
-                const res = await fetchWithTimeout(url, 8000);
+                const res = await fetchWithTimeout(url, 30000);
                 if (res) { primaryCsvText = res; break; }
             }
 
             for (const url of ssvEndpoints) {
-                const res = await fetchWithTimeout(url, 8000);
+                const res = await fetchWithTimeout(url, 30000);
                 if (res) { ssvCsvText = res; break; }
             }
 
             if (!primaryCsvText) {
                 if (syncStatus) {
-                    syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed (Offline / Blocked)';
+                    syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed (Primary Web App Error)';
                     syncStatus.className = 'text-red-500 flex items-center gap-1';
                 }
                 return;
@@ -1691,10 +1657,6 @@
             alert('Site details updated successfully!');
         }
 
-        function toggleSidebar() {
-            document.getElementById('sidebar-deck').classList.toggle('-translate-x-full');
-        }
-
         function togglePinsVisibility() {
             showPins = document.getElementById('chk-show-pins').checked;
             if (showPins) {
@@ -1859,7 +1821,6 @@
             document.getElementById('dashboard-modal').classList.add('hidden');
         }
 
-        // --- FULLY DECOUPLED ANALYTICS ENGINE WITH PIVOT MATRIX MILESTONE SORTING ---
         function renderDashboard() {
             if (!rawDataset || rawDataset.length === 0) {
                 console.warn("Analytics: Dataset is empty.");
@@ -1871,7 +1832,7 @@
                 ? colGroup 
                 : ('SSV STATUS' in sampleRow ? 'SSV STATUS' : Object.keys(sampleRow)[0]);
 
-            colGroup = validColGroup; // Lock validated column key
+            colGroup = validColGroup;
 
             const refLabel = document.getElementById('dash-reference-col-label');
             const refSubLabel = document.getElementById('dash-completion-ref-col');
@@ -1881,7 +1842,6 @@
             if (refSubLabel) refSubLabel.innerText = colGroup;
             if (modalSelect) modalSelect.value = colGroup;
 
-            // Province & Town Filtering for Analytics
             const provCol = getProvColName();
             const townCol = getTownColName();
             const modalProv = document.getElementById('modal-prov-filter')?.value || 'ALL';
@@ -1998,7 +1958,6 @@
                 return { reg, regTotal, regApproved, regPct, stMap };
             });
 
-            // Apply Milestone / Field Sort for Pivot Matrix
             const sortCol = document.getElementById('modal-sort-col')?.value || 'COMPLETION_PCT';
             const sortOrder = document.getElementById('modal-sort-order')?.value || 'DESC';
 
