@@ -30,8 +30,9 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Chart.js -->
+    <!-- Chart.js & DataLabels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -51,13 +52,13 @@
         .glass-card { backdrop-filter: blur(12px); }
         .dark .glass-card {
             background: rgba(15, 23, 42, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             color: #f8fafc;
         }
         html:not(.dark) .glass-card {
             background: rgba(255, 255, 255, 0.98);
-            border: 1px solid rgba(0, 0, 0, 0.2);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
             color: #0f172a;
         }
 
@@ -108,13 +109,12 @@
         .leaflet-popup-tip { background: #0f172a !important; }
         html:not(.dark) .leaflet-popup-tip { background: #ffffff !important; }
 
-        /* Smooth Collapsible Sidebar Styles */
         .sidebar-collapsed {
-            margin-left: -20rem !important; /* -w-80 default */
+            margin-left: -20rem !important;
         }
         @media (min-width: 640px) {
             .sidebar-collapsed {
-                margin-left: -24rem !important; /* -w-96 for sm breakpoint */
+                margin-left: -24rem !important;
             }
         }
     </style>
@@ -490,139 +490,184 @@
         </div>
     </div>
 
-    <!-- Analytics Dashboard Modal (Compact 2-Column Split) -->
-    <div id="dashboard-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex flex-col p-3 sm:p-6">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden">
+    <!-- Analytics Dashboard Modal (Enhanced Modern Split Screen with Scaled-Up Typography & Labeled Pie Chart) -->
+    <div id="dashboard-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex flex-col p-3 sm:p-6">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden">
 
             <!-- In-Modal Header Controls -->
-            <div class="p-3 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-950 shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <div class="p-1.5 bg-purple-600/20 text-purple-600 dark:text-purple-400 rounded-xl border border-purple-500/30">
-                        <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3 bg-slate-50/90 dark:bg-slate-950/90 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-purple-600/20 text-purple-600 dark:text-purple-400 rounded-xl border border-purple-500/30">
+                        <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <h2 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">Cluster Rollout Analytics</h2>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Dynamic completion metrics exclude IBS on SWAP STATUS</p>
+                        <h2 class="font-black text-lg text-slate-900 dark:white tracking-tight leading-tight">Cluster Rollout Analytics</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Dynamic multi-select filtered metrics & pivot distribution (Excl. IBS on completion)</p>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2">
-                    <!-- Column Identifier Dropdown inside Analytics Panel -->
-                    <div class="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 shadow-sm">
-                        <i data-lucide="palette" class="w-3.5 h-3.5 text-purple-500"></i>
-                        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Column:</span>
-                        <select id="modal-col-group" onchange="onModalColumnGroupChanged()" class="bg-transparent text-[11px] font-bold text-blue-600 dark:text-blue-400 outline-none cursor-pointer max-w-[130px] truncate"></select>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <!-- Column Identifier Dropdown -->
+                    <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3 py-1.5 shadow-sm">
+                        <i data-lucide="palette" class="w-4 h-4 text-purple-500"></i>
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">Status Column:</span>
+                        <select id="modal-col-group" onchange="onModalColumnGroupChanged()" class="bg-transparent text-xs font-bold text-blue-600 dark:text-blue-400 outline-none cursor-pointer max-w-[140px] truncate"></select>
                     </div>
 
-                    <!-- Analytics Province Filter -->
-                    <div class="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 shadow-sm">
-                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-500"></i>
-                        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Province:</span>
-                        <select id="modal-prov-filter" onchange="onModalProvinceChanged()" class="bg-transparent text-[11px] font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer max-w-[120px] truncate">
-                            <option value="ALL">All Provinces</option>
-                        </select>
+                    <!-- Multi-Select Province Filter Dropdown -->
+                    <div class="relative">
+                        <button id="modal-prov-multiselect-btn" onclick="toggleModalFilterDropdown('prov')" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 text-slate-900 dark:text-white rounded-xl px-3 py-1.5 text-xs font-semibold outline-none flex items-center gap-2 shadow-sm min-w-[120px] max-w-[170px]">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                            <span id="modal-prov-multiselect-label" class="truncate">All Provinces</span>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-auto"></i>
+                        </button>
+                        <div id="modal-prov-multiselect-panel" class="hidden absolute top-full left-0 mt-1.5 w-64 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2">
+                            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5 px-1">
+                                <span class="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Filter Provinces</span>
+                                <div class="flex items-center gap-2 text-xs">
+                                    <button onclick="selectAllModalFilterValues('prov')" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">Select All</button>
+                                    <span class="text-slate-400">|</span>
+                                    <button onclick="clearAllModalFilterValues('prov')" class="text-rose-500 hover:underline font-semibold">Clear</button>
+                                </div>
+                            </div>
+                            <div id="modal-prov-checkbox-list" class="max-h-52 overflow-y-auto custom-scrollbar space-y-1 pr-1 text-xs"></div>
+                        </div>
                     </div>
 
-                    <!-- Analytics Town / City Filter -->
-                    <div class="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 shadow-sm">
-                        <i data-lucide="building" class="w-3.5 h-3.5 text-amber-500"></i>
-                        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Town:</span>
-                        <select id="modal-town-filter" onchange="renderDashboard()" class="bg-transparent text-[11px] font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer max-w-[120px] truncate">
-                            <option value="ALL">All Towns / Cities</option>
-                        </select>
+                    <!-- Multi-Select Town / City Filter Dropdown -->
+                    <div class="relative">
+                        <button id="modal-town-multiselect-btn" onclick="toggleModalFilterDropdown('town')" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 text-slate-900 dark:text-white rounded-xl px-3 py-1.5 text-xs font-semibold outline-none flex items-center gap-2 shadow-sm min-w-[120px] max-w-[170px]">
+                            <i data-lucide="building" class="w-4 h-4 text-amber-500 shrink-0"></i>
+                            <span id="modal-town-multiselect-label" class="truncate">All Towns</span>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-auto"></i>
+                        </button>
+                        <div id="modal-town-multiselect-panel" class="hidden absolute top-full left-0 mt-1.5 w-64 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2">
+                            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5 px-1">
+                                <span class="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Filter Towns</span>
+                                <div class="flex items-center gap-2 text-xs">
+                                    <button onclick="selectAllModalFilterValues('town')" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">Select All</button>
+                                    <span class="text-slate-400">|</span>
+                                    <button onclick="clearAllModalFilterValues('town')" class="text-rose-500 hover:underline font-semibold">Clear</button>
+                                </div>
+                            </div>
+                            <div id="modal-town-checkbox-list" class="max-h-52 overflow-y-auto custom-scrollbar space-y-1 pr-1 text-xs"></div>
+                        </div>
                     </div>
 
-                    <!-- Dynamic Milestone Sort Control -->
-                    <div class="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 shadow-sm">
-                        <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-indigo-500"></i>
-                        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Sort:</span>
-                        <select id="modal-sort-col" onchange="renderDashboard()" class="bg-transparent text-[11px] font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer max-w-[140px] truncate">
+                    <!-- Dynamic Column-Based Multi-Select Filter -->
+                    <div class="relative flex items-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 py-1 shadow-sm">
+                        <i data-lucide="filter" class="w-4 h-4 text-cyan-500 shrink-0 mr-1.5"></i>
+                        <select id="modal-custom-col-select" onchange="onModalCustomColumnChanged()" class="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer max-w-[120px] truncate mr-2"></select>
+
+                        <button id="modal-custom-multiselect-btn" onclick="toggleModalFilterDropdown('custom')" class="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-2.5 py-1 text-xs outline-none flex items-center gap-1 min-w-[85px] max-w-[130px]">
+                            <span id="modal-custom-multiselect-label" class="truncate font-mono text-xs font-bold">All</span>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-auto"></i>
+                        </button>
+                        <div id="modal-custom-multiselect-panel" class="hidden absolute top-full right-0 mt-1.5 w-64 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2">
+                            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5 px-1">
+                                <span id="modal-custom-panel-title" class="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Custom Filter</span>
+                                <div class="flex items-center gap-2 text-xs">
+                                    <button onclick="selectAllModalFilterValues('custom')" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">Select All</button>
+                                    <span class="text-slate-400">|</span>
+                                    <button onclick="clearAllModalFilterValues('custom')" class="text-rose-500 hover:underline font-semibold">Clear</button>
+                                </div>
+                            </div>
+                            <div id="modal-custom-checkbox-list" class="max-h-52 overflow-y-auto custom-scrollbar space-y-1 pr-1 text-xs"></div>
+                        </div>
+                    </div>
+
+                    <!-- Milestone Sort Control -->
+                    <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3 py-1.5 shadow-sm">
+                        <i data-lucide="arrow-up-down" class="w-4 h-4 text-indigo-500"></i>
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">Sort:</span>
+                        <select id="modal-sort-col" onchange="renderDashboard()" class="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer max-w-[140px] truncate">
                             <option value="COMPLETION_PCT">Completion %</option>
                             <option value="TOTAL">Total Sites</option>
                             <option value="NAME">Region/Province Name</option>
                         </select>
-                        <select id="modal-sort-order" onchange="renderDashboard()" class="bg-transparent text-[11px] font-bold text-indigo-500 outline-none cursor-pointer">
+                        <select id="modal-sort-order" onchange="renderDashboard()" class="bg-transparent text-xs font-black text-indigo-500 outline-none cursor-pointer">
                             <option value="DESC" selected>DESC ▼</option>
                             <option value="ASC">ASC ▲</option>
                         </select>
                     </div>
 
-                    <button onclick="closeDashboardModal()" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
-                        <i data-lucide="x" class="w-5 h-5"></i>
+                    <button onclick="closeDashboardModal()" class="p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+                        <i data-lucide="x" class="w-6 h-6"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Compact Split Body Layout: Left = KPIs & Donut, Right = Pivot Table -->
-            <div class="flex-1 p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
+            <!-- Modern Split Body Layout: Left = KPIs & Donut, Right = Pivot Table -->
+            <div class="flex-1 p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden bg-slate-100/60 dark:bg-slate-950/60">
 
                 <!-- Left Column (KPIs, Progress Bar, Pie Chart, Category Grid) -->
-                <div class="lg:col-span-5 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
+                <div class="lg:col-span-5 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
 
                     <!-- Progress & High Level KPI Card -->
-                    <div class="p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2.5">
+                    <div class="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-sm space-y-4">
                         <div class="flex items-center justify-between">
                             <div>
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Overall Completion Rate (Excl. IBS)</span>
-                                <p class="text-[10px] text-slate-500 dark:text-slate-500">Ref: <strong id="dash-completion-ref-col" class="text-blue-400">SSV STATUS</strong></p>
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Overall Completion Rate (Excl. IBS)</span>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ref: <strong id="dash-completion-ref-col" class="text-blue-500 font-mono text-sm">SSV STATUS</strong></p>
                             </div>
-                            <span id="dash-completion-pct" class="text-2xl font-black text-emerald-600 dark:text-emerald-400">0.0%</span>
+                            <span id="dash-completion-pct" class="text-4xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">0.0%</span>
                         </div>
 
-                        <div class="space-y-1">
-                            <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-3 overflow-hidden p-0.5 border border-slate-300 dark:border-slate-700">
-                                <div id="dash-progress-bar" class="bg-gradient-to-r from-blue-500 via-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+                        <div class="space-y-2">
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-4 overflow-hidden p-0.5 border border-slate-300 dark:border-slate-700/80">
+                                <div id="dash-progress-bar" class="bg-gradient-to-r from-blue-500 via-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700 shadow-sm" style="width: 0%"></div>
                             </div>
-                            <div class="flex justify-between text-[11px] font-medium">
-                                <span id="dash-completion-sub" class="text-slate-700 dark:text-slate-300">0 of 0 completed</span>
+                            <div class="flex justify-between text-xs font-bold">
+                                <span id="dash-completion-sub" class="text-slate-700 dark:text-slate-200">0 of 0 completed</span>
                                 <span id="dash-remaining-sub" class="text-amber-600 dark:text-amber-400">0 pending</span>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-center">
-                            <div class="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                                <div class="text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold">Total Sites</div>
-                                <div id="dash-kpi-total" class="text-sm font-black text-slate-900 dark:text-white mt-0.5">0</div>
+                        <!-- Scaled-up High-Impact KPI Cards -->
+                        <div class="grid grid-cols-3 gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-center">
+                            <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+                                <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Sites</div>
+                                <div id="dash-kpi-total" class="text-xl font-black text-slate-900 dark:text-white mt-1">0</div>
                             </div>
-                            <div class="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                                <div class="text-[9px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">Completed</div>
-                                <div id="dash-kpi-swapped" class="text-sm font-black text-emerald-600 dark:text-emerald-400 mt-0.5">0</div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+                                <div class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Completed</div>
+                                <div id="dash-kpi-swapped" class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0</div>
                             </div>
-                            <div class="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                                <div class="text-[9px] text-amber-600 dark:text-amber-400 uppercase font-bold">Pending</div>
-                                <div id="dash-kpi-pending" class="text-sm font-black text-amber-600 dark:text-amber-400 mt-0.5">0</div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+                                <div class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Pending</div>
+                                <div id="dash-kpi-pending" class="text-xl font-black text-amber-600 dark:text-amber-400 mt-1">0</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Category Distribution Pie Chart Card -->
-                    <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center space-y-2">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category Distribution (Excl. IBS)</span>
-                        <div class="w-36 h-36 relative flex items-center justify-center">
+                    <!-- Category Distribution Pie Chart Card with Big Canvas & Labeled Slices -->
+                    <div class="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-sm flex flex-col items-center justify-center space-y-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category Distribution Breakdown</span>
+                        <div class="w-full h-64 relative flex items-center justify-center py-2">
                             <canvas id="dash-donut-chart"></canvas>
                         </div>
                     </div>
 
-                    <!-- Compact Status Grid -->
-                    <div id="dash-kpi-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                    <!-- Compact Status Grid with Scaled Numbers -->
+                    <div id="dash-kpi-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
                 </div>
 
                 <!-- Right Column (Pivot Matrix Table Full Height) -->
-                <div class="lg:col-span-7 flex flex-col bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden h-full">
-                    <div class="p-2.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-                        <h3 class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                            <i data-lucide="grid" class="w-3.5 h-3.5 text-blue-500"></i> Region / Province Pivot Matrix (Includes IBS)
+                <div class="lg:col-span-7 flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-sm overflow-hidden h-full">
+                    <div class="p-3.5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-950/50">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="grid" class="w-4 h-4 text-blue-500"></i> Region / Province Pivot Matrix (Includes IBS)
                         </h3>
-                        <div class="flex items-center gap-1.5 text-xs">
-                            <span class="text-slate-500 dark:text-slate-400 text-[10px]">Group By:</span>
-                            <select id="dash-pivot-col" onchange="renderDashboard()" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-0.5 outline-none text-[11px]"></select>
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="text-slate-500 dark:text-slate-400 font-bold">Group By:</span>
+                            <select id="dash-pivot-col" onchange="renderDashboard()" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 text-slate-900 dark:text-white rounded-xl px-3 py-1.5 outline-none text-xs font-bold shadow-sm"></select>
                         </div>
                     </div>
 
                     <div class="flex-1 overflow-auto custom-scrollbar">
                         <table class="w-full text-left text-xs text-slate-800 dark:text-slate-300">
-                            <thead id="dash-pivot-thead" class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-400 font-bold uppercase border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10"></thead>
-                            <tbody id="dash-pivot-tbody" class="divide-y divide-slate-200 dark:divide-slate-800/60 font-mono text-[11px]"></tbody>
+                            <thead id="dash-pivot-thead" class="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-300 font-bold uppercase border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 text-xs"></thead>
+                            <tbody id="dash-pivot-tbody" class="divide-y divide-slate-200 dark:divide-slate-800/60 font-mono text-xs"></tbody>
                         </table>
                     </div>
                 </div>
@@ -657,6 +702,11 @@
             { col: '', available: [], selected: new Set() }
         ];
 
+        // Analytics Modal Multi-Select Filters State
+        let modalProvFilter = { available: [], selected: new Set() };
+        let modalTownFilter = { available: [], selected: new Set() };
+        let modalCustomFilter = { col: '', available: [], selected: new Set() };
+
         // Mapped Columns
         let colId = 'Site_ID';
         let colLat = 'Latitude';
@@ -668,7 +718,7 @@
         let selectedSiteIndex = null;
         let userTooltipFields = [];
 
-        // View Presets Manager (Row & Column Configurations)
+        // View Presets Manager
         let savedViewPresets = {};
         try {
             savedViewPresets = JSON.parse(localStorage.getItem('hermes_view_presets') || '{}');
@@ -719,10 +769,22 @@
             renderSavedViewPresetSlots();
             fetchSheetData();
 
+            // Close main toolbar filter dropdowns when clicking outside
             document.addEventListener('click', (e) => {
                 [0, 1, 2].forEach(idx => {
                     const btn = document.getElementById(`filter-multiselect-btn-${idx}`);
                     const panel = document.getElementById(`filter-multiselect-panel-${idx}`);
+                    if (panel && !panel.classList.contains('hidden')) {
+                        if (!panel.contains(e.target) && !btn.contains(e.target)) {
+                            panel.classList.add('hidden');
+                        }
+                    }
+                });
+
+                // Close analytics modal filter dropdowns when clicking outside
+                ['prov', 'town', 'custom'].forEach(type => {
+                    const btn = document.getElementById(`modal-${type}-multiselect-btn`);
+                    const panel = document.getElementById(`modal-${type}-multiselect-panel`);
                     if (panel && !panel.classList.contains('hidden')) {
                         if (!panel.contains(e.target) && !btn.contains(e.target)) {
                             panel.classList.add('hidden');
@@ -944,7 +1006,7 @@
             updateDropdownControls();
             initTooltipFieldsConfig();
             initCategoryVisibility();
-            populateModalLocationFilters();
+            initModalMultiSelectFilters();
 
             [0, 1, 2].forEach(idx => onFilterColumnChanged(idx));
 
@@ -970,79 +1032,159 @@
             return headers.find(h => h.toLowerCase() === 'town' || h.toLowerCase().includes('town') || h.toLowerCase().includes('city')) || '';
         }
 
-        function populateModalLocationFilters() {
+        // --- Analytics Modal Multi-Select Filters Setup ---
+        function initModalMultiSelectFilters() {
             if (!rawDataset || rawDataset.length === 0) return;
-            const provCol = getProvColName();
 
-            const provSelect = document.getElementById('modal-prov-filter');
-            if (provSelect) {
-                const selectedProv = provSelect.value || 'ALL';
-                if (provCol) {
-                    const provinces = [...new Set(rawDataset.map(d => String(d[provCol] || '').trim()).filter(Boolean))].sort();
-                    provSelect.innerHTML = '<option value="ALL">All Provinces</option>' + 
-                        provinces.map(p => `<option value="${p}" ${p === selectedProv ? 'selected' : ''}>${p}</option>`).join('');
-                } else {
-                    provSelect.innerHTML = '<option value="ALL">All Provinces</option>';
-                }
-            }
-
-            updateModalSortDropdown();
-            updateModalTownFilter();
-        }
-
-        function updateModalSortDropdown() {
-            const sortColSelect = document.getElementById('modal-sort-col');
-            if (!sortColSelect || rawDataset.length === 0) return;
-
-            const activeSort = sortColSelect.value || 'COMPLETION_PCT';
-
-            // Extract unique status milestone categories from the active Column Identifier (colGroup)
-            const milestones = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
-
-            let options = `
-                <option value="COMPLETION_PCT" ${activeSort === 'COMPLETION_PCT' ? 'selected' : ''}>Completion %</option>
-                <option value="TOTAL" ${activeSort === 'TOTAL' ? 'selected' : ''}>Total Sites</option>
-                <option value="NAME" ${activeSort === 'NAME' ? 'selected' : ''}>Region / Province Name</option>
-            `;
-
-            options += `<optgroup label="${colGroup} Milestones">`;
-            milestones.forEach(m => {
-                const val = `MILESTONE:${m}`;
-                options += `<option value="${val}" ${activeSort === val ? 'selected' : ''}>${m} (Count)</option>`;
-            });
-            options += `</optgroup>`;
-
-            sortColSelect.innerHTML = options;
-        }
-
-        function updateModalTownFilter() {
-            if (!rawDataset || rawDataset.length === 0) return;
             const provCol = getProvColName();
             const townCol = getTownColName();
+            const headers = Object.keys(rawDataset[0]);
 
-            const provSelect = document.getElementById('modal-prov-filter');
-            const townSelect = document.getElementById('modal-town-filter');
-            if (!townSelect) return;
+            const customSelect = document.getElementById('modal-custom-col-select');
+            if (customSelect) {
+                customSelect.innerHTML = headers.map(h => `<option value="${h}">${h}</option>`).join('');
+                modalCustomFilter.col = headers[0];
+            }
 
-            const selectedProv = provSelect ? provSelect.value : 'ALL';
-            const selectedTown = townSelect.value || 'ALL';
-
-            let filtered = rawDataset;
-            if (selectedProv !== 'ALL' && provCol) {
-                filtered = rawDataset.filter(d => String(d[provCol] || '').trim().toUpperCase() === selectedProv.toUpperCase());
+            if (provCol) {
+                const provs = [...new Set(rawDataset.map(d => String(d[provCol] || '(Blank)').trim()))].sort();
+                modalProvFilter.available = provs;
+                modalProvFilter.selected = new Set(provs);
+            } else {
+                modalProvFilter.available = [];
+                modalProvFilter.selected = new Set();
             }
 
             if (townCol) {
-                const towns = [...new Set(filtered.map(d => String(d[townCol] || '').trim()).filter(Boolean))].sort();
-                townSelect.innerHTML = '<option value="ALL">All Towns / Cities</option>' + 
-                    towns.map(t => `<option value="${t}" ${t === selectedTown ? 'selected' : ''}>${t}</option>`).join('');
+                const towns = [...new Set(rawDataset.map(d => String(d[townCol] || '(Blank)').trim()))].sort();
+                modalTownFilter.available = towns;
+                modalTownFilter.selected = new Set(towns);
             } else {
-                townSelect.innerHTML = '<option value="ALL">All Towns / Cities</option>';
+                modalTownFilter.available = [];
+                modalTownFilter.selected = new Set();
+            }
+
+            if (modalCustomFilter.col) {
+                const vals = [...new Set(rawDataset.map(d => String(d[modalCustomFilter.col] || '(Blank)').trim()))].sort();
+                modalCustomFilter.available = vals;
+                modalCustomFilter.selected = new Set(vals);
+            }
+
+            renderModalFilterCheckboxes('prov');
+            renderModalFilterCheckboxes('town');
+            renderModalFilterCheckboxes('custom');
+
+            updateModalFilterButtonLabel('prov');
+            updateModalFilterButtonLabel('town');
+            updateModalFilterButtonLabel('custom');
+        }
+
+        function toggleModalFilterDropdown(type) {
+            const panel = document.getElementById(`modal-${type}-multiselect-panel`);
+            if (panel) panel.classList.toggle('hidden');
+        }
+
+        function renderModalFilterCheckboxes(type) {
+            const container = document.getElementById(`modal-${type}-checkbox-list`);
+            if (!container) return;
+
+            let filterObj;
+            if (type === 'prov') filterObj = modalProvFilter;
+            else if (type === 'town') filterObj = modalTownFilter;
+            else if (type === 'custom') filterObj = modalCustomFilter;
+
+            if (!filterObj || filterObj.available.length === 0) {
+                container.innerHTML = `<div class="text-[11px] text-slate-400 italic p-2 text-center">No values available</div>`;
+                return;
+            }
+
+            container.innerHTML = filterObj.available.map(val => {
+                const isChecked = filterObj.selected.has(val);
+                return `
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1 rounded transition">
+                        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''} onchange="toggleModalFilterValue('${type}', '${val.replace(/'/g, "\\'")}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-purple-600 focus:ring-0">
+                        <span class="truncate text-slate-800 dark:text-slate-200 font-medium" title="${val}">${val}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function toggleModalFilterValue(type, val) {
+            let filterObj;
+            if (type === 'prov') filterObj = modalProvFilter;
+            else if (type === 'town') filterObj = modalTownFilter;
+            else if (type === 'custom') filterObj = modalCustomFilter;
+
+            if (filterObj.selected.has(val)) {
+                filterObj.selected.delete(val);
+            } else {
+                filterObj.selected.add(val);
+            }
+
+            updateModalFilterButtonLabel(type);
+            renderDashboard();
+        }
+
+        function selectAllModalFilterValues(type) {
+            let filterObj;
+            if (type === 'prov') filterObj = modalProvFilter;
+            else if (type === 'town') filterObj = modalTownFilter;
+            else if (type === 'custom') filterObj = modalCustomFilter;
+
+            filterObj.selected = new Set(filterObj.available);
+            renderModalFilterCheckboxes(type);
+            updateModalFilterButtonLabel(type);
+            renderDashboard();
+        }
+
+        function clearAllModalFilterValues(type) {
+            let filterObj;
+            if (type === 'prov') filterObj = modalProvFilter;
+            else if (type === 'town') filterObj = modalTownFilter;
+            else if (type === 'custom') filterObj = modalCustomFilter;
+
+            filterObj.selected.clear();
+            renderModalFilterCheckboxes(type);
+            updateModalFilterButtonLabel(type);
+            renderDashboard();
+        }
+
+        function updateModalFilterButtonLabel(type) {
+            const label = document.getElementById(`modal-${type}-multiselect-label`);
+            if (!label) return;
+
+            let filterObj;
+            if (type === 'prov') filterObj = modalProvFilter;
+            else if (type === 'town') filterObj = modalTownFilter;
+            else if (type === 'custom') filterObj = modalCustomFilter;
+
+            if (!filterObj || filterObj.available.length === 0) {
+                label.innerText = "N/A";
+            } else if (filterObj.selected.size === filterObj.available.length) {
+                label.innerText = type === 'prov' ? "All Provinces" : (type === 'town' ? "All Towns" : "All");
+            } else if (filterObj.selected.size === 0) {
+                label.innerText = "None";
+            } else {
+                label.innerText = `${filterObj.selected.size} Selected`;
             }
         }
 
-        function onModalProvinceChanged() {
-            updateModalTownFilter();
+        function onModalCustomColumnChanged() {
+            const sel = document.getElementById('modal-custom-col-select');
+            if (!sel || rawDataset.length === 0) return;
+
+            const col = sel.value;
+            modalCustomFilter.col = col;
+
+            const titleEl = document.getElementById('modal-custom-panel-title');
+            if (titleEl) titleEl.innerText = `Filter ${col}`;
+
+            const vals = [...new Set(rawDataset.map(d => String(d[col] || '(Blank)').trim()))].sort();
+            modalCustomFilter.available = vals;
+            modalCustomFilter.selected = new Set(vals);
+
+            renderModalFilterCheckboxes('custom');
+            updateModalFilterButtonLabel('custom');
             renderDashboard();
         }
 
@@ -1090,7 +1232,7 @@
                 const isChecked = state.selected.has(val);
                 return `
                     <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1 rounded transition">
-                        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''} onchange="toggleFilterValue(${slotIdx}, '${val}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-0">
+                        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''} onchange="toggleFilterValue(${slotIdx}, '${val.replace(/'/g, "\\'")}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-0">
                         <span class="truncate text-slate-800 dark:text-slate-200" title="${val}">${val}</span>
                     </label>
                 `;
@@ -1829,7 +1971,6 @@
                 } else if (modalSelect) {
                     modalSelect.value = colGroup;
                 }
-                populateModalLocationFilters();
             }
 
             renderDashboard();
@@ -1837,6 +1978,29 @@
 
         function closeDashboardModal() {
             document.getElementById('dashboard-modal').classList.add('hidden');
+        }
+
+        function updateModalSortDropdown() {
+            const sortColSelect = document.getElementById('modal-sort-col');
+            if (!sortColSelect || rawDataset.length === 0) return;
+
+            const activeSort = sortColSelect.value || 'COMPLETION_PCT';
+            const milestones = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
+
+            let options = `
+                <option value="COMPLETION_PCT" ${activeSort === 'COMPLETION_PCT' ? 'selected' : ''}>Completion %</option>
+                <option value="TOTAL" ${activeSort === 'TOTAL' ? 'selected' : ''}>Total Sites</option>
+                <option value="NAME" ${activeSort === 'NAME' ? 'selected' : ''}>Region / Province Name</option>
+            `;
+
+            options += `<optgroup label="${colGroup} Milestones">`;
+            milestones.forEach(m => {
+                const val = `MILESTONE:${m}`;
+                options += `<option value="${val}" ${activeSort === val ? 'selected' : ''}>${m} (Count)</option>`;
+            });
+            options += `</optgroup>`;
+
+            sortColSelect.innerHTML = options;
         }
 
         function renderDashboard() {
@@ -1852,26 +2016,30 @@
 
             colGroup = validColGroup;
 
-            const refLabel = document.getElementById('dash-reference-col-label');
             const refSubLabel = document.getElementById('dash-completion-ref-col');
             const modalSelect = document.getElementById('modal-col-group');
 
-            if (refLabel) refLabel.innerText = colGroup;
             if (refSubLabel) refSubLabel.innerText = colGroup;
             if (modalSelect) modalSelect.value = colGroup;
 
             const provCol = getProvColName();
             const townCol = getTownColName();
-            const modalProv = document.getElementById('modal-prov-filter')?.value || 'ALL';
-            const modalTown = document.getElementById('modal-town-filter')?.value || 'ALL';
 
             let analyticsDataset = [...rawDataset];
 
-            if (modalProv !== 'ALL' && provCol) {
-                analyticsDataset = analyticsDataset.filter(d => String(d[provCol] || '').trim().toUpperCase() === modalProv.toUpperCase());
+            // Apply Multi-Select Province Filter
+            if (provCol && modalProvFilter.selected.size > 0 && modalProvFilter.selected.size < modalProvFilter.available.length) {
+                analyticsDataset = analyticsDataset.filter(d => modalProvFilter.selected.has(String(d[provCol] || '(Blank)').trim()));
             }
-            if (modalTown !== 'ALL' && townCol) {
-                analyticsDataset = analyticsDataset.filter(d => String(d[townCol] || '').trim().toUpperCase() === modalTown.toUpperCase());
+
+            // Apply Multi-Select Town Filter
+            if (townCol && modalTownFilter.selected.size > 0 && modalTownFilter.selected.size < modalTownFilter.available.length) {
+                analyticsDataset = analyticsDataset.filter(d => modalTownFilter.selected.has(String(d[townCol] || '(Blank)').trim()));
+            }
+
+            // Apply Custom Column Multi-Select Filter
+            if (modalCustomFilter.col && modalCustomFilter.selected.size > 0 && modalCustomFilter.selected.size < modalCustomFilter.available.length) {
+                analyticsDataset = analyticsDataset.filter(d => modalCustomFilter.selected.has(String(d[modalCustomFilter.col] || '(Blank)').trim()));
             }
 
             const isIbsRow = (d) => {
@@ -1930,9 +2098,9 @@
             const kpiGrid = document.getElementById('dash-kpi-grid');
             if (kpiGrid) {
                 kpiGrid.innerHTML = Object.entries(statusCounts).map(([st, cnt]) => `
-                    <div class="p-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg space-y-0.5">
-                        <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase truncate" title="${st}">${st}</div>
-                        <div class="text-sm font-black text-slate-900 dark:text-white">${cnt.toLocaleString()}</div>
+                    <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-xl space-y-1 shadow-xs">
+                        <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase truncate" title="${st}">${st}</div>
+                        <div class="text-base font-black text-slate-900 dark:text-white">${cnt.toLocaleString()}</div>
                     </div>
                 `).join('');
             }
@@ -2013,13 +2181,13 @@
             if (pThead) {
                 pThead.innerHTML = `
                     <tr>
-                        <th class="p-2 border border-slate-200 dark:border-slate-800 text-center w-10">Rank</th>
-                        <th class="p-2 border border-slate-200 dark:border-slate-800">${pivotCol}</th>
-                        <th class="p-2 border border-slate-200 dark:border-slate-800 text-center">Total</th>
-                        <th class="p-2 border border-slate-200 dark:border-slate-800 text-center">% (${colGroup})</th>
+                        <th class="p-3 border border-slate-200 dark:border-slate-800 text-center w-12">Rank</th>
+                        <th class="p-3 border border-slate-200 dark:border-slate-800">${pivotCol}</th>
+                        <th class="p-3 border border-slate-200 dark:border-slate-800 text-center">Total</th>
+                        <th class="p-3 border border-slate-200 dark:border-slate-800 text-center">% (${colGroup})</th>
                         ${statuses.map(s => {
                             const isSortedMilestone = (sortCol === `MILESTONE:${s}`);
-                            return `<th class="p-2 border border-slate-200 dark:border-slate-800 text-center ${isSortedMilestone ? 'bg-indigo-900/40 text-indigo-300 font-black border-indigo-500' : ''}">${s} ${isSortedMilestone ? (sortOrder === 'DESC' ? '▼' : '▲') : ''}</th>`;
+                            return `<th class="p-3 border border-slate-200 dark:border-slate-800 text-center ${isSortedMilestone ? 'bg-indigo-900/40 text-indigo-300 font-black border-indigo-500' : ''}">${s} ${isSortedMilestone ? (sortOrder === 'DESC' ? '▼' : '▲') : ''}</th>`;
                         }).join('')}
                     </tr>
                 `;
@@ -2030,21 +2198,21 @@
                     const formattedPct = row.regPct.toFixed(1);
                     return `
                         <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/40 transition">
-                            <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold text-slate-500 dark:text-slate-400">#${idx + 1}</td>
-                            <td class="p-2 border border-slate-200 dark:border-slate-800 font-bold text-slate-800 dark:text-slate-200">${row.reg}</td>
-                            <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold text-blue-600 dark:text-blue-400">${row.regTotal}</td>
-                            <td class="p-2 border border-slate-200 dark:border-slate-800 text-center font-bold">
-                                <div class="flex items-center justify-center gap-1.5">
-                                    <div class="w-10 bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                            <td class="p-3 border border-slate-200 dark:border-slate-800 text-center font-bold text-slate-500 dark:text-slate-400">#${idx + 1}</td>
+                            <td class="p-3 border border-slate-200 dark:border-slate-800 font-bold text-slate-800 dark:text-slate-200">${row.reg}</td>
+                            <td class="p-3 border border-slate-200 dark:border-slate-800 text-center font-bold text-blue-600 dark:text-blue-400 text-sm">${row.regTotal}</td>
+                            <td class="p-3 border border-slate-200 dark:border-slate-800 text-center font-bold">
+                                <div class="flex items-center justify-center gap-2">
+                                    <div class="w-12 bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                                         <div class="bg-emerald-500 h-full" style="width: ${formattedPct}%"></div>
                                     </div>
-                                    <span class="text-emerald-600 dark:text-emerald-400 font-mono text-[10px]">${formattedPct}%</span>
+                                    <span class="text-emerald-600 dark:text-emerald-400 font-mono text-xs font-bold">${formattedPct}%</span>
                                 </div>
                             </td>
                             ${statuses.map(s => {
                                 const isSortedMilestone = (sortCol === `MILESTONE:${s}`);
                                 const countVal = row.stMap[s] || 0;
-                                return `<td class="p-2 border border-slate-200 dark:border-slate-800 text-center ${isSortedMilestone ? 'bg-indigo-900/20 text-indigo-300 font-black' : (countVal ? 'text-slate-800 dark:text-slate-200 font-bold' : 'text-slate-400 dark:text-slate-600')}">${countVal}</td>`;
+                                return `<td class="p-3 border border-slate-200 dark:border-slate-800 text-center ${isSortedMilestone ? 'bg-indigo-900/20 text-indigo-300 font-black' : (countVal ? 'text-slate-800 dark:text-slate-200 font-bold' : 'text-slate-400 dark:text-slate-600')}">${countVal}</td>`;
                             }).join('')}
                         </tr>
                     `;
@@ -2052,6 +2220,7 @@
             }
         }
 
+        // Render Larger Pie/Donut Chart with DataLabels Integrated
         function renderDonutChart(statusCounts) {
             const ctx = document.getElementById('dash-donut-chart');
             if (!ctx) return;
@@ -2062,7 +2231,11 @@
 
             const labels = Object.keys(statusCounts);
             const dataVals = Object.values(statusCounts);
+            const totalSum = dataVals.reduce((a, b) => a + b, 0);
             const bgColors = labels.map(l => categoryColors[l] || '#3b82f6');
+
+            // Register chartjs-plugin-datalabels
+            Chart.register(ChartDataLabels);
 
             donutChartInstance = new Chart(ctx, {
                 type: 'doughnut',
@@ -2079,9 +2252,32 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                color: isDarkMode ? '#cbd5e1' : '#334155',
+                                font: { size: 11, weight: 'bold' },
+                                boxWidth: 12,
+                                padding: 12
+                            }
+                        },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: {
+                                weight: 'bold',
+                                size: 12
+                            },
+                            textStrokeColor: 'rgba(0, 0, 0, 0.6)',
+                            textStrokeWidth: 3,
+                            formatter: (value) => {
+                                if (totalSum === 0 || value === 0) return '';
+                                const percentage = ((value / totalSum) * 100).toFixed(1);
+                                return percentage > 3 ? `${percentage}%` : ''; // Only render label if slice is wide enough
+                            }
+                        }
                     },
-                    cutout: '70%'
+                    cutout: '55%'
                 }
             });
         }
