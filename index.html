@@ -350,17 +350,24 @@
 
         <main class="flex-1 relative flex flex-col h-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
 
-            <!-- Search & 3 Multi-Select Filter Toolbar + Coordinates/Address Locator -->
+            <!-- Search & 3 Multi-Select Filter Toolbar + Coordinates/Address/GPS Locator -->
             <div class="p-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 z-10 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div class="flex flex-wrap items-center gap-2">
 
-                    <!-- Geospatial Location / Address / Coordinate Search Bar -->
+                    <!-- Geospatial Location / Address / Coordinate Search Bar with Live GPS -->
                     <div class="flex items-center gap-1 bg-amber-500/10 border border-amber-500/40 rounded-lg px-2 py-1 shadow-xs">
                         <i data-lucide="navigation" class="w-3.5 h-3.5 text-amber-500"></i>
                         <input type="text" id="location-input" placeholder="Address or Lat, Lon..." class="bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-amber-500 w-36 sm:w-48 font-mono">
+
                         <button onclick="locateCoordinatesOrAddress()" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded transition flex items-center gap-1">
                             <span>Locate</span>
                         </button>
+
+                        <!-- Live GPS Location Detection Button -->
+                        <button onclick="getUserGPSLocation()" class="p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 rounded border border-slate-300 dark:border-slate-700 transition" title="Detect My Current GPS Location">
+                            <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+                        </button>
+
                         <button onclick="clearLocationTarget()" class="px-1 text-slate-400 hover:text-slate-800 dark:hover:text-white" title="Clear Location Pin">✕</button>
                     </div>
 
@@ -841,6 +848,53 @@
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
             return R * c; // Distance in meters
+        }
+
+        // --- Detect User's Live GPS Coordinates ---
+        function getUserGPSLocation() {
+            const statusEl = document.getElementById('search-filter-status');
+
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            if (statusEl) statusEl.innerText = "Acquiring live GPS location...";
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    // Fill input bar for user visibility
+                    document.getElementById('location-input').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+
+                    // Trigger location marker & proximity calculations
+                    processLocationTarget(lat, lon, `Your GPS Location (±${Math.round(accuracy)}m)`);
+                },
+                (error) => {
+                    let errorMsg = "Unable to retrieve your location.";
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = "Location request denied. Please enable location permissions in your browser.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = "Location request timed out.";
+                            break;
+                    }
+                    alert(errorMsg);
+                    if (statusEl) statusEl.innerText = "GPS acquisition failed.";
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
         }
 
         // --- Locate Coordinates or Address & Identify Nearest Sites ---
