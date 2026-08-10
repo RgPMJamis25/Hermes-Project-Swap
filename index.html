@@ -128,6 +128,17 @@
                 box-shadow: 0 0 0 18px rgba(245, 158, 11, 0);
             }
         }
+
+        .pulse-marker-live {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8);
+            animation: pulse-green 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
+            border-radius: 50%;
+        }
+        @keyframes pulse-green {
+            to {
+                box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
+            }
+        }
     </style>
 </head>
 
@@ -350,11 +361,11 @@
 
         <main class="flex-1 relative flex flex-col h-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
 
-            <!-- Search & 3 Multi-Select Filter Toolbar + Coordinates/Address/GPS Locator -->
+            <!-- Search & Multi-Select Filter Toolbar + Coordinates/Address/Real-time GPS Locator -->
             <div class="p-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 z-10 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div class="flex flex-wrap items-center gap-2">
 
-                    <!-- Geospatial Location / Address / Coordinate Search Bar with Live GPS -->
+                    <!-- Geospatial Location Search Bar -->
                     <div class="flex items-center gap-1 bg-amber-500/10 border border-amber-500/40 rounded-lg px-2 py-1 shadow-xs">
                         <i data-lucide="navigation" class="w-3.5 h-3.5 text-amber-500"></i>
                         <input type="text" id="location-input" placeholder="Address or Lat, Lon..." class="bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-amber-500 w-36 sm:w-48 font-mono">
@@ -363,9 +374,15 @@
                             <span>Locate</span>
                         </button>
 
-                        <!-- Live GPS Location Detection Button -->
-                        <button onclick="getUserGPSLocation()" class="p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 rounded border border-slate-300 dark:border-slate-700 transition" title="Detect My Current GPS Location">
+                        <!-- Single-Shot GPS Button -->
+                        <button onclick="getUserGPSLocation()" class="p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 rounded border border-slate-300 dark:border-slate-700 transition" title="Get Current GPS Location (Static Snap)">
                             <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+                        </button>
+
+                        <!-- Real-time Live Satellite Tracking Toggle Button -->
+                        <button id="btn-live-tracking" onclick="toggleLiveTracking()" class="p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded border border-slate-300 dark:border-slate-700 transition flex items-center gap-1" title="Toggle Real-Time Movement Tracking">
+                            <i data-lucide="satellite" class="w-3.5 h-3.5"></i>
+                            <span id="live-tracking-badge" class="hidden w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                         </button>
 
                         <button onclick="clearLocationTarget()" class="px-1 text-slate-400 hover:text-slate-800 dark:hover:text-white" title="Clear Location Pin">✕</button>
@@ -721,8 +738,11 @@
         let isInitialLoad = true;
         let categoryVisibility = {};
 
-        // Geospatial Location Target Marker
+        // Geospatial Location Target Marker & Real-Time Tracking State
         let targetLocationMarker = null;
+        let gpsAccuracyCircle = null;
+        let watchPositionId = null;
+        let isLiveTrackingActive = false;
 
         // 3 Multi-Select Map Filters State
         let filtersState = [
@@ -850,8 +870,10 @@
             return R * c; // Distance in meters
         }
 
-        // --- Detect User's Live GPS Coordinates ---
+        // --- Detect User's Live GPS Coordinates (Single Snap) ---
         function getUserGPSLocation() {
+            if (isLiveTrackingActive) stopLiveTracking();
+
             const statusEl = document.getElementById('search-filter-status');
 
             if (!navigator.geolocation) {
@@ -867,38 +889,95 @@
                     const lon = position.coords.longitude;
                     const accuracy = position.coords.accuracy;
 
-                    // Fill input bar for user visibility
                     document.getElementById('location-input').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                    processLocationTarget(lat, lon, `Your GPS Location (±${Math.round(accuracy)}m)`, accuracy);
+                },
+                (error) => handleGeolocationError(error),
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
 
-                    // Trigger location marker & proximity calculations
-                    processLocationTarget(lat, lon, `Your GPS Location (±${Math.round(accuracy)}m)`);
+        // --- Toggle Real-time Movement Tracking (Continuous updates as you move) ---
+        function toggleLiveTracking() {
+            if (isLiveTrackingActive) {
+                stopLiveTracking();
+            } else {
+                startLiveTracking();
+            }
+        }
+
+        function startLiveTracking() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            const statusEl = document.getElementById('search-filter-status');
+            const btn = document.getElementById('btn-live-tracking');
+            const badge = document.getElementById('live-tracking-badge');
+
+            if (statusEl) statusEl.innerText = "Initializing real-time GPS tracking...";
+
+            isLiveTrackingActive = true;
+            btn.className = "p-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded border border-emerald-400 transition flex items-center gap-1 shadow-sm";
+            if (badge) badge.classList.remove('hidden');
+
+            watchPositionId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    document.getElementById('location-input').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                    processLocationTarget(lat, lon, `Live GPS (Active Tracking ±${Math.round(accuracy)}m)`, accuracy, true);
                 },
                 (error) => {
-                    let errorMsg = "Unable to retrieve your location.";
-                    switch (error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMsg = "Location request denied. Please enable location permissions in your browser.";
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMsg = "Location information is unavailable.";
-                            break;
-                        case error.TIMEOUT:
-                            errorMsg = "Location request timed out.";
-                            break;
-                    }
-                    alert(errorMsg);
-                    if (statusEl) statusEl.innerText = "GPS acquisition failed.";
+                    stopLiveTracking();
+                    handleGeolocationError(error);
                 },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 1000 }
             );
+        }
+
+        function stopLiveTracking() {
+            if (watchPositionId !== null) {
+                navigator.geolocation.clearWatch(watchPositionId);
+                watchPositionId = null;
+            }
+
+            isLiveTrackingActive = false;
+            const btn = document.getElementById('btn-live-tracking');
+            const badge = document.getElementById('live-tracking-badge');
+
+            if (btn) btn.className = "p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded border border-slate-300 dark:border-slate-700 transition flex items-center gap-1";
+            if (badge) badge.classList.add('hidden');
+
+            const statusEl = document.getElementById('search-filter-status');
+            if (statusEl) statusEl.innerText = "Live tracking stopped.";
+        }
+
+        function handleGeolocationError(error) {
+            let errorMsg = "Unable to retrieve your location.";
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg = "Location permission denied. Please grant location access in your browser.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg = "Location information unavailable.";
+                    break;
+                case error.TIMEOUT:
+                    errorMsg = "Location request timed out.";
+                    break;
+            }
+            alert(errorMsg);
+            const statusEl = document.getElementById('search-filter-status');
+            if (statusEl) statusEl.innerText = "GPS acquisition failed.";
         }
 
         // --- Locate Coordinates or Address & Identify Nearest Sites ---
         async function locateCoordinatesOrAddress() {
+            if (isLiveTrackingActive) stopLiveTracking();
+
             const inputVal = (document.getElementById('location-input').value || '').trim();
             if (!inputVal) return;
 
@@ -936,30 +1015,44 @@
             }
         }
 
-        function processLocationTarget(targetLat, targetLon, labelText) {
-            // Remove previous target pin
-            if (targetLocationMarker) {
-                map.removeLayer(targetLocationMarker);
-            }
+        function processLocationTarget(targetLat, targetLon, labelText, accuracyMeters = null, isLive = false) {
+            // Clear existing target pin & accuracy circle
+            if (targetLocationMarker) map.removeLayer(targetLocationMarker);
+            if (gpsAccuracyCircle) map.removeLayer(gpsAccuracyCircle);
 
-            // Create Pulsing Amber Custom Target Pin
-            const amberIcon = L.divIcon({
-                className: 'pulse-marker',
-                html: '<div style="background-color: #f59e0b; width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid #ffffff;"></div>',
+            const markerClass = isLive ? 'pulse-marker-live' : 'pulse-marker';
+            const dotColor = isLive ? '#10b981' : '#f59e0b';
+
+            // Create Pulsing Marker (Emerald for Live Real-Time GPS, Amber for Static Location)
+            const icon = L.divIcon({
+                className: markerClass,
+                html: `<div style="background-color: ${dotColor}; width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid #ffffff;"></div>`,
                 iconSize: [14, 14],
                 iconAnchor: [7, 7]
             });
 
-            targetLocationMarker = L.marker([targetLat, targetLon], { icon: amberIcon }).addTo(map);
+            targetLocationMarker = L.marker([targetLat, targetLon], { icon: icon }).addTo(map);
             targetLocationMarker.bindPopup(`
                 <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[200px] text-xs font-sans border border-amber-500/50">
-                    <div class="font-bold text-amber-500 border-b border-slate-200 dark:border-slate-800 pb-1 mb-1.5 flex items-center gap-1">
-                        <i data-lucide="map-pin" class="w-4 h-4"></i> Target Location
+                    <div class="font-bold ${isLive ? 'text-emerald-500' : 'text-amber-500'} border-b border-slate-200 dark:border-slate-800 pb-1 mb-1.5 flex items-center gap-1">
+                        <i data-lucide="${isLive ? 'satellite' : 'map-pin'}" class="w-4 h-4"></i> ${isLive ? 'Live Tracked GPS' : 'Target Location'}
                     </div>
                     <div class="text-slate-800 dark:text-slate-200 font-medium leading-tight">${labelText}</div>
                     <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-1">${targetLat.toFixed(6)}, ${targetLon.toFixed(6)}</div>
                 </div>
-            `).openPopup();
+            `);
+
+            // Optionally render GPS accuracy circle
+            if (accuracyMeters && accuracyMeters > 0) {
+                gpsAccuracyCircle = L.circle([targetLat, targetLon], {
+                    radius: accuracyMeters,
+                    color: dotColor,
+                    weight: 1,
+                    opacity: 0.5,
+                    fillColor: dotColor,
+                    fillOpacity: 0.12
+                }).addTo(map);
+            }
 
             // Calculate Distance to All Active Map Sites
             const sitesWithDistance = [];
@@ -984,17 +1077,21 @@
 
             renderNearbySitesPanel(sitesWithDistance, labelText, targetLat, targetLon);
 
-            // Fit Map View to encompass target + nearest 5 sites
-            const boundsPoints = [[targetLat, targetLon]];
-            sitesWithDistance.slice(0, 5).forEach(s => boundsPoints.push([s.lat, s.lon]));
-            if (boundsPoints.length > 1) {
-                map.fitBounds(boundsPoints, { padding: [80, 80], maxZoom: 16 });
+            // Dynamically fit map bounds on first locate or smooth pan on live track
+            if (isLive) {
+                map.panTo([targetLat, targetLon]);
             } else {
-                map.setView([targetLat, targetLon], 15);
+                const boundsPoints = [[targetLat, targetLon]];
+                sitesWithDistance.slice(0, 5).forEach(s => boundsPoints.push([s.lat, s.lon]));
+                if (boundsPoints.length > 1) {
+                    map.fitBounds(boundsPoints, { padding: [80, 80], maxZoom: 16 });
+                } else {
+                    map.setView([targetLat, targetLon], 15);
+                }
             }
 
             const statusEl = document.getElementById('search-filter-status');
-            if (statusEl) statusEl.innerText = `Located target: ${labelText.substring(0, 30)}... (${sitesWithDistance.length} sites analyzed)`;
+            if (statusEl) statusEl.innerText = `${isLive ? 'Live GPS Tracking Active' : 'Located target'}: ${labelText.substring(0, 30)}... (${sitesWithDistance.length} sites sorted)`;
             try { lucide.createIcons(); } catch(e) {}
         }
 
@@ -1052,9 +1149,15 @@
         }
 
         function clearLocationTarget() {
+            if (isLiveTrackingActive) stopLiveTracking();
+
             if (targetLocationMarker) {
                 map.removeLayer(targetLocationMarker);
                 targetLocationMarker = null;
+            }
+            if (gpsAccuracyCircle) {
+                map.removeLayer(gpsAccuracyCircle);
+                gpsAccuracyCircle = null;
             }
             document.getElementById('location-input').value = '';
             closeNearbyPanel();
