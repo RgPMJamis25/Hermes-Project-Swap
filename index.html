@@ -117,6 +117,17 @@
                 margin-left: -24rem !important;
             }
         }
+
+        .pulse-marker {
+            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+            animation: pulse-amber 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
+            border-radius: 50%;
+        }
+        @keyframes pulse-amber {
+            to {
+                box-shadow: 0 0 0 18px rgba(245, 158, 11, 0);
+            }
+        }
     </style>
 </head>
 
@@ -339,9 +350,20 @@
 
         <main class="flex-1 relative flex flex-col h-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
 
-            <!-- Search & 3 Multi-Select Filter Toolbar -->
+            <!-- Search & 3 Multi-Select Filter Toolbar + Coordinates/Address Locator -->
             <div class="p-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 z-10 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div class="flex flex-wrap items-center gap-2">
+
+                    <!-- NEW: Geospatial Location / Address / Coordinate Search Bar -->
+                    <div class="flex items-center gap-1 bg-amber-500/10 border border-amber-500/40 rounded-lg px-2 py-1 shadow-xs">
+                        <i data-lucide="navigation" class="w-3.5 h-3.5 text-amber-500"></i>
+                        <input type="text" id="location-input" placeholder="Address or Lat, Lon..." class="bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-amber-500 w-36 sm:w-48 font-mono">
+                        <button onclick="locateCoordinatesOrAddress()" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded transition flex items-center gap-1">
+                            <span>Locate</span>
+                        </button>
+                        <button onclick="clearLocationTarget()" class="px-1 text-slate-400 hover:text-slate-800 dark:hover:text-white" title="Clear Location Pin">✕</button>
+                    </div>
+
                     <!-- Search Field -->
                     <div class="flex items-center gap-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1">
                         <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
@@ -450,6 +472,16 @@
                 <div id="floating-legend-content" class="space-y-1 text-xs max-h-48 overflow-y-auto custom-scrollbar"></div>
             </div>
 
+            <!-- NEW: Floating Proximity / Nearest Sites Overlay Panel -->
+            <div id="nearby-sites-panel" class="absolute bottom-6 right-4 z-10 glass-card rounded-2xl p-3.5 w-80 max-w-sm shadow-2xl border border-amber-500/40 hidden transition-all">
+                <div class="flex items-center justify-between mb-2 text-xs font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800/80 pb-1.5">
+                    <span class="flex items-center gap-1.5 text-amber-500"><i data-lucide="radar" class="w-4 h-4"></i> Nearest Sites to Target</span>
+                    <button onclick="closeNearbyPanel()" class="text-slate-400 hover:text-slate-800 dark:hover:text-white text-xs font-bold">✕</button>
+                </div>
+                <p id="nearby-target-address" class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mb-2 truncate">Target: --</p>
+                <div id="nearby-sites-list" class="space-y-1.5 text-xs max-h-56 overflow-y-auto custom-scrollbar pr-1"></div>
+            </div>
+
         </main>
     </div>
 
@@ -490,11 +522,10 @@
         </div>
     </div>
 
-    <!-- Analytics Dashboard Modal (Enhanced Modern Split Screen with Scaled-Up Typography & Labeled Pie Chart) -->
+    <!-- Analytics Dashboard Modal -->
     <div id="dashboard-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex flex-col p-3 sm:p-6">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden">
 
-            <!-- In-Modal Header Controls -->
             <div class="p-4 border-b border-slate-200 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3 bg-slate-50/90 dark:bg-slate-950/90 shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="p-2.5 bg-purple-600/20 text-purple-600 dark:text-purple-400 rounded-xl border border-purple-500/30">
@@ -507,14 +538,12 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2.5">
-                    <!-- Column Identifier Dropdown -->
                     <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3 py-1.5 shadow-sm">
                         <i data-lucide="palette" class="w-4 h-4 text-purple-500"></i>
                         <span class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">Status Column:</span>
                         <select id="modal-col-group" onchange="onModalColumnGroupChanged()" class="bg-transparent text-xs font-bold text-blue-600 dark:text-blue-400 outline-none cursor-pointer max-w-[140px] truncate"></select>
                     </div>
 
-                    <!-- Multi-Select Province Filter Dropdown -->
                     <div class="relative">
                         <button id="modal-prov-multiselect-btn" onclick="toggleModalFilterDropdown('prov')" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 text-slate-900 dark:text-white rounded-xl px-3 py-1.5 text-xs font-semibold outline-none flex items-center gap-2 shadow-sm min-w-[120px] max-w-[170px]">
                             <i data-lucide="map-pin" class="w-4 h-4 text-emerald-500 shrink-0"></i>
@@ -534,7 +563,6 @@
                         </div>
                     </div>
 
-                    <!-- Multi-Select Town / City Filter Dropdown -->
                     <div class="relative">
                         <button id="modal-town-multiselect-btn" onclick="toggleModalFilterDropdown('town')" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 text-slate-900 dark:text-white rounded-xl px-3 py-1.5 text-xs font-semibold outline-none flex items-center gap-2 shadow-sm min-w-[120px] max-w-[170px]">
                             <i data-lucide="building" class="w-4 h-4 text-amber-500 shrink-0"></i>
@@ -554,7 +582,6 @@
                         </div>
                     </div>
 
-                    <!-- Dynamic Column-Based Multi-Select Filter -->
                     <div class="relative flex items-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 py-1 shadow-sm">
                         <i data-lucide="filter" class="w-4 h-4 text-cyan-500 shrink-0 mr-1.5"></i>
                         <select id="modal-custom-col-select" onchange="onModalCustomColumnChanged()" class="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer max-w-[120px] truncate mr-2"></select>
@@ -576,7 +603,6 @@
                         </div>
                     </div>
 
-                    <!-- Milestone Sort Control -->
                     <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3 py-1.5 shadow-sm">
                         <i data-lucide="arrow-up-down" class="w-4 h-4 text-indigo-500"></i>
                         <span class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">Sort:</span>
@@ -597,13 +623,9 @@
                 </div>
             </div>
 
-            <!-- Modern Split Body Layout: Left = KPIs & Donut, Right = Pivot Table -->
             <div class="flex-1 p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden bg-slate-100/60 dark:bg-slate-950/60">
-
-                <!-- Left Column (KPIs, Progress Bar, Pie Chart, Category Grid) -->
                 <div class="lg:col-span-5 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
 
-                    <!-- Progress & High Level KPI Card -->
                     <div class="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-sm space-y-4">
                         <div class="flex items-center justify-between">
                             <div>
@@ -623,7 +645,6 @@
                             </div>
                         </div>
 
-                        <!-- Scaled-up High-Impact KPI Cards -->
                         <div class="grid grid-cols-3 gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-center">
                             <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
                                 <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Sites</div>
@@ -640,7 +661,6 @@
                         </div>
                     </div>
 
-                    <!-- Category Distribution Pie Chart Card with Big Canvas & Labeled Slices -->
                     <div class="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-sm flex flex-col items-center justify-center space-y-3">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category Distribution Breakdown</span>
                         <div class="w-full h-64 relative flex items-center justify-center py-2">
@@ -648,11 +668,9 @@
                         </div>
                     </div>
 
-                    <!-- Compact Status Grid with Scaled Numbers -->
                     <div id="dash-kpi-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
                 </div>
 
-                <!-- Right Column (Pivot Matrix Table Full Height) -->
                 <div class="lg:col-span-7 flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-sm overflow-hidden h-full">
                     <div class="p-3.5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-950/50">
                         <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
@@ -692,8 +710,10 @@
         let leafletMarkers = [];
 
         let isInitialLoad = true;
-
         let categoryVisibility = {};
+
+        // Geospatial Location Target Marker
+        let targetLocationMarker = null;
 
         // 3 Multi-Select Map Filters State
         let filtersState = [
@@ -795,6 +815,7 @@
 
             document.getElementById('grid-global-search').addEventListener('input', debounce(renderTableGrid, 250));
             document.getElementById('search-input').addEventListener('keyup', (e) => { if(e.key === 'Enter') executeSearch(); });
+            document.getElementById('location-input').addEventListener('keyup', (e) => { if(e.key === 'Enter') locateCoordinatesOrAddress(); });
 
             document.getElementById('slider-pin-size').addEventListener('input', (e) => {
                 updatePinSize(e.target.value);
@@ -803,6 +824,184 @@
                 updateFontSize(e.target.value);
             }, 100));
         });
+
+        // --- Haversine Distance Calculation (Meters / Kilometers) ---
+        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c; // Distance in meters
+        }
+
+        // --- Locate Coordinates or Address & Identify Nearest Sites ---
+        async function locateCoordinatesOrAddress() {
+            const inputVal = (document.getElementById('location-input').value || '').trim();
+            if (!inputVal) return;
+
+            let targetLat = null;
+            let targetLon = null;
+            let labelText = inputVal;
+
+            // Check if input is direct raw coordinates "14.5995, 120.9842" or "14.5995 120.9842"
+            const coordMatch = inputVal.match(/^([-+]?\d{1,2}\.\d+)[,\s]+([-+]?\d{1,3}\.\d+)$/);
+            if (coordMatch) {
+                targetLat = parseFloat(coordMatch[1]);
+                targetLon = parseFloat(coordMatch[2]);
+                labelText = `Coords: ${targetLat.toFixed(5)}, ${targetLon.toFixed(5)}`;
+                processLocationTarget(targetLat, targetLon, labelText);
+            } else {
+                // Otherwise perform OpenStreetMap Nominatim Geocoding Lookup
+                const statusEl = document.getElementById('search-filter-status');
+                if (statusEl) statusEl.innerText = "Geocoding location via OpenStreetMap...";
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(inputVal)}`);
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        targetLat = parseFloat(data[0].lat);
+                        targetLon = parseFloat(data[0].lon);
+                        labelText = data[0].display_name;
+                        processLocationTarget(targetLat, targetLon, labelText);
+                    } else {
+                        alert("Could not geocode address or location name. Please try adding city/country or input exact Lat, Lon.");
+                        if (statusEl) statusEl.innerText = "Geocoding failed.";
+                    }
+                } catch(e) {
+                    alert("Error reaching geocoding service. Verify network connection.");
+                    if (statusEl) statusEl.innerText = "Geocoding network error.";
+                }
+            }
+        }
+
+        function processLocationTarget(targetLat, targetLon, labelText) {
+            // Remove previous target pin
+            if (targetLocationMarker) {
+                map.removeLayer(targetLocationMarker);
+            }
+
+            // Create Pulsing Amber Custom Target Pin
+            const amberIcon = L.divIcon({
+                className: 'pulse-marker',
+                html: '<div style="background-color: #f59e0b; width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid #ffffff;"></div>',
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
+            });
+
+            targetLocationMarker = L.marker([targetLat, targetLon], { icon: amberIcon }).addTo(map);
+            targetLocationMarker.bindPopup(`
+                <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[200px] text-xs font-sans border border-amber-500/50">
+                    <div class="font-bold text-amber-500 border-b border-slate-200 dark:border-slate-800 pb-1 mb-1.5 flex items-center gap-1">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i> Target Location
+                    </div>
+                    <div class="text-slate-800 dark:text-slate-200 font-medium leading-tight">${labelText}</div>
+                    <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-1">${targetLat.toFixed(6)}, ${targetLon.toFixed(6)}</div>
+                </div>
+            `).openPopup();
+
+            // Calculate Distance to All Active Map Sites
+            const sitesWithDistance = [];
+
+            leafletMarkers.forEach(item => {
+                const site = rawDataset[item.index];
+                if (!site) return;
+                const distMeters = calculateHaversineDistance(targetLat, targetLon, item.lat, item.lon);
+                sitesWithDistance.push({
+                    index: item.index,
+                    siteId: site[colId] || `Row #${item.index + 1}`,
+                    groupVal: item.groupVal,
+                    lat: item.lat,
+                    lon: item.lon,
+                    distanceMeters: distMeters,
+                    siteObj: site
+                });
+            });
+
+            // Sort Nearest to Farthest
+            sitesWithDistance.sort((a, b) => a.distanceMeters - b.distanceMeters);
+
+            renderNearbySitesPanel(sitesWithDistance, labelText, targetLat, targetLon);
+
+            // Fit Map View to encompass target + nearest 5 sites
+            const boundsPoints = [[targetLat, targetLon]];
+            sitesWithDistance.slice(0, 5).forEach(s => boundsPoints.push([s.lat, s.lon]));
+            if (boundsPoints.length > 1) {
+                map.fitBounds(boundsPoints, { padding: [80, 80], maxZoom: 16 });
+            } else {
+                map.setView([targetLat, targetLon], 15);
+            }
+
+            const statusEl = document.getElementById('search-filter-status');
+            if (statusEl) statusEl.innerText = `Located target: ${labelText.substring(0, 30)}... (${sitesWithDistance.length} sites analyzed)`;
+            try { lucide.createIcons(); } catch(e) {}
+        }
+
+        function renderNearbySitesPanel(sitesList, targetName, targetLat, targetLon) {
+            const panel = document.getElementById('nearby-sites-panel');
+            const targetAddrEl = document.getElementById('nearby-target-address');
+            const listEl = document.getElementById('nearby-sites-list');
+
+            if (!panel || !listEl) return;
+
+            targetAddrEl.innerText = `${targetName}`;
+            panel.classList.remove('hidden');
+
+            if (sitesList.length === 0) {
+                listEl.innerHTML = `<div class="text-slate-400 italic text-center py-2">No visible map sites found.</div>`;
+                return;
+            }
+
+            // Display Top 8 Closest Sites
+            listEl.innerHTML = sitesList.slice(0, 8).map((item, rank) => {
+                const color = categoryColors[item.groupVal] || '#3b82f6';
+                const formattedDist = item.distanceMeters >= 1000 
+                    ? `${(item.distanceMeters / 1000).toFixed(2)} km` 
+                    : `${Math.round(item.distanceMeters)} m`;
+
+                return `
+                    <div onclick="focusMapSite(${item.index})" class="p-2 bg-slate-100/90 dark:bg-slate-900/90 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 cursor-pointer transition">
+                        <div class="flex items-center gap-2 truncate">
+                            <span class="font-bold text-[10px] text-slate-400 w-4 font-mono">#${rank + 1}</span>
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0 border border-white/50" style="background-color: ${color};"></span>
+                            <div class="truncate">
+                                <div class="font-bold text-slate-800 dark:text-slate-100 truncate">${item.siteId}</div>
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">${item.groupVal}</div>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black font-mono text-amber-600 dark:text-amber-400 shrink-0 px-1.5 py-0.5 bg-amber-500/10 rounded-md border border-amber-500/20">${formattedDist}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function focusMapSite(index) {
+            const item = leafletMarkers.find(m => m.index === index);
+            if (item) {
+                map.setView([item.lat, item.lon], 16);
+                inspectSite(index);
+                if (item.marker) item.marker.openPopup();
+            }
+        }
+
+        function closeNearbyPanel() {
+            document.getElementById('nearby-sites-panel').classList.add('hidden');
+        }
+
+        function clearLocationTarget() {
+            if (targetLocationMarker) {
+                map.removeLayer(targetLocationMarker);
+                targetLocationMarker = null;
+            }
+            document.getElementById('location-input').value = '';
+            closeNearbyPanel();
+            document.getElementById('search-filter-status').innerText = '';
+        }
 
         function toggleTheme() {
             isDarkMode = !isDarkMode;
@@ -1032,7 +1231,6 @@
             return headers.find(h => h.toLowerCase() === 'town' || h.toLowerCase().includes('town') || h.toLowerCase().includes('city')) || '';
         }
 
-        // --- Analytics Modal Multi-Select Filters Setup ---
         function initModalMultiSelectFilters() {
             if (!rawDataset || rawDataset.length === 0) return;
 
@@ -2220,7 +2418,6 @@
             }
         }
 
-        // Render Larger Pie/Donut Chart with DataLabels Integrated
         function renderDonutChart(statusCounts) {
             const ctx = document.getElementById('dash-donut-chart');
             if (!ctx) return;
@@ -2234,7 +2431,6 @@
             const totalSum = dataVals.reduce((a, b) => a + b, 0);
             const bgColors = labels.map(l => categoryColors[l] || '#3b82f6');
 
-            // Register chartjs-plugin-datalabels
             Chart.register(ChartDataLabels);
 
             donutChartInstance = new Chart(ctx, {
@@ -2273,7 +2469,7 @@
                             formatter: (value) => {
                                 if (totalSum === 0 || value === 0) return '';
                                 const percentage = ((value / totalSum) * 100).toFixed(1);
-                                return percentage > 3 ? `${percentage}%` : ''; // Only render label if slice is wide enough
+                                return percentage > 3 ? `${percentage}%` : '';
                             }
                         }
                     },
