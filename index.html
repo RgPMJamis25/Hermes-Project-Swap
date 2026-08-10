@@ -354,7 +354,7 @@
             <div class="p-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 z-10 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div class="flex flex-wrap items-center gap-2">
 
-                    <!-- NEW: Geospatial Location / Address / Coordinate Search Bar -->
+                    <!-- Geospatial Location / Address / Coordinate Search Bar -->
                     <div class="flex items-center gap-1 bg-amber-500/10 border border-amber-500/40 rounded-lg px-2 py-1 shadow-xs">
                         <i data-lucide="navigation" class="w-3.5 h-3.5 text-amber-500"></i>
                         <input type="text" id="location-input" placeholder="Address or Lat, Lon..." class="bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-slate-900 dark:text-white rounded px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-amber-500 w-36 sm:w-48 font-mono">
@@ -472,14 +472,16 @@
                 <div id="floating-legend-content" class="space-y-1 text-xs max-h-48 overflow-y-auto custom-scrollbar"></div>
             </div>
 
-            <!-- NEW: Floating Proximity / Nearest Sites Overlay Panel -->
-            <div id="nearby-sites-panel" class="absolute bottom-6 right-4 z-10 glass-card rounded-2xl p-3.5 w-80 max-w-sm shadow-2xl border border-amber-500/40 hidden transition-all">
-                <div class="flex items-center justify-between mb-2 text-xs font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800/80 pb-1.5">
-                    <span class="flex items-center gap-1.5 text-amber-500"><i data-lucide="radar" class="w-4 h-4"></i> Nearest Sites to Target</span>
-                    <button onclick="closeNearbyPanel()" class="text-slate-400 hover:text-slate-800 dark:hover:text-white text-xs font-bold">✕</button>
+            <!-- Floating Proximity Overlay Container (pointer-events-none applied to prevent blocking map pins) -->
+            <div id="nearby-sites-wrapper" class="absolute bottom-6 right-4 z-10 pointer-events-none">
+                <div id="nearby-sites-panel" class="glass-card rounded-2xl p-3.5 w-80 max-w-sm shadow-2xl border border-amber-500/40 hidden pointer-events-auto transition-all">
+                    <div class="flex items-center justify-between mb-2 text-xs font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800/80 pb-1.5">
+                        <span class="flex items-center gap-1.5 text-amber-500"><i data-lucide="radar" class="w-4 h-4"></i> Nearest Sites to Target</span>
+                        <button onclick="closeNearbyPanel()" class="text-slate-400 hover:text-slate-800 dark:hover:text-white text-xs font-bold">✕</button>
+                    </div>
+                    <p id="nearby-target-address" class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mb-2 truncate">Target: --</p>
+                    <div id="nearby-sites-list" class="space-y-1.5 text-xs max-h-56 overflow-y-auto custom-scrollbar pr-1"></div>
                 </div>
-                <p id="nearby-target-address" class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mb-2 truncate">Target: --</p>
-                <div id="nearby-sites-list" class="space-y-1.5 text-xs max-h-56 overflow-y-auto custom-scrollbar pr-1"></div>
             </div>
 
         </main>
@@ -985,7 +987,9 @@
             if (item) {
                 map.setView([item.lat, item.lon], 16);
                 inspectSite(index);
-                if (item.marker) item.marker.openPopup();
+                if (item.marker) {
+                    setTimeout(() => item.marker.openPopup(), 150);
+                }
             }
         }
 
@@ -1747,7 +1751,8 @@
                         weight: 1.5,
                         opacity: 1,
                         fillOpacity: 0.9,
-                        renderer: canvasRenderer
+                        renderer: canvasRenderer,
+                        interactive: true
                     });
 
                     const popupHTML = `
@@ -1778,7 +1783,11 @@
                         });
                     }
 
-                    marker.on('click', () => inspectSite(index));
+                    marker.on('click', (e) => {
+                        L.DomEvent.stopPropagation(e);
+                        inspectSite(index);
+                    });
+
                     markersLayerGroup.addLayer(marker);
                     leafletMarkers.push({ index, marker, lat, lon, groupVal });
                 }
