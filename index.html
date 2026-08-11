@@ -2530,7 +2530,6 @@
                 const mainVal = String(d[pivotCol] || 'Unspecified').trim();
                 const provVal = isTownGroup && provCol ? String(d[provCol] || 'Unspecified').trim() : '';
 
-                // Composite key ensures distinct town/province combos
                 const compositeKey = isTownGroup ? `${mainVal}|||${provVal}` : mainVal;
 
                 const st = String(d[colGroup] || 'Unclassified').trim();
@@ -2679,19 +2678,15 @@
             const data = currentAnalyticsExportData;
             const wb = XLSX.utils.book_new();
 
-            // --- SHEET 1: KPIs & Distribution ---
+            // --- SHEET 1: KPIs & Summary (Structured identical to HTML layout) ---
             const sheet1Data = [
-                ["CLUSTER ROLLOUT ANALYTICS SUMMARY"],
-                ["Reference Status Column", data.colGroup],
-                ["Grouped By Column", data.pivotCol],
-                ["Export Date", new Date().toLocaleString()],
+                ["OVERALL COMPLETION RATE (EXCL. IBS)"],
+                ["Reference Column:", data.colGroup, "Completion Rate:", `${data.completionPct}%`],
+                ["Progress:", `${data.completedSites} / ${data.totalSites} completed (${data.colGroup})`, "Pending:", `${data.pendingSites} pending`],
                 [],
-                ["HIGH LEVEL KPIs (Excl. IBS)"],
-                ["Metric", "Value"],
-                ["Total Sites", data.totalSites],
-                ["Completed Sites", data.completedSites],
-                ["Pending Sites", data.pendingSites],
-                ["Overall Completion Rate", `${data.completionPct}%`],
+                ["HIGH LEVEL KPI SUMMARY"],
+                ["TOTAL SITES", "COMPLETED", "PENDING"],
+                [data.totalSites, data.completedSites, data.pendingSites],
                 [],
                 ["CATEGORY DISTRIBUTION BREAKDOWN"],
                 ["Status Category", "Count", "Percentage"]
@@ -2704,7 +2699,29 @@
             });
 
             const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
-            XLSX.utils.book_append_sheet(wb, ws1, "KPIs & Distribution");
+
+            // Capture Doughnut Chart as Base64 Image from HTML Canvas & Embed
+            const chartCanvas = document.getElementById('dash-donut-chart');
+            if (chartCanvas) {
+                try {
+                    const chartBase64 = chartCanvas.toDataURL('image/png').split(',')[1];
+                    if (!ws1['!images']) ws1['!images'] = [];
+                    ws1['!images'].push({
+                        name: 'Category_Distribution_Chart.png',
+                        data: chartBase64,
+                        opts: { base64: true },
+                        position: {
+                            type: 'twoCellAnchor',
+                            from: { col: 4, row: 5 },
+                            to: { col: 11, row: 22 }
+                        }
+                    });
+                } catch(e) {
+                    console.warn("Could not embed chart image:", e);
+                }
+            }
+
+            XLSX.utils.book_append_sheet(wb, ws1, "KPIs & Summary");
 
             // --- SHEET 2: Tabular Pivot View with Separate Province Column ---
             const sheet2Headers = data.isTownGroup
