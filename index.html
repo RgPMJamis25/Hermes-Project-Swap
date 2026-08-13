@@ -65,9 +65,12 @@
             color: #0f172a;
         }
 
-        .leaflet-container { font-family: 'Inter', system-ui, sans-serif !important; }
+        .leaflet-container { 
+            font-family: 'Inter', system-ui, sans-serif !important; 
+            background-color: #020617 !important;
+        }
 
-        /* Custom Touch-Friendly & Interactive Tooltip CSS Overrides */
+        /* Custom Clickable Tooltip Styling */
         .leaflet-tooltip.clickable-tooltip {
             background: transparent !important;
             border: none !important;
@@ -123,6 +126,23 @@
             .sidebar-collapsed {
                 margin-left: -24rem !important;
             }
+        }
+
+        /* SVG Vector Layer Interactivity & Exact Lowercase Pane Selectors */
+        .leaflet-interactive {
+            cursor: pointer !important;
+        }
+
+        .leaflet-wedgespane-pane, 
+        .leaflet-ibscirclespane-pane {
+            pointer-events: none !important;
+        }
+
+        .leaflet-wedgespane-pane path, 
+        .leaflet-ibscirclespane-pane circle,
+        .leaflet-ibscirclespane-pane path {
+            pointer-events: visiblePainted !important;
+            cursor: pointer !important;
         }
 
         .exaggerated-pulse-container {
@@ -183,18 +203,6 @@
             transition: transform 0.15s ease-out;
             transform-origin: center center;
             filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.6));
-        }
-
-        /* SVG Vector Layer Interactivity Rules */
-        .leaflet-wedges-pane, .leaflet-ibs-pane {
-            pointer-events: none !important;
-        }
-        .leaflet-wedges-pane svg, .leaflet-ibs-pane svg {
-            pointer-events: none !important;
-        }
-        .leaflet-wedges-pane path, .leaflet-ibs-pane path {
-            pointer-events: auto !important;
-            cursor: pointer !important;
         }
     </style>
 </head>
@@ -429,10 +437,10 @@
                     </div>
                 </div>
 
-                <!-- 8. Pin Tooltip Fields Settings -->
+                <!-- 8. Pin Click Fields Settings -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5"><i data-lucide="message-square" class="w-4 h-4 text-cyan-500"></i> Pin Click Tooltip Fields</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="message-square" class="w-4 h-4 text-cyan-500"></i> Pin Click Fields</span>
                     </div>
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
                         <p class="text-slate-500 dark:text-slate-400 text-[11px] mb-2">Check the fields displayed when clicking pins on the map:</p>
@@ -849,8 +857,7 @@
         let ssvLookupCount = 0;
 
         let map = null;
-        let canvasRenderer = null;
-        let svgRenderer = null;
+        let sharedSvgRenderer = null;
         let pinsCanvasRenderer = null;
         let markersLayerGroup = null;
         let wedgesLayerGroup = null;
@@ -932,6 +939,16 @@
             'esri-sat': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
         };
 
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar-deck');
+            if (sidebar) {
+                sidebar.classList.toggle('sidebar-collapsed');
+                setTimeout(() => {
+                    if (map) map.invalidateSize();
+                }, 300);
+            }
+        }
+
         function debounce(func, delay = 150) {
             let timeout;
             return (...args) => {
@@ -975,31 +992,31 @@
         });
 
         function initMap() {
-            canvasRenderer = L.canvas({ padding: 0.5 });
-            svgRenderer = L.svg({ padding: 0.5 });
+            // FIX #1: Single shared SVG renderer for all vector features to prevent Canvas/SVG collision
+            sharedSvgRenderer = L.svg({ padding: 0.5 });
 
             map = L.map('map', {
                 center: [14.5995, 120.9842],
                 zoom: 11,
-                zoomControl: false,
-                preferCanvas: true 
+                zoomControl: false
             });
 
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
+            // Structure Map Panes: Wedges (400) -> IBS Circles (500) -> Pins (600)
             map.createPane('locationPane');
-            map.getPane('locationPane').style.zIndex = 700;
-
-            map.createPane('pinsPane');
-            map.getPane('pinsPane').style.zIndex = 500;
-
-            map.createPane('ibsCirclesPane');
-            map.getPane('ibsCirclesPane').style.zIndex = 610;
-            map.getPane('ibsCirclesPane').classList.add('leaflet-ibs-pane');
+            map.getPane('locationPane').style.zIndex = 800;
 
             map.createPane('wedgesPane');
-            map.getPane('wedgesPane').style.zIndex = 600;
-            map.getPane('wedgesPane').classList.add('leaflet-wedges-pane');
+            map.getPane('wedgesPane').style.zIndex = 400;
+            map.getPane('wedgesPane').classList.add('leaflet-wedgespane-pane');
+
+            map.createPane('ibsCirclesPane');
+            map.getPane('ibsCirclesPane').style.zIndex = 500;
+            map.getPane('ibsCirclesPane').classList.add('leaflet-ibscirclespane-pane');
+
+            map.createPane('pinsPane');
+            map.getPane('pinsPane').style.zIndex = 600;
 
             pinsCanvasRenderer = L.canvas({ padding: 0.5, pane: 'pinsPane' });
 
@@ -1019,6 +1036,18 @@
             });
         }
 
+        // Single, centralized tooltip opening function
+        function openMapTooltip(latlng, htmlContent, directionVal = 'center') {
+            L.tooltip({
+                direction: directionVal,
+                opacity: 0.98,
+                className: 'clickable-tooltip'
+            })
+            .setLatLng(latlng)
+            .setContent(htmlContent)
+            .openOn(map);
+        }
+
         async function fetchWithTimeout(url, timeoutMs = 30000) {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeoutMs);
@@ -1027,7 +1056,7 @@
                 clearTimeout(id);
                 if (res && res.ok) {
                     const text = await res.text();
-                    if (text && text.length > 10 && !text.includes('<!DOCTYPE html>') && !text.toLowerCase().includes('<html')) {
+                    if (text && text.length > 10 && !text.includes('<!DOCTYPE html>')) {
                         return text;
                     }
                 }
@@ -1400,7 +1429,7 @@
             });
 
             targetLocationMarker = L.marker([lat, lon], { icon: customIcon, zIndexOffset: 1000, pane: 'locationPane' }).addTo(map);
-            targetLocationMarker.bindPopup(`<b>${labelText}</b><br>Heading: <span id="popup-heading-val">${Math.round(currentHeadingDegrees)}°</span>`);
+            targetLocationMarker.bindTooltip(`<b>${labelText}</b><br>Heading: <span id="popup-heading-val">${Math.round(currentHeadingDegrees)}°</span>`, { permanent: false, direction: 'top' });
         }
 
         function initGyroscopeEngine() {
@@ -1700,8 +1729,13 @@
             return 200;
         }
 
-        function createWedgePolygonPoints(lat, lon, azimuth, radiusMeters, beamwidthDeg) {
-            const points = [[lat, lon]];
+        // FIX #2: Indented wedge generator that offsets the wedge origin 5 meters outward along azimuth
+        function createIndentedWedgePolygonPoints(lat, lon, azimuth, radiusMeters, beamwidthDeg, indentMeters = 5) {
+            const azRad = (azimuth * Math.PI) / 180;
+            const startLat = lat + (indentMeters * Math.cos(azRad)) / 111111;
+            const startLon = lon + (indentMeters * Math.sin(azRad)) / (111111 * Math.cos((lat * Math.PI) / 180));
+
+            const points = [[startLat, startLon]];
             const bw = (beamwidthDeg && !isNaN(beamwidthDeg) && beamwidthDeg > 0) ? parseFloat(beamwidthDeg) : 65;
             const halfBeam = bw / 2;
             const startAngle = azimuth - halfBeam;
@@ -1715,6 +1749,26 @@
                 points.push([lat + dLat, lon + dLon]);
             }
             return points;
+        }
+
+        // FIX #3: True Concentric Donut Generator (Polygon with Inner Hole Cutout)
+        function createIbsDonutRingPoints(lat, lon, outerRadiusMeters, innerRadiusMeters) {
+            const outerPoints = [];
+            const innerPoints = [];
+
+            for (let i = 0; i < 32; i++) {
+                const angleRad = (i * 360 / 32) * (Math.PI / 180);
+                const dLatOuter = (outerRadiusMeters * Math.cos(angleRad)) / 111111;
+                const dLonOuter = (outerRadiusMeters * Math.sin(angleRad)) / (111111 * Math.cos((lat * Math.PI) / 180));
+                outerPoints.push([lat + dLatOuter, lon + dLonOuter]);
+
+                const dLatInner = (innerRadiusMeters * Math.cos(angleRad)) / 111111;
+                const dLonInner = (innerRadiusMeters * Math.sin(angleRad)) / (111111 * Math.cos((lat * Math.PI) / 180));
+                innerPoints.push([lat + dLatInner, lon + dLonInner]);
+            }
+
+            // Return outer ring clockwise, inner ring counter-clockwise (Leaflet hole definition)
+            return [outerPoints, innerPoints.reverse()];
         }
 
         function plotPinsAndWedges() {
@@ -1731,7 +1785,7 @@
 
             const siteMap = {};
 
-            // Build Site Location Reference exclusively from Main Google Sheet
+            // Build Site Location Reference
             rawDataset.forEach((row, index) => {
                 const groupVal = String(row[colGroup] || 'Unclassified').trim();
 
@@ -1751,7 +1805,6 @@
                         siteMap[k] = { lat, lon, data: row, index };
                     });
 
-                    // Check visibility and active filter state
                     let isVisible = categoryVisibility[groupVal] !== false;
                     for (let idx = 0; idx < 3; idx++) {
                         const fState = filtersState[idx];
@@ -1778,45 +1831,40 @@
                                 weight: 1.5,
                                 opacity: 1,
                                 fillOpacity: 0.9,
-                                renderer: pinsCanvasRenderer,
+                                renderer: sharedSvgRenderer,
                                 interactive: true,
-                                pane: 'pinsPane'
+                                pane: 'pinsPane' // pinsPane = 600
                             });
 
                             const popupTitle = row[colId] || row['Site_ID'] || 'Site Details';
 
-                            // DYNAMIC INTERACTIVE SITE PIN TOOLTIP
-                            const pinTooltipHTML = `
-                                <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[220px] text-xs font-sans border border-blue-500/50 pointer-events-auto">
-                                    <div class="font-bold text-xs text-blue-400 border-b border-slate-700/80 pb-1.5 mb-2 flex items-center justify-between">
-                                        <span>📍 Site: ${popupTitle}</span>
-                                        <span class="w-2.5 h-2.5 rounded-full border border-white/50 shrink-0" style="background-color: ${color};"></span>
-                                    </div>
-                                    <div class="space-y-1.5 text-[11px]">
-                                        ${userTooltipFields.length > 0 ? userTooltipFields.map(f => `
-                                            <div class="flex justify-between gap-2 items-center">
-                                                <span class="text-slate-400 font-medium">${f}:</span>
-                                                <span class="font-semibold text-slate-100 text-right truncate max-w-[130px] font-mono select-all">${row[f] || '--'}</span>
-                                            </div>
-                                        `).join('') : '<div class="text-slate-500 italic">No fields selected</div>'}
-                                    </div>
-                                </div>
-                            `;
-
-                            // Bind Interactive Tooltip
-                            marker.bindTooltip(pinTooltipHTML, {
-                                permanent: showLabels,
-                                direction: 'top',
-                                offset: [0, -radius],
-                                opacity: 0.98,
-                                interactive: true,
-                                className: showLabels ? 'custom-pin-label clickable-tooltip' : 'clickable-tooltip'
+                            // Save marker reference
+                            keysToRegister.forEach(k => {
+                                if (siteMap[k]) siteMap[k].marker = marker;
                             });
 
+                            // PRINCIPLE 4: Site Pin handles strictly its own click events
                             marker.on('click', (e) => {
                                 L.DomEvent.stopPropagation(e);
-                                map.closeTooltip(); // Closes existing tooltips for single active focus
-                                setTimeout(() => marker.openTooltip(), 10);
+
+                                const pinTooltipHTML = `
+                                    <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[220px] text-xs font-sans border border-blue-500/50 pointer-events-auto">
+                                        <div class="font-bold text-xs text-blue-400 border-b border-slate-700/80 pb-1.5 mb-2 flex items-center justify-between">
+                                            <span>📍 Site: ${popupTitle}</span>
+                                            <span class="w-2.5 h-2.5 rounded-full border border-white/50 shrink-0" style="background-color: ${color};"></span>
+                                        </div>
+                                        <div class="space-y-1.5 text-[11px]">
+                                            ${userTooltipFields.length > 0 ? userTooltipFields.map(f => `
+                                                <div class="flex justify-between gap-2 items-center">
+                                                    <span class="text-slate-400 font-medium">${f}:</span>
+                                                    <span class="font-semibold text-slate-100 text-right truncate max-w-[130px] font-mono select-all">${row[f] || '--'}</span>
+                                                </div>
+                                            `).join('') : '<div class="text-slate-500 italic">No fields selected in sidebar</div>'}
+                                        </div>
+                                    </div>
+                                `;
+
+                                openMapTooltip(e.latlng, pinTooltipHTML, 'top');
                                 inspectSite(index);
                             });
 
@@ -1827,7 +1875,7 @@
                 }
             });
 
-            // INDEPENDENT CLICKABLE SECTOR WEDGES & IBS CIRCLES WITH DEDICATED UTILIZATION TOOLTIP
+            // CLICKABLE SECTOR WEDGES & IBS DONUT RINGS
             if (showWedges && utilizationDataset.length > 0) {
                 const ibsSectorIndexTracker = {};
 
@@ -1853,7 +1901,6 @@
                     const az = parseFloat(String(rawAzVal || '').replace(/[^0-9.-]/g, ''));
                     const displaySectorName = secNameKey && sec[secNameKey] ? sec[secNameKey] : (!isNaN(az) ? `Sector Azimuth ${az}°` : 'Sector');
 
-                    // Band Status List Builder
                     const bandRowsHTML = TARGET_BANDS.map(b => {
                         const matchingBKey = secKeys.find(k => k.trim().toUpperCase() === b.toUpperCase());
                         const st = String((matchingBKey ? sec[matchingBKey] : '') || 'BLACK').toUpperCase().trim();
@@ -1871,30 +1918,30 @@
                         const currentIbsIdx = ibsSectorIndexTracker[candidateKey];
                         ibsSectorIndexTracker[candidateKey] += 1;
 
-                        const baseRadiusMeters = 100;
-                        const radiusStepMeters = 20;
-                        const dynamicRadiusMeters = Math.max(20, baseRadiusMeters - (currentIbsIdx * radiusStepMeters));
+                        const outerRadius = Math.max(30, 110 - (currentIbsIdx * 20));
+                        const innerRadius = Math.max(10, outerRadius - 20);
 
-                        const ibsCircle = L.circle([siteRef.lat, siteRef.lon], {
-                            radius: dynamicRadiusMeters,
+                        // True Non-Overlapping Donut Polygon (Hole Cutout)
+                        const donutPoints = createIbsDonutRingPoints(siteRef.lat, siteRef.lon, outerRadius, innerRadius);
+
+                        const ibsPolygon = L.polygon(donutPoints, {
                             fillColor: blendedColor,
                             fillOpacity: 0.65,
                             color: '#ffffff',
-                            weight: 1.5,
+                            weight: 1,
                             dashArray: '3, 3',
-                            renderer: svgRenderer,
+                            renderer: sharedSvgRenderer,
                             interactive: true,
-                            pane: 'ibsCirclesPane'
+                            pane: 'ibsCirclesPane' // ibsCirclesPane = 500
                         }).addTo(ibsCirclesLayerGroup);
 
-                        // IBS DEDICATED SECTOR UTILIZATION TOOLTIP
                         const ibsTooltipHTML = `
                             <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[240px] text-xs border border-emerald-500/60 select-text pointer-events-auto">
                                 <div class="font-bold text-xs text-emerald-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between items-center">
                                     <span>📶 Site: ${displaySiteName}</span>
-                                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono border border-emerald-500/30">IBS</span>
+                                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono border border-emerald-500/30">IBS Ring #${currentIbsIdx + 1}</span>
                                 </div>
-                                <div class="text-[11px] font-semibold text-slate-200 mb-2 truncate">Sector: <span class="text-emerald-300 font-mono">${displaySectorName} (IBS #${currentIbsIdx + 1})</span></div>
+                                <div class="text-[11px] font-semibold text-slate-200 mb-2 truncate">Sector Name: <span class="text-emerald-300 font-mono">${displaySectorName}</span></div>
                                 <div class="space-y-0.5 mb-2.5">${bandRowsHTML}</div>
                                 <div class="pt-2 border-t border-slate-700/80 flex items-center justify-between text-[11px]">
                                     <span class="font-bold text-slate-400">Blended Congestion:</span>
@@ -1903,21 +1950,13 @@
                             </div>
                         `;
 
-                        ibsCircle.bindTooltip(ibsTooltipHTML, {
-                            sticky: false,
-                            interactive: true,
-                            direction: 'top',
-                            opacity: 0.98,
-                            className: 'clickable-tooltip'
-                        });
+                        ibsPolygon.off('mouseover');
+                        ibsPolygon.off('mouseout');
 
-                        ibsCircle.on('click', (e) => {
+                        // PRINCIPLE 5: Donut handles clicks everywhere outside the inner hole and site pin
+                        ibsPolygon.on('click', (e) => {
                             L.DomEvent.stopPropagation(e);
-                            map.closeTooltip();
-                            setTimeout(() => {
-                                ibsCircle.bringToFront();
-                                ibsCircle.openTooltip();
-                            }, 10);
+                            openMapTooltip(e.latlng, ibsTooltipHTML, 'top');
                             inspectWedge(sec, siteRef.data);
                         });
                     } else {
@@ -1925,48 +1964,60 @@
                         const radiusMeters = getWedgeRadiusMeters(rawSiteType);
 
                         if (!isNaN(az)) {
-                            const wedgePoints = createWedgePolygonPoints(siteRef.lat, siteRef.lon, az, radiusMeters, bw);
+                            // FIX #2: Indented Wedge (5m Gap from Lat/Lon Origin)
+                            const wedgePoints = createIndentedWedgePolygonPoints(siteRef.lat, siteRef.lon, az, radiusMeters, bw, 5);
+
                             const polygon = L.polygon(wedgePoints, {
                                 fillColor: blendedColor,
                                 fillOpacity: 0.7,
                                 color: '#ffffff',
                                 weight: 1,
-                                renderer: svgRenderer,
+                                renderer: sharedSvgRenderer,
                                 interactive: true,
-                                pane: 'wedgesPane'
+                                pane: 'wedgesPane' // wedgesPane = 400
                             }).addTo(wedgesLayerGroup);
 
-                            // MACRO / OUTDOOR DEDICATED SECTOR UTILIZATION TOOLTIP
                             const sectorTooltipHTML = `
                                 <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[240px] text-xs border border-amber-500/60 select-text pointer-events-auto">
                                     <div class="font-bold text-xs text-amber-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between items-center">
                                         <span>📐 Site: ${displaySiteName}</span>
-                                        <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono border border-amber-500/30">Azimuth: ${az}°</span>
+                                        <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono border border-amber-500/30">
+                                            Azimuth: ${az}°
+                                        </span>
                                     </div>
-                                    <div class="text-[11px] font-semibold text-slate-200 mb-2 truncate">Sector Name: <span class="text-amber-300 font-mono">${displaySectorName}</span></div>
-                                    <div class="space-y-0.5 mb-2.5">${bandRowsHTML}</div>
+
+                                    <div class="text-[11px] font-semibold text-slate-200 mb-2 truncate">
+                                        Sector Name:
+                                        <span class="text-amber-300 font-mono">${displaySectorName}</span>
+                                    </div>
+
+                                    <div class="space-y-0.5 mb-2.5">
+                                        ${bandRowsHTML}
+                                    </div>
+
                                     <div class="pt-2 border-t border-slate-700/80 flex items-center justify-between text-[11px]">
                                         <span class="font-bold text-slate-400">Blended Congestion:</span>
-                                        <span class="px-2 py-0.5 rounded font-black font-mono text-xs" style="background:${blendedColor}25; color:${blendedColor}; border:1.5px solid ${blendedColor};">${blendedStatusLabel}</span>
+                                        <span
+                                            class="px-2 py-0.5 rounded font-black font-mono text-xs"
+                                            style="
+                                                background:${blendedColor}25;
+                                                color:${blendedColor};
+                                                border:1.5px solid ${blendedColor};
+                                            "
+                                        >
+                                            ${blendedStatusLabel}
+                                        </span>
                                     </div>
                                 </div>
                             `;
 
-                            polygon.bindTooltip(sectorTooltipHTML, {
-                                sticky: false,
-                                interactive: true,
-                                direction: 'center',
-                                opacity: 0.98,
-                                className: 'clickable-tooltip'
-                            });
+                            polygon.off('mouseover');
+                            polygon.off('mouseout');
 
+                            // PRINCIPLE 5: Wedge handles clicks everywhere outside the pin
                             polygon.on('click', (e) => {
                                 L.DomEvent.stopPropagation(e);
-                                map.closeTooltip();
-                                setTimeout(() => {
-                                    polygon.bringToFront();
-                                    polygon.openTooltip();
-                                }, 10);
+                                openMapTooltip(e.latlng, sectorTooltipHTML, 'center');
                                 inspectWedge(sec, siteRef.data);
                             });
                         }
@@ -1992,7 +2043,7 @@
 
             const isIbs = siteType.includes('IBS') || siteType.includes('INDOOR') || siteType.includes('BUILDING');
             const azVal = utilRow['Azimuth'] || utilRow['AZIMUTH'] || '0';
-            const headingLabel = isIbs ? 'IBS Circle' : `${azVal}°`;
+            const headingLabel = isIbs ? 'IBS Donut' : `${azVal}°`;
             document.getElementById('inspect-site-id').innerText = `${siteId} (${headingLabel})`;
 
             const blendedColor = calculateBlendedCongestionColor(utilRow);
@@ -2012,10 +2063,10 @@
             container.innerHTML = `
                 <div class="space-y-2">
                     <div class="grid grid-cols-2 gap-2 text-[11px]">
-                        <div><b>${isIbs ? 'Shape:' : 'Azimuth:'}</b> ${isIbs ? 'Dynamic Circle' : `${azVal}°`}</div>
+                        <div><b>${isIbs ? 'Shape:' : 'Azimuth:'}</b> ${isIbs ? 'Concentric Donut' : `${azVal}°`}</div>
                         <div><b>Beamwidth:</b> ${utilRow['BW'] || 65}°</div>
                         <div><b>Site Type:</b> ${siteType}</div>
-                        <div><b>Radius Scope:</b> ${isIbs ? '100m Concentric' : `${getWedgeRadiusMeters(siteType)}m`}</div>
+                        <div><b>Radius Scope:</b> ${isIbs ? 'Donut Cutout' : `${getWedgeRadiusMeters(siteType)}m`}</div>
                     </div>
                     <div class="p-2 bg-slate-900/90 rounded-lg border border-slate-800 flex items-center justify-between">
                         <span class="font-bold text-slate-400">Blended Congestion:</span>
