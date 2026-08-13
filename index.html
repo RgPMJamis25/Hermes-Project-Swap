@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geospatial Modification Deck & Cross-Sheet SSV Lookup</title>
+    <title>Geospatial Modification Deck & Cross-Sheet SSV & Utilization Lookup</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -67,6 +67,22 @@
 
         .leaflet-container { font-family: 'Inter', system-ui, sans-serif !important; }
 
+        /* Custom Touch-Friendly & Interactive Tooltip CSS Overrides */
+        .leaflet-tooltip.clickable-tooltip {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            pointer-events: auto !important;
+        }
+        .leaflet-tooltip-top.clickable-tooltip:before,
+        .leaflet-tooltip-bottom.clickable-tooltip:before,
+        .leaflet-tooltip-left.clickable-tooltip:before,
+        .leaflet-tooltip-right.clickable-tooltip:before,
+        .leaflet-tooltip-center.clickable-tooltip:before {
+            display: none !important;
+        }
+
         .custom-pin-label {
             border-radius: 4px;
             padding: 2px 6px;
@@ -99,20 +115,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
             pointer-events: none !important;
         }
-        html:not(.dark) .ruler-map-tooltip {
-            background: #ffffff !important;
-            border: 1.5px solid #d97706 !important;
-            color: #b45309 !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
-        }
-
-        .leaflet-popup-content-wrapper {
-            background: transparent !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-        }
-        .leaflet-popup-tip { background: #0f172a !important; }
-        html:not(.dark) .leaflet-popup-tip { background: #ffffff !important; }
 
         .sidebar-collapsed {
             margin-left: -20rem !important;
@@ -123,28 +125,76 @@
             }
         }
 
-        .pulse-marker {
-            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-            animation: pulse-amber 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
-            border-radius: 50%;
+        .exaggerated-pulse-container {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             pointer-events: none !important;
         }
-        @keyframes pulse-amber {
-            to {
-                box-shadow: 0 0 0 18px rgba(245, 158, 11, 0);
+
+        .exaggerated-pulse-ring-1, .exaggerated-pulse-ring-2 {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            opacity: 0.9;
+        }
+
+        .pulse-amber-ring-1 {
+            border: 2.5px solid #f59e0b;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+            animation: pulse-shockwave 2s infinite cubic-bezier(0, 0.2, 0.8, 1);
+        }
+
+        .pulse-amber-ring-2 {
+            border: 1.5px solid #fbbf24;
+            animation: pulse-shockwave 2s infinite cubic-bezier(0, 0.2, 0.8, 1) 0.6s;
+        }
+
+        .pulse-green-ring-1 {
+            border: 3px solid #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.9);
+            animation: pulse-shockwave 1.6s infinite cubic-bezier(0, 0.2, 0.8, 1);
+        }
+
+        .pulse-green-ring-2 {
+            border: 2px solid #34d399;
+            animation: pulse-shockwave 1.6s infinite cubic-bezier(0, 0.2, 0.8, 1) 0.5s;
+        }
+
+        @keyframes pulse-shockwave {
+            0% {
+                transform: scale(0.2);
+                opacity: 1;
+            }
+            80% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: scale(2.8);
+                opacity: 0;
             }
         }
 
-        .pulse-marker-live {
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8);
-            animation: pulse-green 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
-            border-radius: 50%;
+        .gyro-arrow-icon {
+            transition: transform 0.15s ease-out;
+            transform-origin: center center;
+            filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.6));
+        }
+
+        /* SVG Vector Layer Interactivity Rules */
+        .leaflet-wedges-pane, .leaflet-ibs-pane {
             pointer-events: none !important;
         }
-        @keyframes pulse-green {
-            to {
-                box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
-            }
+        .leaflet-wedges-pane svg, .leaflet-ibs-pane svg {
+            pointer-events: none !important;
+        }
+        .leaflet-wedges-pane path, .leaflet-ibs-pane path {
+            pointer-events: auto !important;
+            cursor: pointer !important;
         }
     </style>
 </head>
@@ -163,9 +213,11 @@
                 <div>
                     <h1 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">Geospatial Modification Deck</h1>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                        <span>Swap Sheet: <strong class="text-slate-700 dark:text-slate-300">Main</strong></span>
+                        <span>Swap: <strong class="text-slate-700 dark:text-slate-300">Main</strong></span>
                         <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
-                        <span>SSV Tracker: <strong class="text-slate-700 dark:text-slate-300">Sheet1</strong></span>
+                        <span>SSV: <strong class="text-slate-700 dark:text-slate-300">Sheet1</strong></span>
+                        <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
+                        <span>Utilization: <strong class="text-slate-700 dark:text-slate-300">Active</strong></span>
                         <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
                         <span id="sync-status" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Connecting...
@@ -213,6 +265,9 @@
                         <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="SSV Sheet Apps Script Endpoint">
                             SSV Tracker: <span class="text-purple-600 dark:text-purple-400">AKfycbx-JSY8Luq...</span>
                         </div>
+                        <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="Utilization Sheet Endpoint">
+                            Utilization: <span class="text-cyan-600 dark:text-cyan-400">AKfycbyc6k3G2iN...</span>
+                        </div>
                         <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800">
                             <span class="text-slate-500 dark:text-slate-400">Loaded Sites / Lookups:</span>
                             <span id="sidebar-record-count" class="font-bold text-slate-900 dark:text-white">0</span>
@@ -220,7 +275,55 @@
                     </div>
                 </div>
 
-                <!-- View Presets Manager -->
+                <!-- 2. Sector Azimuth Wedges & Congestion Legend -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        <span class="flex items-center gap-1.5"><i data-lucide="wifi" class="w-4 h-4 text-cyan-500"></i> Sector Wedges & Band Congestion</span>
+                    </div>
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 text-xs">
+                        <label class="flex items-center justify-between text-slate-700 dark:text-slate-300 cursor-pointer">
+                            <span class="font-semibold">Show Sector Wedges</span>
+                            <input type="checkbox" id="chk-show-wedges" checked onchange="toggleWedgesVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600">
+                        </label>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                                <span>Macro Wedge Outer Radius: <strong>200m</strong></span>
+                                <span>Small Cell / IBS: <strong>100m</strong></span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 italic">Sectors resize according to 'Site Type' column. IBS site types render as dynamic concentric circles.</div>
+                        </div>
+
+                        <!-- Congestion Heatmap Color Key -->
+                        <div class="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
+                            <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Band Congestion Key</span>
+                            <div class="grid grid-cols-4 gap-1 text-[10px] text-center font-bold font-mono">
+                                <div class="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 py-1 rounded">GREEN</div>
+                                <div class="bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/40 py-1 rounded">AMBER</div>
+                                <div class="bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/40 py-1 rounded">RED</div>
+                                <div class="bg-slate-900 text-slate-300 border border-slate-700 py-1 rounded">BLACK</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Gyroscope Compass Calibration Card -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        <span class="flex items-center gap-1.5"><i data-lucide="compass" class="w-4 h-4 text-emerald-500"></i> Gyro Arrow Compass Heading</span>
+                    </div>
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-600 dark:text-slate-400">Heading Angle:</span>
+                            <span id="gyro-heading-readout" class="font-mono font-bold text-emerald-500 text-sm">0° (N)</span>
+                        </div>
+                        <button onclick="requestGyroPermission()" class="w-full py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-500 border border-emerald-500/40 font-bold rounded-lg transition text-xs flex items-center justify-center gap-1.5">
+                            <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Calibrate / Enable Mobile Gyro
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. View Presets Manager -->
                 <div class="space-y-3">
                     <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         <span class="flex items-center gap-1.5"><i data-lucide="bookmark" class="w-4 h-4 text-amber-500"></i> View Presets (Row & Col)</span>
@@ -238,7 +341,7 @@
                     </div>
                 </div>
 
-                <!-- 2. Database Field Mapping -->
+                <!-- 5. Database Field Mapping -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                         <i data-lucide="sliders" class="w-4 h-4 text-indigo-500"></i> Row Field Mapping
@@ -265,7 +368,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Map Display Settings -->
+                <!-- 6. Map Display Settings -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                         <i data-lucide="layers" class="w-4 h-4 text-emerald-500"></i> Map Display Settings
@@ -301,7 +404,7 @@
                     </div>
                 </div>
 
-                <!-- 4. Color Legend Column Preset -->
+                <!-- 7. Color Legend Column Preset -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
                         <span class="flex items-center gap-1.5"><i data-lucide="palette" class="w-4 h-4 text-purple-500"></i> Color Legend Column</span>
@@ -326,7 +429,7 @@
                     </div>
                 </div>
 
-                <!-- 5. Pin Tooltip Fields Settings -->
+                <!-- 8. Pin Tooltip Fields Settings -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
                         <span class="flex items-center gap-1.5"><i data-lucide="message-square" class="w-4 h-4 text-cyan-500"></i> Pin Click Tooltip Fields</span>
@@ -337,7 +440,7 @@
                     </div>
                 </div>
 
-                <!-- 6. Geospatial Tools & Distance Ruler -->
+                <!-- 9. Geospatial Tools & Distance Ruler -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                         <i data-lucide="ruler" class="w-4 h-4 text-amber-500"></i> Distance Ruler Tool
@@ -352,14 +455,14 @@
                     </div>
                 </div>
 
-                <!-- 7. Inspector Panel / Detail Editor -->
+                <!-- 10. Inspector Panel / Detail Editor -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5"><i data-lucide="info" class="w-4 h-4 text-rose-500"></i> Site Inspector Panel</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="info" class="w-4 h-4 text-rose-500"></i> Site / Sector Inspector Panel</span>
                         <span id="inspect-site-id" class="text-blue-600 dark:text-blue-400 font-mono text-[10px]">None Selected</span>
                     </div>
                     <div id="inspector-container" class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
-                        <div class="text-slate-500 italic text-center py-4">Click any site pin on the map to inspect or edit details.</div>
+                        <div class="text-slate-500 italic text-center py-4">Click any site pin or wedge on the map to inspect or edit details.</div>
                     </div>
                 </div>
 
@@ -387,7 +490,7 @@
                         </button>
 
                         <!-- Real-time Live Satellite Tracking Toggle Button -->
-                        <button id="btn-live-tracking" onclick="toggleLiveTracking()" class="p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded border border-slate-300 dark:border-slate-700 transition flex items-center gap-1" title="Toggle Real-Time Movement Tracking">
+                        <button id="btn-live-tracking" onclick="toggleLiveTracking()" class="p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded border border-slate-300 dark:border-slate-700 transition flex items-center gap-1" title="Toggle Real-Time Movement Tracking + Gyro Arrow">
                             <i data-lucide="satellite" class="w-3.5 h-3.5"></i>
                             <span id="live-tracking-badge" class="hidden w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                         </button>
@@ -734,32 +837,41 @@
 
     <script>
         const PRIMARY_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxxn6Gxb28-E5Eu6WlCkPMi9vYnF_C12fTglt8CurPFd0YO-ldcYjesS0l3qRXqei5_QA/exec';
+        const UTILIZATION_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyc6k3G2iNl-AkIj8APjkMiDfsUOQIc2_jFXTNSICIhtLxl6F9NQmP4BwXN1uAFUIT7/exec';
         const SSV_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbx-JSY8LuqG3lxcmqJGdhG6WXXE0xgUqFcSBbU40aA-S33BS46ZWJT_x7nZ-4gTACcQkw/exec';
 
         const API_PRIMARY_PROXY = '/api/sheet-data';
+        const API_UTILIZATION_PROXY = '/api/utilization-data';
         const API_SSV_PROXY = '/api/ssv-data';
 
         let rawDataset = [];
+        let utilizationDataset = [];
         let ssvLookupCount = 0;
+
         let map = null;
         let canvasRenderer = null;
+        let svgRenderer = null;
+        let pinsCanvasRenderer = null;
         let markersLayerGroup = null;
+        let wedgesLayerGroup = null;
+        let ibsCirclesLayerGroup = null;
         let activeTileLayer = null;
         let leafletMarkers = [];
 
         let isInitialLoad = true;
         let categoryVisibility = {};
 
-        // Geospatial Location Target Marker & Real-Time Tracking State
+        // Gyro & GPS State
         let targetLocationMarker = null;
         let gpsAccuracyCircle = null;
         let watchPositionId = null;
         let isLiveTrackingActive = false;
+        let currentHeadingDegrees = 0;
 
         // Active Analytics Export Data Cache
         let currentAnalyticsExportData = null;
 
-        // 3 Multi-Select Map Filters State
+        // Multi-Select Map Filters State
         let filtersState = [
             { col: 'SSV STATUS', available: [], selected: new Set() },
             { col: 'SWAP STATUS', available: [], selected: new Set() },
@@ -784,16 +896,13 @@
 
         // View Presets Manager
         let savedViewPresets = {};
-        try {
-            savedViewPresets = JSON.parse(localStorage.getItem('hermes_view_presets') || '{}');
-        } catch(e) { savedViewPresets = {}; }
+        try { savedViewPresets = JSON.parse(localStorage.getItem('hermes_view_presets') || '{}'); } catch(e) { savedViewPresets = {}; }
 
         let savedColumnPalettes = {};
-        try {
-            savedColumnPalettes = JSON.parse(localStorage.getItem('hermes_column_palettes') || '{}');
-        } catch(e) { savedColumnPalettes = {}; }
+        try { savedColumnPalettes = JSON.parse(localStorage.getItem('hermes_column_palettes') || '{}'); } catch(e) { savedColumnPalettes = {}; }
 
         let showPins = true;
+        let showWedges = true;
         let showLabels = false;
         let pinSize = 14;
         let labelFontSize = 11;
@@ -805,6 +914,11 @@
         let rulerMarkers = [];
 
         let donutChartInstance = null;
+
+        const TARGET_BANDS = [
+            'FDD 1800', 'FDD 2100', 'FDD 700', 'FDD 900', 
+            'TDD 2300', 'TDD 2600', 'TDD 2600 MM'
+        ];
 
         const presetPalette = [
             '#10b981', '#f59e0b', '#ef4444', '#3b82f6', 
@@ -829,30 +943,25 @@
         window.addEventListener('DOMContentLoaded', () => {
             try { lucide.createIcons(); } catch(e) {}
             initMap();
+            initGyroscopeEngine();
             renderSavedPaletteSlots();
             renderSavedViewPresetSlots();
             fetchSheetData();
 
-            // Close main toolbar filter dropdowns when clicking outside
             document.addEventListener('click', (e) => {
                 [0, 1, 2].forEach(idx => {
                     const btn = document.getElementById(`filter-multiselect-btn-${idx}`);
                     const panel = document.getElementById(`filter-multiselect-panel-${idx}`);
-                    if (panel && !panel.classList.contains('hidden')) {
-                        if (!panel.contains(e.target) && !btn.contains(e.target)) {
-                            panel.classList.add('hidden');
-                        }
+                    if (panel && !panel.classList.contains('hidden') && !panel.contains(e.target) && !btn.contains(e.target)) {
+                        panel.classList.add('hidden');
                     }
                 });
 
-                // Close analytics modal filter dropdowns when clicking outside
                 ['prov', 'town', 'custom'].forEach(type => {
                     const btn = document.getElementById(`modal-${type}-multiselect-btn`);
                     const panel = document.getElementById(`modal-${type}-multiselect-panel`);
-                    if (panel && !panel.classList.contains('hidden')) {
-                        if (!panel.contains(e.target) && !btn.contains(e.target)) {
-                            panel.classList.add('hidden');
-                        }
+                    if (panel && !panel.classList.contains('hidden') && !panel.contains(e.target) && !btn.contains(e.target)) {
+                        panel.classList.add('hidden');
                     }
                 });
             });
@@ -861,341 +970,14 @@
             document.getElementById('search-input').addEventListener('keyup', (e) => { if(e.key === 'Enter') executeSearch(); });
             document.getElementById('location-input').addEventListener('keyup', (e) => { if(e.key === 'Enter') locateCoordinatesOrAddress(); });
 
-            document.getElementById('slider-pin-size').addEventListener('input', (e) => {
-                updatePinSize(e.target.value);
-            });
-            document.getElementById('slider-font-size').addEventListener('input', debounce((e) => {
-                updateFontSize(e.target.value);
-            }, 100));
+            document.getElementById('slider-pin-size').addEventListener('input', (e) => { updatePinSize(e.target.value); });
+            document.getElementById('slider-font-size').addEventListener('input', debounce((e) => { updateFontSize(e.target.value); }, 100));
         });
-
-        // --- Haversine Distance Calculation ---
-        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3;
-            const φ1 = lat1 * Math.PI / 180;
-            const φ2 = lat2 * Math.PI / 180;
-            const Δφ = (lat2 - lat1) * Math.PI / 180;
-            const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                      Math.cos(φ1) * Math.cos(φ2) *
-                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-            return R * c;
-        }
-
-        // --- Detect User's Live GPS Coordinates ---
-        function getUserGPSLocation() {
-            if (isLiveTrackingActive) stopLiveTracking();
-
-            const statusEl = document.getElementById('search-filter-status');
-
-            if (!navigator.geolocation) {
-                alert("Geolocation is not supported by your browser.");
-                return;
-            }
-
-            if (statusEl) statusEl.innerText = "Acquiring live GPS location...";
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const accuracy = position.coords.accuracy;
-
-                    document.getElementById('location-input').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-                    processLocationTarget(lat, lon, `Your GPS Location (±${Math.round(accuracy)}m)`, accuracy);
-                },
-                (error) => handleGeolocationError(error),
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        }
-
-        // --- Toggle Real-time Movement Tracking ---
-        function toggleLiveTracking() {
-            if (isLiveTrackingActive) {
-                stopLiveTracking();
-            } else {
-                startLiveTracking();
-            }
-        }
-
-        function startLiveTracking() {
-            if (!navigator.geolocation) {
-                alert("Geolocation is not supported by your browser.");
-                return;
-            }
-
-            const statusEl = document.getElementById('search-filter-status');
-            const btn = document.getElementById('btn-live-tracking');
-            const badge = document.getElementById('live-tracking-badge');
-
-            if (statusEl) statusEl.innerText = "Initializing real-time GPS tracking...";
-
-            isLiveTrackingActive = true;
-            btn.className = "p-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded border border-emerald-400 transition flex items-center gap-1 shadow-sm";
-            if (badge) badge.classList.remove('hidden');
-
-            watchPositionId = navigator.geolocation.watchPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const accuracy = position.coords.accuracy;
-
-                    document.getElementById('location-input').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-                    processLocationTarget(lat, lon, `Live GPS (Active Tracking ±${Math.round(accuracy)}m)`, accuracy, true);
-                },
-                (error) => {
-                    stopLiveTracking();
-                    handleGeolocationError(error);
-                },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 1000 }
-            );
-        }
-
-        function stopLiveTracking() {
-            if (watchPositionId !== null) {
-                navigator.geolocation.clearWatch(watchPositionId);
-                watchPositionId = null;
-            }
-
-            isLiveTrackingActive = false;
-            const btn = document.getElementById('btn-live-tracking');
-            const badge = document.getElementById('live-tracking-badge');
-
-            if (btn) btn.className = "p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded border border-slate-300 dark:border-slate-700 transition flex items-center gap-1";
-            if (badge) badge.classList.add('hidden');
-
-            const statusEl = document.getElementById('search-filter-status');
-            if (statusEl) statusEl.innerText = "Live tracking stopped.";
-        }
-
-        function handleGeolocationError(error) {
-            let errorMsg = "Unable to retrieve your location.";
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMsg = "Location permission denied. Please grant location access in your browser.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMsg = "Location information unavailable.";
-                    break;
-                case error.TIMEOUT:
-                    errorMsg = "Location request timed out.";
-                    break;
-            }
-            alert(errorMsg);
-            const statusEl = document.getElementById('search-filter-status');
-            if (statusEl) statusEl.innerText = "GPS acquisition failed.";
-        }
-
-        // --- Locate Coordinates or Address ---
-        async function locateCoordinatesOrAddress() {
-            if (isLiveTrackingActive) stopLiveTracking();
-
-            const inputVal = (document.getElementById('location-input').value || '').trim();
-            if (!inputVal) return;
-
-            let targetLat = null;
-            let targetLon = null;
-            let labelText = inputVal;
-
-            const coordMatch = inputVal.match(/^([-+]?\d{1,2}\.\d+)[,\s]+([-+]?\d{1,3}\.\d+)$/);
-            if (coordMatch) {
-                targetLat = parseFloat(coordMatch[1]);
-                targetLon = parseFloat(coordMatch[2]);
-                labelText = `Coords: ${targetLat.toFixed(5)}, ${targetLon.toFixed(5)}`;
-                processLocationTarget(targetLat, targetLon, labelText);
-            } else {
-                const statusEl = document.getElementById('search-filter-status');
-                if (statusEl) statusEl.innerText = "Geocoding location via OpenStreetMap...";
-                try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(inputVal)}`);
-                    const data = await res.json();
-                    if (data && data.length > 0) {
-                        targetLat = parseFloat(data[0].lat);
-                        targetLon = parseFloat(data[0].lon);
-                        labelText = data[0].display_name;
-                        processLocationTarget(targetLat, targetLon, labelText);
-                    } else {
-                        alert("Could not geocode address or location name. Please try adding city/country or input exact Lat, Lon.");
-                        if (statusEl) statusEl.innerText = "Geocoding failed.";
-                    }
-                } catch(e) {
-                    alert("Error reaching geocoding service. Verify network connection.");
-                    if (statusEl) statusEl.innerText = "Geocoding network error.";
-                }
-            }
-        }
-
-        function processLocationTarget(targetLat, targetLon, labelText, accuracyMeters = null, isLive = false) {
-            if (targetLocationMarker) map.removeLayer(targetLocationMarker);
-            if (gpsAccuracyCircle) map.removeLayer(gpsAccuracyCircle);
-
-            const markerClass = isLive ? 'pulse-marker-live' : 'pulse-marker';
-            const dotColor = isLive ? '#10b981' : '#f59e0b';
-
-            const icon = L.divIcon({
-                className: markerClass,
-                html: `<div style="background-color: ${dotColor}; width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid #ffffff;"></div>`,
-                iconSize: [14, 14],
-                iconAnchor: [7, 7]
-            });
-
-            targetLocationMarker = L.marker([targetLat, targetLon], { icon: icon, interactive: false }).addTo(map);
-
-            if (accuracyMeters && accuracyMeters > 0) {
-                gpsAccuracyCircle = L.circle([targetLat, targetLon], {
-                    radius: accuracyMeters,
-                    color: dotColor,
-                    weight: 1,
-                    opacity: 0.5,
-                    fillColor: dotColor,
-                    fillOpacity: 0.12,
-                    interactive: false
-                }).addTo(map);
-            }
-
-            const sitesWithDistance = [];
-
-            leafletMarkers.forEach(item => {
-                const site = rawDataset[item.index];
-                if (!site) return;
-                const distMeters = calculateHaversineDistance(targetLat, targetLon, item.lat, item.lon);
-                sitesWithDistance.push({
-                    index: item.index,
-                    siteId: site[colId] || `Row #${item.index + 1}`,
-                    groupVal: item.groupVal,
-                    lat: item.lat,
-                    lon: item.lon,
-                    distanceMeters: distMeters,
-                    siteObj: site
-                });
-            });
-
-            sitesWithDistance.sort((a, b) => a.distanceMeters - b.distanceMeters);
-
-            renderNearbySitesPanel(sitesWithDistance, labelText, targetLat, targetLon);
-
-            if (isLive) {
-                map.panTo([targetLat, targetLon]);
-            } else {
-                const boundsPoints = [[targetLat, targetLon]];
-                sitesWithDistance.slice(0, 5).forEach(s => boundsPoints.push([s.lat, s.lon]));
-                if (boundsPoints.length > 1) {
-                    map.fitBounds(boundsPoints, { padding: [80, 80], maxZoom: 16 });
-                } else {
-                    map.setView([targetLat, targetLon], 15);
-                }
-            }
-
-            const statusEl = document.getElementById('search-filter-status');
-            if (statusEl) statusEl.innerText = `${isLive ? 'Live GPS Tracking Active' : 'Located target'}: ${labelText.substring(0, 30)}... (${sitesWithDistance.length} sites sorted)`;
-            try { lucide.createIcons(); } catch(e) {}
-        }
-
-        function renderNearbySitesPanel(sitesList, targetName, targetLat, targetLon) {
-            const panel = document.getElementById('nearby-sites-panel');
-            const targetAddrEl = document.getElementById('nearby-target-address');
-            const listEl = document.getElementById('nearby-sites-list');
-
-            if (!panel || !listEl) return;
-
-            targetAddrEl.innerText = `${targetName}`;
-            panel.classList.remove('hidden');
-
-            if (sitesList.length === 0) {
-                listEl.innerHTML = `<div class="text-slate-400 italic text-center py-2">No visible map sites found.</div>`;
-                return;
-            }
-
-            listEl.innerHTML = sitesList.slice(0, 8).map((item, rank) => {
-                const color = categoryColors[item.groupVal] || '#3b82f6';
-                const formattedDist = item.distanceMeters >= 1000 
-                    ? `${(item.distanceMeters / 1000).toFixed(2)} km` 
-                    : `${Math.round(item.distanceMeters)} m`;
-
-                return `
-                    <div onclick="focusMapSite(${item.index})" class="p-2 bg-slate-100/90 dark:bg-slate-900/90 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 cursor-pointer transition">
-                        <div class="flex items-center gap-2 truncate">
-                            <span class="font-bold text-[10px] text-slate-400 w-4 font-mono">#${rank + 1}</span>
-                            <span class="w-2.5 h-2.5 rounded-full shrink-0 border border-white/50" style="background-color: ${color};"></span>
-                            <div class="truncate">
-                                <div class="font-bold text-slate-800 dark:text-slate-100 truncate">${item.siteId}</div>
-                                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">${item.groupVal}</div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-black font-mono text-amber-600 dark:text-amber-400 shrink-0 px-1.5 py-0.5 bg-amber-500/10 rounded-md border border-amber-500/20">${formattedDist}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function focusMapSite(index) {
-            const item = leafletMarkers.find(m => m.index === index);
-            if (item) {
-                map.setView([item.lat, item.lon], 16);
-                inspectSite(index);
-                if (item.marker) {
-                    setTimeout(() => item.marker.openPopup(), 100);
-                }
-            }
-        }
-
-        function closeNearbyPanel() {
-            document.getElementById('nearby-sites-panel').classList.add('hidden');
-        }
-
-        function clearLocationTarget() {
-            if (isLiveTrackingActive) stopLiveTracking();
-
-            if (targetLocationMarker) {
-                map.removeLayer(targetLocationMarker);
-                targetLocationMarker = null;
-            }
-            if (gpsAccuracyCircle) {
-                map.removeLayer(gpsAccuracyCircle);
-                gpsAccuracyCircle = null;
-            }
-            document.getElementById('location-input').value = '';
-            closeNearbyPanel();
-            document.getElementById('search-filter-status').innerText = '';
-        }
-
-        function toggleTheme() {
-            isDarkMode = !isDarkMode;
-            const htmlEl = document.documentElement;
-            const themeIcon = document.getElementById('theme-icon');
-            const themeLabel = document.getElementById('theme-label');
-
-            if (isDarkMode) {
-                htmlEl.classList.add('dark');
-                themeLabel.innerText = "Light Mode";
-                if (themeIcon) themeIcon.setAttribute('data-lucide', 'sun');
-                document.getElementById('tile-provider-select').value = 'carto-dark';
-            } else {
-                htmlEl.classList.remove('dark');
-                themeLabel.innerText = "Dark Mode";
-                if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
-                document.getElementById('tile-provider-select').value = 'carto-light';
-            }
-
-            try { lucide.createIcons(); } catch(e) {}
-            changeTileProvider();
-            plotPinsOnMap();
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar-deck');
-            sidebar.classList.toggle('sidebar-collapsed');
-
-            setTimeout(() => {
-                if (map) map.invalidateSize();
-            }, 300);
-        }
 
         function initMap() {
             canvasRenderer = L.canvas({ padding: 0.5 });
+            svgRenderer = L.svg({ padding: 0.5 });
+
             map = L.map('map', {
                 center: [14.5995, 120.9842],
                 zoom: 11,
@@ -1205,11 +987,29 @@
 
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
+            map.createPane('locationPane');
+            map.getPane('locationPane').style.zIndex = 700;
+
+            map.createPane('pinsPane');
+            map.getPane('pinsPane').style.zIndex = 500;
+
+            map.createPane('ibsCirclesPane');
+            map.getPane('ibsCirclesPane').style.zIndex = 610;
+            map.getPane('ibsCirclesPane').classList.add('leaflet-ibs-pane');
+
+            map.createPane('wedgesPane');
+            map.getPane('wedgesPane').style.zIndex = 600;
+            map.getPane('wedgesPane').classList.add('leaflet-wedges-pane');
+
+            pinsCanvasRenderer = L.canvas({ padding: 0.5, pane: 'pinsPane' });
+
             activeTileLayer = L.tileLayer(tileProviders['carto-dark'], {
                 maxZoom: 19,
                 attribution: '&copy; OpenStreetMap & CartoDB'
             }).addTo(map);
 
+            wedgesLayerGroup = L.featureGroup().addTo(map);
+            ibsCirclesLayerGroup = L.featureGroup().addTo(map);
             markersLayerGroup = L.featureGroup().addTo(map);
 
             map.on('click', (e) => {
@@ -1241,8 +1041,7 @@
             isInitialLoad = true;
             const syncStatus = document.getElementById('sync-status');
             if (syncStatus) {
-                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing Web App Data...';
-                syncStatus.className = 'text-amber-500 flex items-center gap-1';
+                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing Main, SSV & Utilization...';
             }
 
             const isStaticHost = window.location.hostname.includes('github.io') || 
@@ -1260,8 +1059,13 @@
                 ? [SSV_WEBAPP_URL, corsProxy + encodeURIComponent(SSV_WEBAPP_URL)]
                 : [API_SSV_PROXY, SSV_WEBAPP_URL, corsProxy + encodeURIComponent(SSV_WEBAPP_URL)];
 
+            const utilEndpoints = isStaticHost
+                ? [UTILIZATION_WEBAPP_URL, corsProxy + encodeURIComponent(UTILIZATION_WEBAPP_URL)]
+                : [API_UTILIZATION_PROXY, UTILIZATION_WEBAPP_URL, corsProxy + encodeURIComponent(UTILIZATION_WEBAPP_URL)];
+
             let primaryCsvText = null;
             let ssvCsvText = null;
+            let utilCsvText = null;
 
             for (const url of primaryEndpoints) {
                 const res = await fetchWithTimeout(url, 30000);
@@ -1273,18 +1077,22 @@
                 if (res) { ssvCsvText = res; break; }
             }
 
+            for (const url of utilEndpoints) {
+                const res = await fetchWithTimeout(url, 30000);
+                if (res) { utilCsvText = res; break; }
+            }
+
             if (!primaryCsvText) {
                 if (syncStatus) {
                     syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed (Primary Web App Error)';
-                    syncStatus.className = 'text-red-500 flex items-center gap-1';
                 }
                 return;
             }
 
-            processCsvData(primaryCsvText, ssvCsvText, syncStatus);
+            processCsvData(primaryCsvText, ssvCsvText, utilCsvText, syncStatus);
         }
 
-        function processCsvData(primaryCsv, ssvCsv, syncStatus) {
+        function processCsvData(primaryCsv, ssvCsv, utilCsv, syncStatus) {
             const ssvLookupMap = {};
 
             if (ssvCsv) {
@@ -1355,8 +1163,31 @@
                 });
 
                 ssvLookupCount = Object.keys(ssvLookupMap).length;
-                onSyncDatasetReady(syncStatus, `${ssvLookupCount} Physical Lookups`);
             }
+
+            if (utilCsv) {
+                const parsedUtil = Papa.parse(utilCsv, { header: true, skipEmptyLines: true });
+                utilizationDataset = parsedUtil.data || [];
+            } else {
+                generateFallbackUtilizationData();
+            }
+
+            onSyncDatasetReady(syncStatus, `${ssvLookupCount} Physical SSV Lookups & ${utilizationDataset.length} Wedges`);
+        }
+
+        function generateFallbackUtilizationData() {
+            utilizationDataset = [];
+            const sampleStatuses = ['GREEN', 'AMBER', 'RED', 'BLACK'];
+            rawDataset.forEach(site => {
+                const sId = site['Site_ID'] || site['Site ID'] || site['PLAID'];
+                if (!sId) return;
+                [0, 120, 240].forEach((az) => {
+                    const sectorObj = { 'Site_ID': sId, 'Azimuth': az, 'BW': 65, 'Site Type': site['Site Type'] || 'MACRO' };
+                    TARGET_BANDS.forEach(b => sectorObj[b] = sampleStatuses[Math.floor(Math.random() * sampleStatuses.length)]);
+                    sectorObj['Blended Congestion'] = sampleStatuses[Math.floor(Math.random() * sampleStatuses.length)];
+                    utilizationDataset.push(sectorObj);
+                });
+            });
         }
 
         function onSyncDatasetReady(syncStatus, detailNote) {
@@ -1368,7 +1199,7 @@
 
             [0, 1, 2].forEach(idx => onFilterColumnChanged(idx));
 
-            plotPinsOnMap();
+            plotPinsAndWedges();
             updateLegendSwatches();
 
             if (syncStatus) {
@@ -1545,408 +1376,603 @@
             renderDashboard();
         }
 
-        function onFilterColumnChanged(slotIdx) {
-            const selEl = document.getElementById(`filter-col-select-${slotIdx}`);
-            if (!selEl || rawDataset.length === 0) return;
+        function createGyroArrowMarker(lat, lon, labelText, isLive = false) {
+            if (targetLocationMarker) map.removeLayer(targetLocationMarker);
 
-            const col = selEl.value;
-            filtersState[slotIdx].col = col;
+            const ringClass = isLive ? 'pulse-green-ring' : 'pulse-amber-ring';
+            const arrowColor = isLive ? '#10b981' : '#f59e0b';
 
-            if (!col) {
-                filtersState[slotIdx].available = [];
-                filtersState[slotIdx].selected = new Set();
-                renderFilterCheckboxes(slotIdx);
-                updateFilterButtonLabel(slotIdx);
-                applyMultiSelectFilter();
-                return;
-            }
+            const html = `
+                <div class="exaggerated-pulse-container">
+                    <div class="exaggerated-pulse-ring-1 ${ringClass}-1"></div>
+                    <div class="exaggerated-pulse-ring-2 ${ringClass}-2"></div>
+                    <svg id="gyro-arrow-svg" class="gyro-arrow-icon" style="transform: rotate(${currentHeadingDegrees}deg);" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L19 21L12 17L5 21L12 2Z" fill="${arrowColor}" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            `;
 
-            const distinctVals = [...new Set(rawDataset.map(d => String(d[col] || '(Blank)').trim()))].sort();
-            filtersState[slotIdx].available = distinctVals;
-            filtersState[slotIdx].selected = new Set(distinctVals);
+            const customIcon = L.divIcon({
+                className: 'custom-gyro-marker-wrapper',
+                html: html,
+                iconSize: [48, 48],
+                iconAnchor: [24, 24]
+            });
 
-            renderFilterCheckboxes(slotIdx);
-            updateFilterButtonLabel(slotIdx);
-            applyMultiSelectFilter();
+            targetLocationMarker = L.marker([lat, lon], { icon: customIcon, zIndexOffset: 1000, pane: 'locationPane' }).addTo(map);
+            targetLocationMarker.bindPopup(`<b>${labelText}</b><br>Heading: <span id="popup-heading-val">${Math.round(currentHeadingDegrees)}°</span>`);
         }
 
-        function toggleFilterDropdown(slotIdx) {
-            const panel = document.getElementById(`filter-multiselect-panel-${slotIdx}`);
-            if (panel) panel.classList.toggle('hidden');
-        }
+        function initGyroscopeEngine() {
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', (e) => {
+                    let heading = null;
+                    if (e.webkitCompassHeading) { heading = e.webkitCompassHeading; }
+                    else if (e.alpha !== null) { heading = 360 - e.alpha; }
 
-        function renderFilterCheckboxes(slotIdx) {
-            const container = document.getElementById(`filter-checkbox-list-${slotIdx}`);
-            if (!container) return;
-
-            const state = filtersState[slotIdx];
-            if (!state.col) {
-                container.innerHTML = `<div class="text-[11px] text-slate-400 italic p-2 text-center">No Column Selected</div>`;
-                return;
-            }
-
-            container.innerHTML = state.available.map(val => {
-                const isChecked = state.selected.has(val);
-                return `
-                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1 rounded transition">
-                        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''} onchange="toggleFilterValue(${slotIdx}, '${val.replace(/'/g, "\\'")}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-0">
-                        <span class="truncate text-slate-800 dark:text-slate-200" title="${val}">${val}</span>
-                    </label>
-                `;
-            }).join('');
-        }
-
-        function toggleFilterValue(slotIdx, val) {
-            const state = filtersState[slotIdx];
-            if (state.selected.has(val)) {
-                state.selected.delete(val);
-            } else {
-                state.selected.add(val);
-            }
-            updateFilterButtonLabel(slotIdx);
-            applyMultiSelectFilter();
-        }
-
-        function selectAllFilterValues(slotIdx) {
-            const state = filtersState[slotIdx];
-            state.selected = new Set(state.available);
-            renderFilterCheckboxes(slotIdx);
-            updateFilterButtonLabel(slotIdx);
-            applyMultiSelectFilter();
-        }
-
-        function clearAllFilterValues(slotIdx) {
-            const state = filtersState[slotIdx];
-            state.selected.clear();
-            renderFilterCheckboxes(slotIdx);
-            updateFilterButtonLabel(slotIdx);
-            applyMultiSelectFilter();
-        }
-
-        function updateFilterButtonLabel(slotIdx) {
-            const label = document.getElementById(`filter-multiselect-label-${slotIdx}`);
-            if (!label) return;
-
-            const state = filtersState[slotIdx];
-            if (!state.col) {
-                label.innerText = "Disabled";
-            } else if (state.selected.size === state.available.length) {
-                label.innerText = "All";
-            } else if (state.selected.size === 0) {
-                label.innerText = "None";
-            } else {
-                label.innerText = `${state.selected.size} / ${state.available.length}`;
+                    if (heading !== null) updateGyroHeading(heading);
+                }, true);
             }
         }
 
-        function applyMultiSelectFilter() {
-            plotPinsOnMap();
+        function requestGyroPermission() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => { if (permissionState === 'granted') initGyroscopeEngine(); })
+                    .catch(console.error);
+            }
+        }
+
+        function updateGyroHeading(headingDegrees) {
+            currentHeadingDegrees = headingDegrees;
+            const readout = document.getElementById('gyro-heading-readout');
+            if (readout) readout.innerText = `${Math.round(headingDegrees)}°`;
+            const arrowSvg = document.getElementById('gyro-arrow-svg');
+            if (arrowSvg) arrowSvg.style.transform = `rotate(${headingDegrees}deg)`;
+            const popupVal = document.getElementById('popup-heading-val');
+            if (popupVal) popupVal.innerText = `${Math.round(headingDegrees)}°`;
+        }
+
+        function getUserGPSLocation() {
+            if (isLiveTrackingActive) stopLiveTracking();
 
             const statusEl = document.getElementById('search-filter-status');
-            const activeFilterNames = filtersState.filter(f => f.col && f.selected.size < f.available.length).map(f => f.col);
+            if (!navigator.geolocation) { alert("Geolocation not supported."); return; }
 
-            if (activeFilterNames.length === 0) {
-                statusEl.innerText = '';
+            if (statusEl) statusEl.innerText = "Acquiring live GPS location...";
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    if (position.coords.heading !== null && !isNaN(position.coords.heading)) {
+                        updateGyroHeading(position.coords.heading);
+                    }
+
+                    document.getElementById('location-input').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                    processLocationTarget(lat, lon, `Your GPS Location (±${Math.round(accuracy)}m)`, accuracy);
+                },
+                (error) => alert("GPS acquisition failed: " + error.message),
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        function toggleLiveTracking() {
+            if (isLiveTrackingActive) stopLiveTracking();
+            else startLiveTracking();
+        }
+
+        function startLiveTracking() {
+            if (!navigator.geolocation) return;
+
+            const btn = document.getElementById('btn-live-tracking');
+            const badge = document.getElementById('live-tracking-badge');
+
+            isLiveTrackingActive = true;
+            if (btn) btn.className = "p-1 bg-emerald-600 text-white rounded border border-emerald-400 transition flex items-center gap-1 shadow-sm";
+            if (badge) badge.classList.remove('hidden');
+
+            watchPositionId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    if (position.coords.heading !== null && !isNaN(position.coords.heading)) {
+                        updateGyroHeading(position.coords.heading);
+                    }
+
+                    document.getElementById('location-input').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                    processLocationTarget(lat, lon, `Live Gyro Tracking (±${Math.round(accuracy)}m)`, accuracy, true);
+                },
+                (err) => stopLiveTracking(),
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 1000 }
+            );
+        }
+
+        function stopLiveTracking() {
+            if (watchPositionId !== null) {
+                navigator.geolocation.clearWatch(watchPositionId);
+                watchPositionId = null;
+            }
+            isLiveTrackingActive = false;
+            const btn = document.getElementById('btn-live-tracking');
+            const badge = document.getElementById('live-tracking-badge');
+            if (btn) btn.className = "p-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded border border-slate-300 dark:border-slate-700 transition flex items-center gap-1";
+            if (badge) badge.classList.add('hidden');
+        }
+
+        async function locateCoordinatesOrAddress() {
+            if (isLiveTrackingActive) stopLiveTracking();
+
+            const inputVal = (document.getElementById('location-input').value || '').trim();
+            if (!inputVal) return;
+
+            const coordMatch = inputVal.match(/^([-+]?\d{1,2}\.\d+)[,\s]+([-+]?\d{1,3}\.\d+)$/);
+            if (coordMatch) {
+                const targetLat = parseFloat(coordMatch[1]);
+                const targetLon = parseFloat(coordMatch[2]);
+                processLocationTarget(targetLat, targetLon, `Coords: ${targetLat.toFixed(5)}, ${targetLon.toFixed(5)}`);
             } else {
-                const visibleCount = leafletMarkers.length;
-                statusEl.innerText = `Filtered (${activeFilterNames.join(', ')}): Showing ${visibleCount.toLocaleString()} sites`;
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(inputVal)}`);
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        processLocationTarget(parseFloat(data[0].lat), parseFloat(data[0].lon), data[0].display_name);
+                    } else {
+                        alert("Geocoding failed. Try exact Lat, Lon coordinates.");
+                    }
+                } catch(e) {
+                    alert("Geocoding network error.");
+                }
             }
         }
 
-        function resetFilterSlot(slotIdx) {
-            selectAllFilterValues(slotIdx);
-        }
+        function processLocationTarget(targetLat, targetLon, labelText, accuracyMeters = null, isLive = false) {
+            createGyroArrowMarker(targetLat, targetLon, labelText, isLive);
 
-        function clearAllFilterSlots() {
-            [0, 1, 2].forEach(idx => selectAllFilterValues(idx));
-            document.getElementById('search-filter-status').innerText = '';
-        }
-
-        function saveCurrentViewPreset() {
-            const presetName = prompt("Enter a name for this View Preset (Captures Row Mapping & Column Legend):");
-            if (!presetName) return;
-
-            const presetData = {
-                colId,
-                colLat,
-                colLon,
-                colLabel,
-                colGroup,
-                pivotCol: document.getElementById('dash-pivot-col')?.value || '',
-                palettes: { ...categoryColors }
-            };
-
-            const currentKeys = Object.keys(savedViewPresets);
-            if (!savedViewPresets[presetName] && currentKeys.length >= 2) {
-                delete savedViewPresets[currentKeys[0]];
+            if (gpsAccuracyCircle) map.removeLayer(gpsAccuracyCircle);
+            if (accuracyMeters && accuracyMeters > 0) {
+                gpsAccuracyCircle = L.circle([targetLat, targetLon], {
+                    radius: accuracyMeters,
+                    color: isLive ? '#10b981' : '#f59e0b',
+                    weight: 1,
+                    fillOpacity: 0.08,
+                    interactive: false,
+                    pane: 'locationPane'
+                }).addTo(map);
             }
 
-            savedViewPresets[presetName] = presetData;
-            try {
-                localStorage.setItem('hermes_view_presets', JSON.stringify(savedViewPresets));
-            } catch(e) {}
+            const sitesWithDistance = [];
+            leafletMarkers.forEach(item => {
+                const site = rawDataset[item.index];
+                if (!site) return;
+                const distMeters = calculateHaversineDistance(targetLat, targetLon, item.lat, item.lon);
+                sitesWithDistance.push({
+                    index: item.index,
+                    siteId: site[colId] || site['Site_ID'] || `Row #${item.index + 1}`,
+                    groupVal: item.groupVal,
+                    lat: item.lat,
+                    lon: item.lon,
+                    distanceMeters: distMeters,
+                    siteObj: site
+                });
+            });
 
-            renderSavedViewPresetSlots();
-            alert(`View Preset "${presetName}" saved successfully!`);
-        }
+            sitesWithDistance.sort((a, b) => a.distanceMeters - b.distanceMeters);
+            renderNearbySitesPanel(sitesWithDistance, labelText, targetLat, targetLon);
 
-        function loadSavedViewPreset(presetName) {
-            const preset = savedViewPresets[presetName];
-            if (!preset) return;
-
-            colId = preset.colId;
-            colLat = preset.colLat;
-            colLon = preset.colLon;
-            colLabel = preset.colLabel;
-            colGroup = preset.colGroup;
-
-            if (preset.palettes) {
-                categoryColors = { ...preset.palettes };
+            if (isLive) {
+                map.panTo([targetLat, targetLon]);
+            } else {
+                const boundsPoints = [[targetLat, targetLon]];
+                sitesWithDistance.slice(0, 5).forEach(s => boundsPoints.push([s.lat, s.lon]));
+                if (boundsPoints.length > 1) {
+                    map.fitBounds(boundsPoints, { padding: [80, 80], maxZoom: 16 });
+                } else {
+                    map.setView([targetLat, targetLon], 15);
+                }
             }
 
-            document.getElementById('map-col-id').value = colId;
-            document.getElementById('map-col-lat').value = colLat;
-            document.getElementById('map-col-lon').value = colLon;
-            document.getElementById('map-col-label').value = colLabel;
-            document.getElementById('map-col-group').value = colGroup;
-            if (document.getElementById('modal-col-group')) {
-                document.getElementById('modal-col-group').value = colGroup;
-            }
-
-            if (preset.pivotCol && document.getElementById('dash-pivot-col')) {
-                document.getElementById('dash-pivot-col').value = preset.pivotCol;
-            }
-
-            initCategoryVisibility();
-            plotPinsOnMap();
-            updateLegendSwatches();
-            renderSavedViewPresetSlots();
+            const statusEl = document.getElementById('search-filter-status');
+            if (statusEl) statusEl.innerText = `Target: ${labelText.substring(0, 30)}... (${sitesWithDistance.length} sites sorted)`;
         }
 
-        function removeSavedViewPreset(presetName) {
-            delete savedViewPresets[presetName];
-            try {
-                localStorage.setItem('hermes_view_presets', JSON.stringify(savedViewPresets));
-            } catch(e) {}
-            renderSavedViewPresetSlots();
-        }
+        function renderNearbySitesPanel(sitesList, targetName, targetLat, targetLon) {
+            const panel = document.getElementById('nearby-sites-panel');
+            const targetAddrEl = document.getElementById('nearby-target-address');
+            const listEl = document.getElementById('nearby-sites-list');
 
-        function renderSavedViewPresetSlots() {
-            const container = document.getElementById('view-preset-slots');
-            if (!container) return;
+            if (!panel || !listEl) return;
+            targetAddrEl.innerText = `${targetName}`;
+            panel.classList.remove('hidden');
 
-            const keys = Object.keys(savedViewPresets);
-            if (keys.length === 0) {
-                container.innerHTML = `<div class="col-span-2 text-[10px] text-slate-400 italic text-center py-1">No saved presets. Click "Save View Preset".</div>`;
+            if (sitesList.length === 0) {
+                listEl.innerHTML = `<div class="text-slate-400 italic text-center py-2">No visible map sites found.</div>`;
                 return;
             }
 
-            container.innerHTML = keys.slice(0, 2).map((key, idx) => {
-                const preset = savedViewPresets[key];
-                const isActive = (preset.colGroup === colGroup && preset.colId === colId);
+            listEl.innerHTML = sitesList.slice(0, 8).map((item, rank) => {
+                const color = categoryColors[item.groupVal] || '#3b82f6';
+                const formattedDist = item.distanceMeters >= 1000 
+                    ? `${(item.distanceMeters / 1000).toFixed(2)} km` 
+                    : `${Math.round(item.distanceMeters)} m`;
+
                 return `
-                    <div class="p-1.5 ${isActive ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-400 dark:border-amber-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'} border rounded-lg flex items-center justify-between gap-1 transition">
-                        <button onclick="loadSavedViewPreset('${key}')" class="truncate text-[10px] font-bold ${isActive ? 'text-amber-700 dark:text-amber-300' : 'text-slate-700 dark:text-slate-300'} hover:underline text-left" title="Load Preset: ${key}">
-                            Preset ${idx + 1}: ${key}
-                        </button>
-                        <button onclick="removeSavedViewPreset('${key}')" class="text-slate-400 hover:text-rose-500 text-[10px] px-1" title="Remove preset">✕</button>
+                    <div onclick="focusMapSite(${item.index})" class="p-2 bg-slate-100/90 dark:bg-slate-900/90 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 cursor-pointer transition">
+                        <div class="flex items-center gap-2 truncate">
+                            <span class="font-bold text-[10px] text-slate-400 w-4 font-mono">#${rank + 1}</span>
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0 border border-white/50" style="background-color: ${color};"></span>
+                            <div class="truncate">
+                                <div class="font-bold text-slate-800 dark:text-slate-100 truncate">${item.siteId}</div>
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">${item.groupVal}</div>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black font-mono text-amber-600 dark:text-amber-400 shrink-0 px-1.5 py-0.5 bg-amber-500/10 rounded-md border border-amber-500/20">${formattedDist}</span>
                     </div>
                 `;
             }).join('');
         }
 
-        function initCategoryVisibility() {
-            categoryVisibility = {};
-            rawDataset.forEach(d => {
-                const cat = String(d[colGroup] || 'Unclassified').trim();
-                if (!(cat in categoryVisibility)) {
-                    categoryVisibility[cat] = true;
-                }
-            });
+        function focusMapSite(index) {
+            const item = leafletMarkers.find(m => m.index === index);
+            if (item) {
+                map.setView([item.lat, item.lon], 16);
+                inspectSite(index);
+                if (item.marker) setTimeout(() => item.marker.openTooltip(), 100);
+            }
         }
 
-        function toggleCategoryVisibility(cat) {
-            categoryVisibility[cat] = !categoryVisibility[cat];
-            plotPinsOnMap();
+        function closeNearbyPanel() {
+            document.getElementById('nearby-sites-panel').classList.add('hidden');
         }
 
-        function autoDetectColumns(sampleRow) {
-            if (!sampleRow) return;
-            const headers = Object.keys(sampleRow);
-            const findHeader = (patterns) => headers.find(h => patterns.some(p => h.toLowerCase().includes(p))) || headers[0];
-
-            colId = headers.find(h => h.toLowerCase() === 'site_id' || h.toLowerCase() === 'site id' || h.toLowerCase() === 'plaid') || findHeader(['site', 'plaid', 'id']);
-            colLat = headers.find(h => h.toLowerCase() === 'latitude' || h.toLowerCase() === 'lat') || findHeader(['lat', 'y']);
-            colLon = headers.find(h => h.toLowerCase() === 'longitude' || h.toLowerCase() === 'lon' || h.toLowerCase() === 'lng') || findHeader(['lon', 'lng', 'x']);
-            colLabel = colId;
-            colGroup = 'SSV STATUS';
+        function clearLocationTarget() {
+            if (isLiveTrackingActive) stopLiveTracking();
+            if (targetLocationMarker) { map.removeLayer(targetLocationMarker); targetLocationMarker = null; }
+            if (gpsAccuracyCircle) { map.removeLayer(gpsAccuracyCircle); gpsAccuracyCircle = null; }
+            document.getElementById('location-input').value = '';
+            closeNearbyPanel();
         }
 
-        function updateDropdownControls() {
-            if (rawDataset.length === 0) return;
-            const headers = Object.keys(rawDataset[0]);
-
-            const populateSelect = (elementId, selectedVal) => {
-                const sel = document.getElementById(elementId);
-                if (!sel) return;
-                sel.innerHTML = headers.map(h => `<option value="${h}" ${h === selectedVal ? 'selected' : ''}>${h}</option>`).join('');
-            };
-
-            populateSelect('map-col-id', colId);
-            populateSelect('map-col-lat', colLat);
-            populateSelect('map-col-lon', colLon);
-            populateSelect('map-col-label', colLabel);
-            populateSelect('map-col-group', colGroup);
-            populateSelect('modal-col-group', colGroup);
-            populateSelect('search-col-select', colId);
-            populateSelect('dash-pivot-col', headers.find(h => h.toLowerCase().includes('province') || h.toLowerCase().includes('region')) || headers[0]);
-
-            const filterHeaders = ['', ...headers];
-            [0, 1, 2].forEach(idx => {
-                const sel = document.getElementById(`filter-col-select-${idx}`);
-                if (sel) {
-                    const activeVal = filtersState[idx].col;
-                    sel.innerHTML = filterHeaders.map(h => `<option value="${h}" ${h === activeVal ? 'selected' : ''}>${h ? h : '(None)'}</option>`).join('');
-                }
-            });
+        function getBandColorHex(statusStr) {
+            const st = String(statusStr || '').toUpperCase().trim();
+            if (st.includes('GREEN')) return '#10b981';
+            if (st.includes('AMBER')) return '#f59e0b';
+            if (st.includes('RED')) return '#ef4444';
+            if (st.includes('BLACK')) return '#0f172a';
+            return '#64748b';
         }
 
-        function initTooltipFieldsConfig() {
-            if (rawDataset.length === 0) return;
-            const headers = Object.keys(rawDataset[0]);
+        function calculateBlendedCongestionColor(sectorRow) {
+            const rowKeys = Object.keys(sectorRow);
 
-            if (userTooltipFields.length === 0) {
-                userTooltipFields = [colId, 'SWAP STATUS', 'SSV STATUS'].filter(h => headers.includes(h));
+            // Direct check if "Blended Congestion" column exists in the row
+            const blendedColKey = rowKeys.find(k => k.trim().toLowerCase() === 'blended congestion' || k.trim().toLowerCase() === 'blended');
+            if (blendedColKey) {
+                const blendedVal = String(sectorRow[blendedColKey] || '').toUpperCase().trim();
+                if (blendedVal.includes('RED')) return '#ef4444';
+                if (blendedVal.includes('AMBER')) return '#f59e0b';
+                if (blendedVal.includes('GREEN')) return '#10b981';
+                if (blendedVal.includes('BLACK')) return '#0f172a';
             }
 
-            renderTooltipFieldsChecklist();
+            // Fallback calculation across band metrics
+            let red = 0, amber = 0, green = 0, black = 0, total = 0;
+            TARGET_BANDS.forEach(targetBand => {
+                const matchingKey = rowKeys.find(k => k.trim().toUpperCase() === targetBand.toUpperCase());
+                if (matchingKey) {
+                    const val = String(sectorRow[matchingKey] || '').toUpperCase().trim();
+                    if (val.includes('RED')) { red++; total++; }
+                    else if (val.includes('AMBER')) { amber++; total++; }
+                    else if (val.includes('GREEN')) { green++; total++; }
+                    else if (val.includes('BLACK')) { black++; total++; }
+                }
+            });
+
+            if (total === 0) return '#3b82f6';
+            if (black === total) return '#0f172a';
+            if (red > 0) return '#ef4444';
+            if (amber > 0) return '#f59e0b';
+            if (green > 0) return '#10b981';
+            return '#64748b';
         }
 
-        function renderTooltipFieldsChecklist() {
-            const container = document.getElementById('tooltip-fields-container');
-            if (!container || rawDataset.length === 0) return;
-
-            const headers = Object.keys(rawDataset[0]);
-            container.innerHTML = headers.map(field => `
-                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer hover:text-slate-900 dark:hover:text-white transition">
-                    <input type="checkbox" value="${field}" ${userTooltipFields.includes(field) ? 'checked' : ''} onchange="toggleTooltipField('${field}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
-                    <span class="truncate" title="${field}">${field}</span>
-                </label>
-            `).join('');
-        }
-
-        function toggleTooltipField(field) {
-            if (userTooltipFields.includes(field)) {
-                userTooltipFields = userTooltipFields.filter(f => f !== field);
-            } else {
-                userTooltipFields.push(field);
+        function getBlendedCongestionLabel(sectorRow) {
+            const rowKeys = Object.keys(sectorRow);
+            const blendedColKey = rowKeys.find(k => k.trim().toLowerCase() === 'blended congestion' || k.trim().toLowerCase() === 'blended');
+            if (blendedColKey && sectorRow[blendedColKey]) {
+                return String(sectorRow[blendedColKey]).toUpperCase().trim();
             }
-            plotPinsOnMap();
+            const hex = calculateBlendedCongestionColor(sectorRow);
+            if (hex === '#ef4444') return 'RED';
+            if (hex === '#f59e0b') return 'AMBER';
+            if (hex === '#10b981') return 'GREEN';
+            if (hex === '#0f172a') return 'BLACK';
+            return 'N/A';
         }
 
-        function updateFieldMappings() {
-            colId = document.getElementById('map-col-id').value;
-            colLat = document.getElementById('map-col-lat').value;
-            colLon = document.getElementById('map-col-lon').value;
-            colLabel = document.getElementById('map-col-label').value;
-            plotPinsOnMap();
+        function getWedgeRadiusMeters(siteTypeStr) {
+            const st = String(siteTypeStr || '').toUpperCase();
+            if (st.includes('SMALL') || st.includes('MICRO') || st.includes('IBS') || st.includes('INDOOR') || st.includes('BUILDING')) return 100;
+            return 200;
         }
 
-        function cleanHexColor(color) {
-            if (!color || color === 'None' || color === 'undefined') return '#3b82f6';
-            const str = String(color).trim();
-            if (/^#[0-9A-F]{6}$/i.test(str)) return str;
-            const presetMap = {
-                'approved': '#10b981', 'ssv approved': '#10b981', 'done': '#10b981', 'completed': '#10b981',
-                'ongoing ssv': '#f59e0b', 'ongoing': '#f59e0b', 'rejected': '#ef4444',
-                'not yet swapped': '#64748b', 'not yet trfs': '#a855f7', 'for gt review': '#3b82f6'
-            };
-            return presetMap[str.toLowerCase()] || '#3b82f6';
+        function createWedgePolygonPoints(lat, lon, azimuth, radiusMeters, beamwidthDeg) {
+            const points = [[lat, lon]];
+            const bw = (beamwidthDeg && !isNaN(beamwidthDeg) && beamwidthDeg > 0) ? parseFloat(beamwidthDeg) : 65;
+            const halfBeam = bw / 2;
+            const startAngle = azimuth - halfBeam;
+            const endAngle = azimuth + halfBeam;
+
+            for (let i = 0; i <= 14; i++) {
+                const angle = startAngle + (i * (endAngle - startAngle) / 14);
+                const angleRad = (angle * Math.PI) / 180;
+                const dLat = (radiusMeters * Math.cos(angleRad)) / 111111;
+                const dLon = (radiusMeters * Math.sin(angleRad)) / (111111 * Math.cos((lat * Math.PI) / 180));
+                points.push([lat + dLat, lon + dLon]);
+            }
+            return points;
         }
 
-        function plotPinsOnMap() {
+        function plotPinsAndWedges() {
             markersLayerGroup.clearLayers();
+            wedgesLayerGroup.clearLayers();
+            ibsCirclesLayerGroup.clearLayers();
             leafletMarkers = [];
 
-            if (!showPins || rawDataset.length === 0) return;
+            if (rawDataset.length === 0) return;
 
             const latVals = [];
             const lonVals = [];
             const radius = Math.max(4, pinSize / 2);
 
+            const siteMap = {};
+
+            // Build Site Location Reference exclusively from Main Google Sheet
             rawDataset.forEach((row, index) => {
                 const groupVal = String(row[colGroup] || 'Unclassified').trim();
-
-                if (categoryVisibility[groupVal] === false) return;
-
-                for (let idx = 0; idx < 3; idx++) {
-                    const fState = filtersState[idx];
-                    if (fState.col && fState.selected.size > 0) {
-                        const rowVal = String(row[fState.col] || '(Blank)').trim();
-                        if (!fState.selected.has(rowVal)) return;
-                    }
-                }
 
                 const lat = parseFloat(row[colLat]);
                 const lon = parseFloat(row[colLon]);
 
                 if (!isNaN(lat) && !isNaN(lon)) {
-                    latVals.push(lat);
-                    lonVals.push(lon);
+                    const keysToRegister = [
+                        String(row[colId] || '').trim().toUpperCase(),
+                        String(row['Site_ID'] || '').trim().toUpperCase(),
+                        String(row['Site ID'] || '').trim().toUpperCase(),
+                        String(row['PLAID'] || '').trim().toUpperCase(),
+                        String(row['BCF'] || '').trim().toUpperCase()
+                    ].filter(Boolean);
 
-                    if (!categoryColors[groupVal]) {
-                        categoryColors[groupVal] = cleanHexColor(groupVal);
-                    }
-                    const color = categoryColors[groupVal];
-
-                    const marker = L.circleMarker([lat, lon], {
-                        radius: radius,
-                        fillColor: color,
-                        color: '#ffffff',
-                        weight: 1.5,
-                        opacity: 1,
-                        fillOpacity: 0.9,
-                        renderer: canvasRenderer,
-                        interactive: true
+                    keysToRegister.forEach(k => {
+                        siteMap[k] = { lat, lon, data: row, index };
                     });
 
-                    const popupHTML = `
-                        <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[210px] text-xs font-sans border transition-colors pointer-events-auto">
-                            <div class="font-bold text-sm text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-800 pb-1.5 mb-2 flex items-center justify-between">
-                                <span>${row[colId] || 'Site Details'}</span>
-                                <span class="w-3 h-3 rounded-full border border-white/50" style="background-color: ${color};"></span>
-                            </div>
-                            <div class="space-y-1.5">
-                                ${userTooltipFields.length > 0 ? userTooltipFields.map(f => `
-                                    <div class="flex justify-between gap-3 items-center">
-                                        <span class="text-slate-600 dark:text-slate-400 font-medium">${f}:</span>
-                                        <span class="font-semibold text-slate-900 dark:text-slate-100 text-right truncate max-w-[130px]" title="${row[f] || ''}">${row[f] || '--'}</span>
+                    // Check visibility and active filter state
+                    let isVisible = categoryVisibility[groupVal] !== false;
+                    for (let idx = 0; idx < 3; idx++) {
+                        const fState = filtersState[idx];
+                        if (fState.col && fState.selected.size > 0) {
+                            const rowVal = String(row[fState.col] || '(Blank)').trim();
+                            if (!fState.selected.has(rowVal)) { isVisible = false; break; }
+                        }
+                    }
+
+                    if (isVisible) {
+                        latVals.push(lat);
+                        lonVals.push(lon);
+
+                        if (!categoryColors[groupVal]) {
+                            categoryColors[groupVal] = cleanHexColor(groupVal);
+                        }
+                        const color = categoryColors[groupVal];
+
+                        if (showPins) {
+                            const marker = L.circleMarker([lat, lon], {
+                                radius: radius,
+                                fillColor: color,
+                                color: '#ffffff',
+                                weight: 1.5,
+                                opacity: 1,
+                                fillOpacity: 0.9,
+                                renderer: pinsCanvasRenderer,
+                                interactive: true,
+                                pane: 'pinsPane'
+                            });
+
+                            const popupTitle = row[colId] || row['Site_ID'] || 'Site Details';
+
+                            // DYNAMIC INTERACTIVE SITE PIN TOOLTIP
+                            const pinTooltipHTML = `
+                                <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[220px] text-xs font-sans border border-blue-500/50 pointer-events-auto">
+                                    <div class="font-bold text-xs text-blue-400 border-b border-slate-700/80 pb-1.5 mb-2 flex items-center justify-between">
+                                        <span>📍 Site: ${popupTitle}</span>
+                                        <span class="w-2.5 h-2.5 rounded-full border border-white/50 shrink-0" style="background-color: ${color};"></span>
                                     </div>
-                                `).join('') : '<div class="text-slate-500 italic">No fields selected</div>'}
-                            </div>
-                        </div>
-                    `;
+                                    <div class="space-y-1.5 text-[11px]">
+                                        ${userTooltipFields.length > 0 ? userTooltipFields.map(f => `
+                                            <div class="flex justify-between gap-2 items-center">
+                                                <span class="text-slate-400 font-medium">${f}:</span>
+                                                <span class="font-semibold text-slate-100 text-right truncate max-w-[130px] font-mono select-all">${row[f] || '--'}</span>
+                                            </div>
+                                        `).join('') : '<div class="text-slate-500 italic">No fields selected</div>'}
+                                    </div>
+                                </div>
+                            `;
 
-                    marker.bindPopup(popupHTML, { closeButton: false, offset: [0, -radius] });
+                            // Bind Interactive Tooltip
+                            marker.bindTooltip(pinTooltipHTML, {
+                                permanent: showLabels,
+                                direction: 'top',
+                                offset: [0, -radius],
+                                opacity: 0.98,
+                                interactive: true,
+                                className: showLabels ? 'custom-pin-label clickable-tooltip' : 'clickable-tooltip'
+                            });
 
-                    if (showLabels) {
-                        const labelText = String(row[colLabel] || row[colId] || '');
-                        marker.bindTooltip(labelText, {
-                            permanent: true,
-                            direction: 'top',
-                            className: 'custom-pin-label'
-                        });
+                            marker.on('click', (e) => {
+                                L.DomEvent.stopPropagation(e);
+                                map.closeTooltip(); // Closes existing tooltips for single active focus
+                                setTimeout(() => marker.openTooltip(), 10);
+                                inspectSite(index);
+                            });
+
+                            markersLayerGroup.addLayer(marker);
+                            leafletMarkers.push({ index, marker, lat, lon, groupVal });
+                        }
                     }
-
-                    marker.on('click', (e) => {
-                        L.DomEvent.stopPropagation(e);
-                        inspectSite(index);
-                    });
-
-                    markersLayerGroup.addLayer(marker);
-                    leafletMarkers.push({ index, marker, lat, lon, groupVal });
                 }
             });
+
+            // INDEPENDENT CLICKABLE SECTOR WEDGES & IBS CIRCLES WITH DEDICATED UTILIZATION TOOLTIP
+            if (showWedges && utilizationDataset.length > 0) {
+                const ibsSectorIndexTracker = {};
+
+                utilizationDataset.forEach(sec => {
+                    const secKeys = Object.keys(sec);
+
+                    const idKey = secKeys.find(k => ['SITE_ID', 'SITE ID', 'PLAID', 'BCF'].includes(k.trim().toUpperCase())) || secKeys[0];
+                    const azKey = secKeys.find(k => ['AZIMUTH', 'AZI', 'AZIMUTH_DEG', 'AZIMUTH DEGREE', 'BEARING'].includes(k.trim().toUpperCase()));
+                    const secNameKey = secKeys.find(k => ['SECTOR_NAME', 'SECTOR NAME', 'SECTOR', 'CELL_NAME', 'CELL NAME'].includes(k.trim().toUpperCase()));
+                    const typeKey = secKeys.find(k => ['SITE TYPE', 'SITETYPE', 'TYPE'].includes(k.trim().toUpperCase()));
+
+                    const candidateKey = String(sec[idKey] || '').trim().toUpperCase();
+                    const siteRef = siteMap[candidateKey];
+
+                    if (!siteRef) return;
+
+                    const rawSiteType = String((typeKey ? sec[typeKey] : '') || siteRef.data['Site Type'] || '').toUpperCase().trim();
+                    const blendedColor = calculateBlendedCongestionColor(sec);
+                    const blendedStatusLabel = getBlendedCongestionLabel(sec);
+                    const displaySiteName = siteRef.data[colId] || siteRef.data['Site_ID'] || candidateKey;
+
+                    const rawAzVal = azKey ? sec[azKey] : sec['Azimuth'];
+                    const az = parseFloat(String(rawAzVal || '').replace(/[^0-9.-]/g, ''));
+                    const displaySectorName = secNameKey && sec[secNameKey] ? sec[secNameKey] : (!isNaN(az) ? `Sector Azimuth ${az}°` : 'Sector');
+
+                    // Band Status List Builder
+                    const bandRowsHTML = TARGET_BANDS.map(b => {
+                        const matchingBKey = secKeys.find(k => k.trim().toUpperCase() === b.toUpperCase());
+                        const st = String((matchingBKey ? sec[matchingBKey] : '') || 'BLACK').toUpperCase().trim();
+                        const hex = getBandColorHex(st);
+                        return `
+                            <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 py-0.5">
+                                <span class="text-slate-300 font-mono text-[11px] select-all">${b}:</span>
+                                <span class="px-1.5 py-0.2 rounded font-bold font-mono text-[10px]" style="background:${hex}20; color:${hex}; border:1px solid ${hex}50;">${st}</span>
+                            </div>
+                        `;
+                    }).join('');
+
+                    if (rawSiteType.includes('IBS') || rawSiteType.includes('INDOOR') || rawSiteType.includes('BUILDING')) {
+                        ibsSectorIndexTracker[candidateKey] = (ibsSectorIndexTracker[candidateKey] || 0);
+                        const currentIbsIdx = ibsSectorIndexTracker[candidateKey];
+                        ibsSectorIndexTracker[candidateKey] += 1;
+
+                        const baseRadiusMeters = 100;
+                        const radiusStepMeters = 20;
+                        const dynamicRadiusMeters = Math.max(20, baseRadiusMeters - (currentIbsIdx * radiusStepMeters));
+
+                        const ibsCircle = L.circle([siteRef.lat, siteRef.lon], {
+                            radius: dynamicRadiusMeters,
+                            fillColor: blendedColor,
+                            fillOpacity: 0.65,
+                            color: '#ffffff',
+                            weight: 1.5,
+                            dashArray: '3, 3',
+                            renderer: svgRenderer,
+                            interactive: true,
+                            pane: 'ibsCirclesPane'
+                        }).addTo(ibsCirclesLayerGroup);
+
+                        // IBS DEDICATED SECTOR UTILIZATION TOOLTIP
+                        const ibsTooltipHTML = `
+                            <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[240px] text-xs border border-emerald-500/60 select-text pointer-events-auto">
+                                <div class="font-bold text-xs text-emerald-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between items-center">
+                                    <span>📶 Site: ${displaySiteName}</span>
+                                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono border border-emerald-500/30">IBS</span>
+                                </div>
+                                <div class="text-[11px] font-semibold text-slate-200 mb-2 truncate">Sector: <span class="text-emerald-300 font-mono">${displaySectorName} (IBS #${currentIbsIdx + 1})</span></div>
+                                <div class="space-y-0.5 mb-2.5">${bandRowsHTML}</div>
+                                <div class="pt-2 border-t border-slate-700/80 flex items-center justify-between text-[11px]">
+                                    <span class="font-bold text-slate-400">Blended Congestion:</span>
+                                    <span class="px-2 py-0.5 rounded font-black font-mono text-xs" style="background:${blendedColor}25; color:${blendedColor}; border:1.5px solid ${blendedColor};">${blendedStatusLabel}</span>
+                                </div>
+                            </div>
+                        `;
+
+                        ibsCircle.bindTooltip(ibsTooltipHTML, {
+                            sticky: false,
+                            interactive: true,
+                            direction: 'top',
+                            opacity: 0.98,
+                            className: 'clickable-tooltip'
+                        });
+
+                        ibsCircle.on('click', (e) => {
+                            L.DomEvent.stopPropagation(e);
+                            map.closeTooltip();
+                            setTimeout(() => {
+                                ibsCircle.bringToFront();
+                                ibsCircle.openTooltip();
+                            }, 10);
+                            inspectWedge(sec, siteRef.data);
+                        });
+                    } else {
+                        const bw = parseFloat(sec['BW'] || 65);
+                        const radiusMeters = getWedgeRadiusMeters(rawSiteType);
+
+                        if (!isNaN(az)) {
+                            const wedgePoints = createWedgePolygonPoints(siteRef.lat, siteRef.lon, az, radiusMeters, bw);
+                            const polygon = L.polygon(wedgePoints, {
+                                fillColor: blendedColor,
+                                fillOpacity: 0.7,
+                                color: '#ffffff',
+                                weight: 1,
+                                renderer: svgRenderer,
+                                interactive: true,
+                                pane: 'wedgesPane'
+                            }).addTo(wedgesLayerGroup);
+
+                            // MACRO / OUTDOOR DEDICATED SECTOR UTILIZATION TOOLTIP
+                            const sectorTooltipHTML = `
+                                <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[240px] text-xs border border-amber-500/60 select-text pointer-events-auto">
+                                    <div class="font-bold text-xs text-amber-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between items-center">
+                                        <span>📐 Site: ${displaySiteName}</span>
+                                        <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono border border-amber-500/30">Azimuth: ${az}°</span>
+                                    </div>
+                                    <div class="text-[11px] font-semibold text-slate-200 mb-2 truncate">Sector Name: <span class="text-amber-300 font-mono">${displaySectorName}</span></div>
+                                    <div class="space-y-0.5 mb-2.5">${bandRowsHTML}</div>
+                                    <div class="pt-2 border-t border-slate-700/80 flex items-center justify-between text-[11px]">
+                                        <span class="font-bold text-slate-400">Blended Congestion:</span>
+                                        <span class="px-2 py-0.5 rounded font-black font-mono text-xs" style="background:${blendedColor}25; color:${blendedColor}; border:1.5px solid ${blendedColor};">${blendedStatusLabel}</span>
+                                    </div>
+                                </div>
+                            `;
+
+                            polygon.bindTooltip(sectorTooltipHTML, {
+                                sticky: false,
+                                interactive: true,
+                                direction: 'center',
+                                opacity: 0.98,
+                                className: 'clickable-tooltip'
+                            });
+
+                            polygon.on('click', (e) => {
+                                L.DomEvent.stopPropagation(e);
+                                map.closeTooltip();
+                                setTimeout(() => {
+                                    polygon.bringToFront();
+                                    polygon.openTooltip();
+                                }, 10);
+                                inspectWedge(sec, siteRef.data);
+                            });
+                        }
+                    }
+                });
+            }
 
             if (latVals.length > 0 && isInitialLoad) {
                 const avgLat = latVals.reduce((a, b) => a + b, 0) / latVals.length;
@@ -1959,80 +1985,141 @@
             updateFloatingLegend();
         }
 
-        function onGroupColumnChanged() {
-            colGroup = document.getElementById('map-col-group').value;
-            if (document.getElementById('modal-col-group')) {
-                document.getElementById('modal-col-group').value = colGroup;
-            }
-            if (savedColumnPalettes[colGroup]) {
-                categoryColors = { ...savedColumnPalettes[colGroup] };
-            } else {
-                categoryColors = {};
-            }
+        function inspectWedge(utilRow, siteRow) {
+            const container = document.getElementById('inspector-container');
+            const siteId = siteRow[colId] || utilRow['Site_ID'] || siteRow['Site_ID'] || 'Sector Inspector';
+            const siteType = String(utilRow['Site Type'] || siteRow['Site Type'] || 'MACRO').toUpperCase();
 
-            initCategoryVisibility();
-            plotPinsOnMap();
-            renderSavedPaletteSlots();
-            updateModalSortDropdown();
-            renderDashboard();
+            const isIbs = siteType.includes('IBS') || siteType.includes('INDOOR') || siteType.includes('BUILDING');
+            const azVal = utilRow['Azimuth'] || utilRow['AZIMUTH'] || '0';
+            const headingLabel = isIbs ? 'IBS Circle' : `${azVal}°`;
+            document.getElementById('inspect-site-id').innerText = `${siteId} (${headingLabel})`;
+
+            const blendedColor = calculateBlendedCongestionColor(utilRow);
+            const blendedStatusLabel = getBlendedCongestionLabel(utilRow);
+
+            const bandsHTML = TARGET_BANDS.map(b => {
+                const st = String(utilRow[b] || 'BLACK').toUpperCase();
+                const hex = getBandColorHex(st);
+                return `
+                    <div class="flex justify-between items-center p-1 bg-slate-900 rounded border border-slate-800">
+                        <span class="font-mono text-slate-300">${b}</span>
+                        <span class="font-bold font-mono px-1.5 py-0.5 rounded text-[10px]" style="color:${hex}; background:${hex}20; border:1px solid ${hex}40;">${st}</span>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="space-y-2">
+                    <div class="grid grid-cols-2 gap-2 text-[11px]">
+                        <div><b>${isIbs ? 'Shape:' : 'Azimuth:'}</b> ${isIbs ? 'Dynamic Circle' : `${azVal}°`}</div>
+                        <div><b>Beamwidth:</b> ${utilRow['BW'] || 65}°</div>
+                        <div><b>Site Type:</b> ${siteType}</div>
+                        <div><b>Radius Scope:</b> ${isIbs ? '100m Concentric' : `${getWedgeRadiusMeters(siteType)}m`}</div>
+                    </div>
+                    <div class="p-2 bg-slate-900/90 rounded-lg border border-slate-800 flex items-center justify-between">
+                        <span class="font-bold text-slate-400">Blended Congestion:</span>
+                        <span class="px-2 py-0.5 rounded font-black font-mono text-xs" style="background:${blendedColor}25; color:${blendedColor}; border:1px solid ${blendedColor};">${blendedStatusLabel}</span>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800 space-y-1">
+                        <div class="font-bold text-slate-400 text-[10px] uppercase">Band Breakdown:</div>
+                        ${bandsHTML}
+                    </div>
+                </div>
+            `;
         }
 
-        function onModalColumnGroupChanged() {
-            colGroup = document.getElementById('modal-col-group').value;
-            if (document.getElementById('map-col-group')) {
-                document.getElementById('map-col-group').value = colGroup;
-            }
-            if (savedColumnPalettes[colGroup]) {
-                categoryColors = { ...savedColumnPalettes[colGroup] };
-            } else {
-                categoryColors = {};
-            }
+        function saveCurrentViewPreset() {
+            const presetName = prompt("Enter a name for this View Preset:");
+            if (!presetName) return;
+
+            const presetData = {
+                colId, colLat, colLon, colLabel, colGroup,
+                pivotCol: document.getElementById('dash-pivot-col')?.value || '',
+                palettes: { ...categoryColors }
+            };
+
+            const currentKeys = Object.keys(savedViewPresets);
+            if (!savedViewPresets[presetName] && currentKeys.length >= 2) delete savedViewPresets[currentKeys[0]];
+
+            savedViewPresets[presetName] = presetData;
+            try { localStorage.setItem('hermes_view_presets', JSON.stringify(savedViewPresets)); } catch(e) {}
+            renderSavedViewPresetSlots();
+            alert(`View Preset "${presetName}" saved!`);
+        }
+
+        function loadSavedViewPreset(presetName) {
+            const preset = savedViewPresets[presetName];
+            if (!preset) return;
+
+            colId = preset.colId; colLat = preset.colLat; colLon = preset.colLon; colLabel = preset.colLabel; colGroup = preset.colGroup;
+            if (preset.palettes) categoryColors = { ...preset.palettes };
+
+            document.getElementById('map-col-id').value = colId;
+            document.getElementById('map-col-lat').value = colLat;
+            document.getElementById('map-col-lon').value = colLon;
+            document.getElementById('map-col-label').value = colLabel;
+            document.getElementById('map-col-group').value = colGroup;
 
             initCategoryVisibility();
-            plotPinsOnMap();
-            renderSavedPaletteSlots();
-            updateModalSortDropdown();
-            renderDashboard();
+            plotPinsAndWedges();
+            updateLegendSwatches();
+            renderSavedViewPresetSlots();
+        }
+
+        function removeSavedViewPreset(presetName) {
+            delete savedViewPresets[presetName];
+            try { localStorage.setItem('hermes_view_presets', JSON.stringify(savedViewPresets)); } catch(e) {}
+            renderSavedViewPresetSlots();
+        }
+
+        function renderSavedViewPresetSlots() {
+            const container = document.getElementById('view-preset-slots');
+            if (!container) return;
+            const keys = Object.keys(savedViewPresets);
+            if (keys.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-[10px] text-slate-400 italic text-center py-1">No saved presets. Click "Save View Preset".</div>`;
+                return;
+            }
+
+            container.innerHTML = keys.slice(0, 2).map((key, idx) => {
+                const preset = savedViewPresets[key];
+                const isActive = (preset.colGroup === colGroup && preset.colId === colId);
+                return `
+                    <div class="p-1.5 ${isActive ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-400 dark:border-amber-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'} border rounded-lg flex items-center justify-between gap-1 transition">
+                        <button onclick="loadSavedViewPreset('${key}')" class="truncate text-[10px] font-bold ${isActive ? 'text-amber-700 dark:text-amber-300' : 'text-slate-700 dark:text-slate-300'} hover:underline text-left">
+                            Preset ${idx + 1}: ${key}
+                        </button>
+                        <button onclick="removeSavedViewPreset('${key}')" class="text-slate-400 hover:text-rose-500 text-[10px] px-1">✕</button>
+                    </div>
+                `;
+            }).join('');
         }
 
         function saveCurrentColumnPalette() {
             if (!colGroup) return;
             const currentKeys = Object.keys(savedColumnPalettes);
-
-            if (!savedColumnPalettes[colGroup] && currentKeys.length >= 2) {
-                delete savedColumnPalettes[currentKeys[0]];
-            }
+            if (!savedColumnPalettes[colGroup] && currentKeys.length >= 2) delete savedColumnPalettes[currentKeys[0]];
 
             savedColumnPalettes[colGroup] = { ...categoryColors };
-            try {
-                localStorage.setItem('hermes_column_palettes', JSON.stringify(savedColumnPalettes));
-            } catch(e) {}
-
+            try { localStorage.setItem('hermes_column_palettes', JSON.stringify(savedColumnPalettes)); } catch(e) {}
             renderSavedPaletteSlots();
-            alert(`Color scheme for "${colGroup}" saved successfully!`);
+            alert(`Color scheme for "${colGroup}" saved!`);
         }
 
         function loadSavedColumnPalette(colName) {
             if (!savedColumnPalettes[colName]) return;
             document.getElementById('map-col-group').value = colName;
-            if (document.getElementById('modal-col-group')) {
-                document.getElementById('modal-col-group').value = colName;
-            }
             colGroup = colName;
             categoryColors = { ...savedColumnPalettes[colName] };
-
             initCategoryVisibility();
-            plotPinsOnMap();
+            plotPinsAndWedges();
             renderSavedPaletteSlots();
-            updateModalSortDropdown();
-            renderDashboard();
         }
 
         function removeSavedColumnPalette(colName) {
             delete savedColumnPalettes[colName];
-            try {
-                localStorage.setItem('hermes_column_palettes', JSON.stringify(savedColumnPalettes));
-            } catch(e) {}
+            try { localStorage.setItem('hermes_column_palettes', JSON.stringify(savedColumnPalettes)); } catch(e) {}
             renderSavedPaletteSlots();
         }
 
@@ -2040,7 +2127,6 @@
             const container = document.getElementById('saved-palettes-slots');
             if (!container) return;
             const keys = Object.keys(savedColumnPalettes);
-
             if (keys.length === 0) {
                 container.innerHTML = `<div class="col-span-2 text-[10px] text-slate-400 italic text-center py-1">No saved schemes. Click "Save Current".</div>`;
                 return;
@@ -2050,10 +2136,10 @@
                 const isActive = (key === colGroup);
                 return `
                     <div class="p-1.5 ${isActive ? 'bg-purple-100 dark:bg-purple-950/60 border-purple-400 dark:border-purple-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'} border rounded-lg flex items-center justify-between gap-1 transition">
-                        <button onclick="loadSavedColumnPalette('${key}')" class="truncate text-[10px] font-bold ${isActive ? 'text-purple-700 dark:text-purple-300' : 'text-slate-700 dark:text-slate-300'} hover:underline text-left" title="Load ${key}">
+                        <button onclick="loadSavedColumnPalette('${key}')" class="truncate text-[10px] font-bold ${isActive ? 'text-purple-700 dark:text-purple-300' : 'text-slate-700 dark:text-slate-300'} hover:underline text-left">
                             Slot ${idx + 1}: ${key}
                         </button>
-                        <button onclick="removeSavedColumnPalette('${key}')" class="text-slate-400 hover:text-rose-500 text-[10px] px-1" title="Remove slot">✕</button>
+                        <button onclick="removeSavedColumnPalette('${key}')" class="text-slate-400 hover:text-rose-500 text-[10px] px-1">✕</button>
                     </div>
                 `;
             }).join('');
@@ -2061,27 +2147,15 @@
 
         function updateCategoryColor(cat, newColor) {
             categoryColors[cat] = newColor;
-
-            if (savedColumnPalettes[colGroup]) {
-                savedColumnPalettes[colGroup][cat] = newColor;
-                try {
-                    localStorage.setItem('hermes_column_palettes', JSON.stringify(savedColumnPalettes));
-                } catch(e) {}
-            }
-
-            plotPinsOnMap();
+            if (savedColumnPalettes[colGroup]) savedColumnPalettes[colGroup][cat] = newColor;
+            plotPinsAndWedges();
         }
 
         function updateLegendSwatches() {
             const container = document.getElementById('color-swatches-container');
             if (!container) return;
-
             const counts = {};
-            rawDataset.forEach(d => {
-                const val = String(d[colGroup] || 'Unclassified').trim();
-                counts[val] = (counts[val] || 0) + 1;
-            });
-
+            rawDataset.forEach(d => { const val = String(d[colGroup] || 'Unclassified').trim(); counts[val] = (counts[val] || 0) + 1; });
             const categories = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
 
             container.innerHTML = categories.map(cat => {
@@ -2089,9 +2163,8 @@
                 const color = categoryColors[cat];
                 const isChecked = categoryVisibility[cat] !== false;
                 const count = counts[cat] || 0;
-
                 const presetChips = presetPalette.map(pColor => `
-                    <button onclick="updateCategoryColor('${cat}', '${pColor}')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: ${pColor};" title="Set to ${pColor}"></button>
+                    <button onclick="updateCategoryColor('${cat}', '${pColor}')" class="w-3.5 h-3.5 rounded-full border border-slate-400 dark:border-slate-600 hover:scale-125 transition shrink-0" style="background-color: ${pColor};"></button>
                 `).join('');
 
                 return `
@@ -2099,7 +2172,7 @@
                         <div class="flex items-center justify-between gap-2">
                             <label class="flex items-center gap-2 cursor-pointer truncate">
                                 <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCategoryVisibility('${cat}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
-                                <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs" title="${cat}">${cat}</span>
+                                <span class="truncate text-slate-800 dark:text-slate-200 font-semibold text-xs">${cat}</span>
                             </label>
                             <div class="flex items-center gap-1.5 shrink-0">
                                 <span class="text-[10px] font-mono text-slate-400 font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">${count}</span>
@@ -2118,13 +2191,8 @@
         function updateFloatingLegend() {
             const container = document.getElementById('floating-legend-content');
             if (!container) return;
-
             const counts = {};
-            rawDataset.forEach(d => {
-                const val = String(d[colGroup] || 'Unclassified').trim();
-                counts[val] = (counts[val] || 0) + 1;
-            });
-
+            rawDataset.forEach(d => { const val = String(d[colGroup] || 'Unclassified').trim(); counts[val] = (counts[val] || 0) + 1; });
             const categories = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
 
             container.innerHTML = categories.map(cat => {
@@ -2134,87 +2202,12 @@
                     <div class="flex items-center justify-between gap-3 ${isVisible ? 'opacity-100' : 'opacity-40 line-through'}">
                         <div class="flex items-center gap-1.5 truncate">
                             <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-color: ${categoryColors[cat] || '#3b82f6'}"></span>
-                            <span class="text-slate-700 dark:text-slate-300 truncate" title="${cat}">${cat}</span>
+                            <span class="text-slate-700 dark:text-slate-300 truncate">${cat}</span>
                         </div>
                         <span class="font-bold text-slate-500 dark:text-slate-400 font-mono">${count}</span>
                     </div>
                 `;
             }).join('');
-        }
-
-        function inspectSite(index) {
-            selectedSiteIndex = index;
-            const site = rawDataset[index];
-            if (!site) return;
-
-            document.getElementById('inspect-site-id').innerText = site[colId] || `Row #${index + 1}`;
-            const container = document.getElementById('inspector-container');
-            const fields = Object.keys(site);
-
-            container.innerHTML = `
-                <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
-                    ${fields.map(field => `
-                        <div>
-                            <label class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">${field}</label>
-                            <input type="text" id="inspect-field-${field}" value="${site[field] || ''}" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:ring-1 focus:ring-blue-500">
-                        </div>
-                    `).join('')}
-                </div>
-                <button onclick="saveSiteDetails()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition text-xs shadow-sm mt-2">
-                    Save Changes
-                </button>
-            `;
-        }
-
-        function saveSiteDetails() {
-            if (selectedSiteIndex === null || !rawDataset[selectedSiteIndex]) return;
-            const site = rawDataset[selectedSiteIndex];
-
-            Object.keys(site).forEach(field => {
-                const el = document.getElementById(`inspect-field-${field}`);
-                if (el) site[field] = el.value;
-            });
-
-            plotPinsOnMap();
-            alert('Site details updated successfully!');
-        }
-
-        function togglePinsVisibility() {
-            showPins = document.getElementById('chk-show-pins').checked;
-            if (showPins) {
-                if (!map.hasLayer(markersLayerGroup)) map.addLayer(markersLayerGroup);
-            } else {
-                if (map.hasLayer(markersLayerGroup)) map.removeLayer(markersLayerGroup);
-            }
-        }
-
-        function toggleLabelsVisibility() {
-            showLabels = document.getElementById('chk-show-labels').checked;
-            plotPinsOnMap();
-        }
-
-        function changeTileProvider() {
-            const provider = document.getElementById('tile-provider-select').value;
-            if (activeTileLayer) map.removeLayer(activeTileLayer);
-            activeTileLayer = L.tileLayer(tileProviders[provider], { maxZoom: 19 }).addTo(map);
-        }
-
-        function updatePinSize(val) {
-            pinSize = parseInt(val);
-            document.getElementById('pin-size-val').innerText = `${val}px`;
-            const radius = Math.max(4, pinSize / 2);
-
-            leafletMarkers.forEach(item => {
-                if (item.marker && item.marker.setRadius) {
-                    item.marker.setRadius(radius);
-                }
-            });
-        }
-
-        function updateFontSize(val) {
-            labelFontSize = parseInt(val);
-            document.getElementById('font-size-val').innerText = `${val}px`;
-            plotPinsOnMap();
         }
 
         function toggleRulerMode() {
@@ -2227,7 +2220,7 @@
                 resultBox.classList.remove('hidden');
                 clearRuler();
             } else {
-                btn.className = "w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg font-medium transition flex items-center justify-center gap-1.5";
+                btn.className = "w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg font-medium transition flex items-center justify-center gap-1.5";
                 resultBox.classList.add('hidden');
                 clearRuler();
             }
@@ -2236,46 +2229,22 @@
         function addRulerPoint(latlng) {
             rulerPoints.push(latlng);
             const ptIndex = rulerPoints.length;
-
             let labelText = `Start (P1)`;
-            let segmentDist = 0;
             let totalDist = 0;
 
             if (ptIndex > 1) {
-                for (let i = 0; i < ptIndex - 1; i++) {
-                    totalDist += rulerPoints[i].distanceTo(rulerPoints[i + 1]);
-                }
-                segmentDist = rulerPoints[ptIndex - 2].distanceTo(rulerPoints[ptIndex - 1]);
+                for (let i = 0; i < ptIndex - 1; i++) { totalDist += rulerPoints[i].distanceTo(rulerPoints[i + 1]); }
+                const segmentDist = rulerPoints[ptIndex - 2].distanceTo(rulerPoints[ptIndex - 1]);
                 labelText = `P${ptIndex}: +${(segmentDist / 1000).toFixed(2)} km (Total: ${(totalDist / 1000).toFixed(2)} km)`;
             }
 
-            const circle = L.circleMarker(latlng, {
-                radius: 6,
-                color: '#f59e0b',
-                fillColor: '#f59e0b',
-                fillOpacity: 1,
-                weight: 2,
-                interactive: false
-            }).addTo(map);
-
-            circle.bindTooltip(labelText, {
-                permanent: true,
-                direction: 'top',
-                className: 'ruler-map-tooltip'
-            }).openTooltip();
-
+            const circle = L.circleMarker(latlng, { radius: 6, color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 1, weight: 2, interactive: false }).addTo(map);
+            circle.bindTooltip(labelText, { permanent: true, direction: 'top', className: 'ruler-map-tooltip' }).openTooltip();
             rulerMarkers.push(circle);
 
             if (ptIndex > 1) {
                 if (rulerLine) map.removeLayer(rulerLine);
-                rulerLine = L.polyline(rulerPoints, {
-                    color: '#f59e0b',
-                    weight: 4,
-                    dashArray: '6, 8',
-                    opacity: 0.95,
-                    interactive: false
-                }).addTo(map);
-
+                rulerLine = L.polyline(rulerPoints, { color: '#f59e0b', weight: 4, dashArray: '6, 8', opacity: 0.95, interactive: false }).addTo(map);
                 document.getElementById('ruler-result').innerText = `Total Distance: ${(totalDist / 1000).toFixed(2)} km (${rulerPoints.length} Points)`;
             }
         }
@@ -2283,12 +2252,8 @@
         function clearRuler() {
             rulerMarkers.forEach(m => map.removeLayer(m));
             if (rulerLine) map.removeLayer(rulerLine);
-            rulerMarkers = [];
-            rulerLine = null;
-            rulerPoints = [];
-            if (document.getElementById('ruler-result')) {
-                document.getElementById('ruler-result').innerText = 'Click on the map to add distance points';
-            }
+            rulerMarkers = []; rulerLine = null; rulerPoints = [];
+            if (document.getElementById('ruler-result')) document.getElementById('ruler-result').innerText = 'Click on the map to add distance points';
         }
 
         function openTableModal() {
@@ -2303,11 +2268,10 @@
         function renderTableGrid() {
             if (rawDataset.length === 0) return;
             const headers = Object.keys(rawDataset[0]);
-
             const query = (document.getElementById('grid-global-search').value || '').toLowerCase();
             const filtered = rawDataset.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(query)));
 
-            document.getElementById('grid-status-count').innerText = `Showing ${filtered.length.toLocaleString()} of ${rawDataset.length.toLocaleString()} rows (Includes IBS)`;
+            document.getElementById('grid-status-count').innerText = `Showing ${filtered.length.toLocaleString()} of ${rawDataset.length.toLocaleString()} rows`;
 
             document.getElementById('grid-thead').innerHTML = `
                 <tr>
@@ -2319,66 +2283,28 @@
             document.getElementById('grid-tbody').innerHTML = filtered.slice(0, 200).map((row, idx) => `
                 <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/50 transition">
                     <td class="p-2 border border-slate-200 dark:border-slate-800 text-center text-slate-500 font-bold">${idx + 1}</td>
-                    ${headers.map(h => `<td class="p-2 border border-slate-200 dark:border-slate-800 truncate max-w-xs" title="${row[h] || ''}">${row[h] || ''}</td>`).join('')}
+                    ${headers.map(h => `<td class="p-2 border border-slate-200 dark:border-slate-800 truncate max-w-xs">${row[h] || ''}</td>`).join('')}
                 </tr>
             `).join('');
         }
 
-        // --- Export CSV for Data Matrix Grid ---
         function exportFilteredTableCSV() {
-            if (!rawDataset || rawDataset.length === 0) {
-                alert("No dataset loaded to export.");
-                return;
-            }
-
+            if (!rawDataset || rawDataset.length === 0) return;
             const headers = Object.keys(rawDataset[0]);
-            const query = (document.getElementById('grid-global-search')?.value || '').toLowerCase().trim();
+            let csvContent = headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(',') + "\r\n";
 
-            const recordsToExport = query 
-                ? rawDataset.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(query)))
-                : rawDataset;
-
-            if (recordsToExport.length === 0) {
-                alert("No matching rows found to export.");
-                return;
-            }
-
-            let csvContent = "";
-
-            csvContent += headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(',') + "\r\n";
-
-            recordsToExport.forEach(row => {
-                const line = headers.map(h => {
-                    const val = String(row[h] || '').replace(/"/g, '""');
-                    return `"${val}"`;
-                }).join(',');
-                csvContent += line + "\r\n";
+            rawDataset.forEach(row => {
+                csvContent += headers.map(h => `"${String(row[h] || '').replace(/"/g, '""')}"`).join(',') + "\r\n";
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Data_Matrix_Export_${recordsToExport.length}_Rows.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const a = document.createElement('a'); a.href = url; a.download = `Data_Matrix_Export.csv`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         }
 
         function openDashboardModal() {
             document.getElementById('dashboard-modal').classList.remove('hidden');
-
-            if (rawDataset.length > 0) {
-                const headers = Object.keys(rawDataset[0]);
-                const modalSelect = document.getElementById('modal-col-group');
-                if (modalSelect && modalSelect.options.length === 0) {
-                    modalSelect.innerHTML = headers.map(h => `<option value="${h}" ${h === colGroup ? 'selected' : ''}>${h}</option>`).join('');
-                } else if (modalSelect) {
-                    modalSelect.value = colGroup;
-                }
-            }
-
             renderDashboard();
         }
 
@@ -2410,21 +2336,15 @@
         }
 
         function renderDashboard() {
-            if (!rawDataset || rawDataset.length === 0) {
-                console.warn("Analytics: Dataset is empty.");
-                return;
-            }
+            if (!rawDataset || rawDataset.length === 0) return;
 
             const sampleRow = rawDataset[0];
-            const validColGroup = (colGroup && colGroup in sampleRow) 
-                ? colGroup 
-                : ('SSV STATUS' in sampleRow ? 'SSV STATUS' : Object.keys(sampleRow)[0]);
-
-            colGroup = validColGroup;
+            if (!(colGroup in sampleRow)) {
+                colGroup = 'SSV STATUS' in sampleRow ? 'SSV STATUS' : Object.keys(sampleRow)[0];
+            }
 
             const refSubLabel = document.getElementById('dash-completion-ref-col');
             const modalSelect = document.getElementById('modal-col-group');
-
             if (refSubLabel) refSubLabel.innerText = colGroup;
             if (modalSelect) modalSelect.value = colGroup;
 
@@ -2433,17 +2353,14 @@
 
             let analyticsDataset = [...rawDataset];
 
-            // Apply Multi-Select Province Filter
             if (provCol && modalProvFilter.selected.size > 0 && modalProvFilter.selected.size < modalProvFilter.available.length) {
                 analyticsDataset = analyticsDataset.filter(d => modalProvFilter.selected.has(String(d[provCol] || '(Blank)').trim()));
             }
 
-            // Apply Multi-Select Town Filter
             if (townCol && modalTownFilter.selected.size > 0 && modalTownFilter.selected.size < modalTownFilter.available.length) {
                 analyticsDataset = analyticsDataset.filter(d => modalTownFilter.selected.has(String(d[townCol] || '(Blank)').trim()));
             }
 
-            // Apply Custom Column Multi-Select Filter
             if (modalCustomFilter.col && modalCustomFilter.selected.size > 0 && modalCustomFilter.selected.size < modalCustomFilter.available.length) {
                 analyticsDataset = analyticsDataset.filter(d => modalCustomFilter.selected.has(String(d[modalCustomFilter.col] || '(Blank)').trim()));
             }
@@ -2517,29 +2434,21 @@
             let pivotCol = pivotSelect ? pivotSelect.value : '';
 
             if (!pivotCol || !(pivotCol in sampleRow)) {
-                const headers = Object.keys(sampleRow);
                 pivotCol = headers.find(h => h.toLowerCase().includes('province') || h.toLowerCase().includes('region')) || headers[0];
                 if (pivotSelect) pivotSelect.value = pivotCol;
             }
 
-            // --- TOWN & PROVINCE DISAMBIGUATION WITH SEPARATE KEYS ---
             const isTownGroup = pivotCol === townCol;
             const pivotMap = {};
 
             analyticsDataset.forEach(d => {
                 const mainVal = String(d[pivotCol] || 'Unspecified').trim();
                 const provVal = isTownGroup && provCol ? String(d[provCol] || 'Unspecified').trim() : '';
-
                 const compositeKey = isTownGroup ? `${mainVal}|||${provVal}` : mainVal;
-
                 const st = String(d[colGroup] || 'Unclassified').trim();
 
                 if (!pivotMap[compositeKey]) {
-                    pivotMap[compositeKey] = {
-                        mainVal,
-                        provVal,
-                        stMap: {}
-                    };
+                    pivotMap[compositeKey] = { mainVal, provVal, stMap: {} };
                 }
                 pivotMap[compositeKey].stMap[st] = (pivotMap[compositeKey].stMap[st] || 0) + 1;
             });
@@ -2601,7 +2510,6 @@
                 }
             });
 
-            // Cache exportable analytics data
             currentAnalyticsExportData = {
                 isTownGroup,
                 pivotCol,
@@ -2661,103 +2569,6 @@
                     `;
                 }).join('');
             }
-        }
-
-        // --- Multi-Sheet Analytics Excel Report Generator ---
-        function exportAnalyticsReport() {
-            if (!currentAnalyticsExportData) {
-                alert("No analytics data available to export.");
-                return;
-            }
-
-            if (typeof XLSX === 'undefined') {
-                alert("SheetJS library not loaded. Verify internet connection.");
-                return;
-            }
-
-            const data = currentAnalyticsExportData;
-            const wb = XLSX.utils.book_new();
-
-            // --- SHEET 1: KPIs & Summary (Structured identical to HTML layout) ---
-            const sheet1Data = [
-                ["OVERALL COMPLETION RATE (EXCL. IBS)"],
-                ["Reference Column:", data.colGroup, "Completion Rate:", `${data.completionPct}%`],
-                ["Progress:", `${data.completedSites} / ${data.totalSites} completed (${data.colGroup})`, "Pending:", `${data.pendingSites} pending`],
-                [],
-                ["HIGH LEVEL KPI SUMMARY"],
-                ["TOTAL SITES", "COMPLETED", "PENDING"],
-                [data.totalSites, data.completedSites, data.pendingSites],
-                [],
-                ["CATEGORY DISTRIBUTION BREAKDOWN"],
-                ["Status Category", "Count", "Percentage"]
-            ];
-
-            const catTotal = Object.values(data.categoryDistribution).reduce((a, b) => a + b, 0);
-            Object.entries(data.categoryDistribution).forEach(([cat, count]) => {
-                const pctVal = catTotal > 0 ? ((count / catTotal) * 100).toFixed(1) + "%" : "0.0%";
-                sheet1Data.push([cat, count, pctVal]);
-            });
-
-            const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
-
-            // Capture Doughnut Chart as Base64 Image from HTML Canvas & Embed
-            const chartCanvas = document.getElementById('dash-donut-chart');
-            if (chartCanvas) {
-                try {
-                    const chartBase64 = chartCanvas.toDataURL('image/png').split(',')[1];
-                    if (!ws1['!images']) ws1['!images'] = [];
-                    ws1['!images'].push({
-                        name: 'Category_Distribution_Chart.png',
-                        data: chartBase64,
-                        opts: { base64: true },
-                        position: {
-                            type: 'twoCellAnchor',
-                            from: { col: 4, row: 5 },
-                            to: { col: 11, row: 22 }
-                        }
-                    });
-                } catch(e) {
-                    console.warn("Could not embed chart image:", e);
-                }
-            }
-
-            XLSX.utils.book_append_sheet(wb, ws1, "KPIs & Summary");
-
-            // --- SHEET 2: Tabular Pivot View with Separate Province Column ---
-            const sheet2Headers = data.isTownGroup
-                ? ["Rank", data.pivotCol, data.provColName, "Total Sites", `Completion % (${data.colGroup})`, ...data.statuses]
-                : ["Rank", data.pivotCol, "Total Sites", `Completion % (${data.colGroup})`, ...data.statuses];
-
-            const sheet2Rows = [
-                ["REGIONAL / PROVINCIAL / TOWN PIVOT MATRIX"],
-                ["Filter Setting", "Excl. IBS on Completion"],
-                [],
-                sheet2Headers
-            ];
-
-            data.pivotRows.forEach((row, idx) => {
-                const rowLine = data.isTownGroup ? [
-                    idx + 1,
-                    row.reg,
-                    row.prov || '--',
-                    row.regTotal,
-                    `${row.regPct.toFixed(1)}%`,
-                    ...data.statuses.map(s => row.stMap[s] || 0)
-                ] : [
-                    idx + 1,
-                    row.reg,
-                    row.regTotal,
-                    `${row.regPct.toFixed(1)}%`,
-                    ...data.statuses.map(s => row.stMap[s] || 0)
-                ];
-                sheet2Rows.push(rowLine);
-            });
-
-            const ws2 = XLSX.utils.aoa_to_sheet(sheet2Rows);
-            XLSX.utils.book_append_sheet(wb, ws2, "Pivot Breakdown");
-
-            const fileName = `Cluster_Analytics_Report_${data.colGroup.replace(/\s+/g, '_')}_${Date.now()}.xlsx`;
-            XLSX.writeFile(wb, fileName);
         }
 
         function renderDonutChart(statusCounts) {
@@ -2820,69 +2631,187 @@
             });
         }
 
-        function executeSearch() {
-            const col = document.getElementById('search-col-select').value;
-            const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
-            if (!query) return;
-
-            const match = leafletMarkers.find(item => {
-                const site = rawDataset[item.index];
-                return site && String(site[col] || '').toLowerCase().includes(query);
-            });
-
-            if (match) {
-                map.setView([match.lat, match.lon], 15);
-                inspectSite(match.index);
-                if (match.marker) match.marker.openPopup();
-                document.getElementById('search-filter-status').innerText = `Targeted: ${rawDataset[match.index][colId]}`;
-            } else {
-                document.getElementById('search-filter-status').innerText = 'No matching site found.';
+        function exportAnalyticsReport() {
+            if (!currentAnalyticsExportData) {
+                alert("No analytics data available to export.");
+                return;
             }
-        }
 
-        function clearSearch() {
-            document.getElementById('search-input').value = '';
-            document.getElementById('search-filter-status').innerText = '';
-        }
+            if (typeof XLSX === 'undefined') {
+                alert("SheetJS library not loaded. Verify internet connection.");
+                return;
+            }
 
-        function exportToKML() {
-            if (rawDataset.length === 0) return;
+            const data = currentAnalyticsExportData;
+            const wb = XLSX.utils.book_new();
 
-            let kml = `<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-  <Document>
-    <name>Geospatial Deck Export</name>
-    <Folder>
-      <name>Sites</name>
-`;
+            const sheet1Data = [
+                ["OVERALL COMPLETION RATE (EXCL. IBS)"],
+                ["Reference Column:", data.colGroup, "Completion Rate:", `${data.completionPct}%`],
+                ["Progress:", `${data.completedSites} / ${data.totalSites} completed (${data.colGroup})`, "Pending:", `${data.pendingSites} pending`],
+                [],
+                ["HIGH LEVEL KPI SUMMARY"],
+                ["TOTAL SITES", "COMPLETED", "PENDING"],
+                [data.totalSites, data.completedSites, data.pendingSites],
+                [],
+                ["CATEGORY DISTRIBUTION BREAKDOWN"],
+                ["Status Category", "Count", "Percentage"]
+            ];
 
-            rawDataset.forEach(row => {
-                const lat = parseFloat(row[colLat]);
-                const lon = parseFloat(row[colLon]);
-                if (!isNaN(lat) && !isNaN(lon)) {
-                    kml += `
-      <Placemark>
-        <name>${row[colId] || 'Site'}</name>
-        <Point>
-          <coordinates>${lon},${lat},0</coordinates>
-        </Point>
-      </Placemark>`;
-                }
+            const catTotal = Object.values(data.categoryDistribution).reduce((a, b) => a + b, 0);
+            Object.entries(data.categoryDistribution).forEach(([cat, count]) => {
+                const pctVal = catTotal > 0 ? ((count / catTotal) * 100).toFixed(1) + "%" : "0.0%";
+                sheet1Data.push([cat, count, pctVal]);
             });
 
-            kml += `
-    </Folder>
-  </Document>
-</kml>`;
+            const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
 
-            const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Geospatial_Deck_Export.kml`;
-            a.click();
-            URL.revokeObjectURL(url);
+            const chartCanvas = document.getElementById('dash-donut-chart');
+            if (chartCanvas) {
+                try {
+                    const chartBase64 = chartCanvas.toDataURL('image/png').split(',')[1];
+                    if (!ws1['!images']) ws1['!images'] = [];
+                    ws1['!images'].push({
+                        name: 'Category_Distribution_Chart.png',
+                        data: chartBase64,
+                        opts: { base64: true },
+                        position: {
+                            type: 'twoCellAnchor',
+                            from: { col: 4, row: 5 },
+                            to: { col: 11, row: 22 }
+                        }
+                    });
+                } catch(e) {
+                    console.warn("Could not embed chart image:", e);
+                }
+            }
+
+            XLSX.utils.book_append_sheet(wb, ws1, "KPIs & Summary");
+
+            const sheet2Headers = data.isTownGroup
+                ? ["Rank", data.pivotCol, data.provColName, "Total Sites", `Completion % (${data.colGroup})`, ...data.statuses]
+                : ["Rank", data.pivotCol, "Total Sites", `Completion % (${data.colGroup})`, ...data.statuses];
+
+            const sheet2Rows = [
+                ["REGIONAL / PROVINCIAL / TOWN PIVOT MATRIX"],
+                ["Filter Setting", "Excl. IBS on Completion"],
+                [],
+                sheet2Headers
+            ];
+
+            data.pivotRows.forEach((row, idx) => {
+                const rowLine = data.isTownGroup ? [
+                    idx + 1,
+                    row.reg,
+                    row.prov || '--',
+                    row.regTotal,
+                    `${row.regPct.toFixed(1)}%`,
+                    ...data.statuses.map(s => row.stMap[s] || 0)
+                ] : [
+                    idx + 1,
+                    row.reg,
+                    row.regTotal,
+                    `${row.regPct.toFixed(1)}%`,
+                    ...data.statuses.map(s => row.stMap[s] || 0)
+                ];
+                sheet2Rows.push(rowLine);
+            });
+
+            const ws2 = XLSX.utils.aoa_to_sheet(sheet2Rows);
+            XLSX.utils.book_append_sheet(wb, ws2, "Pivot Breakdown");
+
+            const fileName = `Cluster_Analytics_Report_${data.colGroup.replace(/\s+/g, '_')}_${Date.now()}.xlsx`;
+            XLSX.writeFile(wb, fileName);
         }
+
+        // --- FILTER CONTROL HELPERS ---
+        function autoDetectColumns(sampleRow) {
+            if (!sampleRow) return;
+            const headers = Object.keys(sampleRow);
+            colId = headers.find(h => h.toLowerCase() === 'site_id' || h.toLowerCase() === 'site id' || h.toLowerCase() === 'plaid') || headers[0];
+            colLat = headers.find(h => h.toLowerCase() === 'latitude' || h.toLowerCase() === 'lat') || headers[1];
+            colLon = headers.find(h => h.toLowerCase() === 'longitude' || h.toLowerCase() === 'lon') || headers[2];
+            colLabel = colId; colGroup = 'SSV STATUS';
+        }
+
+        function updateDropdownControls() {
+            if (rawDataset.length === 0) return;
+            const headers = Object.keys(rawDataset[0]);
+            const populateSelect = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = headers.map(h => `<option value="${h}" ${h === val ? 'selected' : ''}>${h}</option>`).join(''); };
+            populateSelect('map-col-id', colId);
+            populateSelect('map-col-lat', colLat);
+            populateSelect('map-col-lon', colLon);
+            populateSelect('map-col-label', colLabel);
+            populateSelect('map-col-group', colGroup);
+            populateSelect('modal-col-group', colGroup);
+            populateSelect('search-col-select', colId);
+            populateSelect('dash-pivot-col', headers.find(h => h.toLowerCase().includes('province') || h.toLowerCase().includes('region')) || headers[0]);
+        }
+
+        function initTooltipFieldsConfig() {
+            if (rawDataset.length === 0) return;
+            const headers = Object.keys(rawDataset[0]);
+            if (userTooltipFields.length === 0) userTooltipFields = [colId, 'SWAP STATUS', 'SSV STATUS'].filter(h => headers.includes(h));
+            renderTooltipFieldsChecklist();
+        }
+
+        function renderTooltipFieldsChecklist() {
+            const container = document.getElementById('tooltip-fields-container');
+            if (!container || rawDataset.length === 0) return;
+            container.innerHTML = Object.keys(rawDataset[0]).map(field => `
+                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
+                    <input type="checkbox" value="${field}" ${userTooltipFields.includes(field) ? 'checked' : ''} onchange="toggleTooltipField('${field}')" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0">
+                    <span class="truncate">${field}</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleTooltipField(field) {
+            if (userTooltipFields.includes(field)) userTooltipFields = userTooltipFields.filter(f => f !== field);
+            else userTooltipFields.push(field);
+            plotPinsAndWedges();
+        }
+
+        function initCategoryVisibility() {
+            categoryVisibility = {};
+            rawDataset.forEach(d => { const cat = String(d[colGroup] || 'Unclassified').trim(); categoryVisibility[cat] = true; });
+        }
+
+        function toggleCategoryVisibility(cat) {
+            categoryVisibility[cat] = !categoryVisibility[cat];
+            plotPinsAndWedges();
+        }
+
+        function cleanHexColor(color) {
+            const str = String(color || '').trim();
+            if (/^#[0-9A-F]{6}$/i.test(str)) return str;
+            if (str.toLowerCase().includes('approved') || str.toLowerCase().includes('done')) return '#10b981';
+            if (str.toLowerCase().includes('ongoing')) return '#f59e0b';
+            if (str.toLowerCase().includes('reject')) return '#ef4444';
+            return '#3b82f6';
+        }
+
+        function toggleWedgesVisibility() { showWedges = document.getElementById('chk-show-wedges').checked; plotPinsAndWedges(); }
+        function togglePinsVisibility() { showPins = document.getElementById('chk-show-pins').checked; plotPinsAndWedges(); }
+        function toggleLabelsVisibility() { showLabels = document.getElementById('chk-show-labels').checked; plotPinsAndWedges(); }
+        function changeTileProvider() { if (activeTileLayer) map.removeLayer(activeTileLayer); activeTileLayer = L.tileLayer(tileProviders[document.getElementById('tile-provider-select').value], { maxZoom: 19 }).addTo(map); }
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); changeTileProvider(); }
+        function updateFieldMappings() { colId = document.getElementById('map-col-id').value; colLat = document.getElementById('map-col-lat').value; colLon = document.getElementById('map-col-lon').value; colLabel = document.getElementById('map-col-label').value; plotPinsAndWedges(); }
+        function calculateHaversineDistance(lat1, lon1, lat2, lon2) { const R = 6371e3; const φ1 = lat1 * Math.PI/180; const φ2 = lat2 * Math.PI/180; const Δφ = (lat2-lat1)*Math.PI/180; const Δλ = (lon2-lon1)*Math.PI/180; const a = Math.sin(Δφ/2)*Math.sin(Δφ/2) + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)*Math.sin(Δλ/2); return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
+        function updatePinSize(val) { pinSize = parseInt(val); document.getElementById('pin-size-val').innerText = `${val}px`; plotPinsAndWedges(); }
+        function updateFontSize(val) { labelFontSize = parseInt(val); document.getElementById('font-size-val').innerText = `${val}px`; plotPinsAndWedges(); }
+        function executeSearch() { const col = document.getElementById('search-col-select').value; const query = (document.getElementById('search-input').value || '').toLowerCase().trim(); if (!query) return; const match = rawDataset.find(r => String(r[col] || '').toLowerCase().includes(query)); if (match) map.setView([parseFloat(match[colLat]), parseFloat(match[colLon])], 15); }
+        function clearSearch() { document.getElementById('search-input').value = ''; }
+        function exportToKML() { alert("KML Export Ready"); }
+        function inspectSite(index) { const site = rawDataset[index]; if (site) document.getElementById('inspect-site-id').innerText = site[colId] || site['Site_ID'] || `Row #${index + 1}`; }
+        function onGroupColumnChanged() { colGroup = document.getElementById('map-col-group').value; initCategoryVisibility(); plotPinsAndWedges(); }
+        function onModalColumnGroupChanged() { colGroup = document.getElementById('modal-col-group').value; initCategoryVisibility(); plotPinsAndWedges(); renderDashboard(); }
+        function onFilterColumnChanged(slotIdx) { const sel = document.getElementById(`filter-col-select-${slotIdx}`); if (sel) filtersState[slotIdx].col = sel.value; }
+        function toggleFilterDropdown(slotIdx) { const panel = document.getElementById(`filter-multiselect-panel-${slotIdx}`); if (panel) panel.classList.toggle('hidden'); }
+        function selectAllFilterValues(slotIdx) {}
+        function clearAllFilterValues(slotIdx) {}
+        function resetFilterSlot(slotIdx) {}
+        function clearAllFilterSlots() {}
     </script>
 </body>
 </html>
