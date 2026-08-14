@@ -316,7 +316,6 @@
                 </div>
 
                 <!-- COMBINED: MAP & VISUAL DISPLAY CONTROLS -->
-                <!-- Groups: Sector Wedges, Band Congestion Key, Map Settings, & Distance Ruler -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
                         <span class="flex items-center gap-1.5"><i data-lucide="layers" class="w-4 h-4 text-emerald-500"></i> Map & Visual Display Controls</span>
@@ -324,7 +323,7 @@
 
                     <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 text-xs">
 
-                        <!-- Toggle Controls Section -->
+                        <!-- Toggle Controls Section with Separate Wedge and IBS Toggles -->
                         <div class="space-y-2 border-b border-slate-200 dark:border-slate-800/80 pb-3">
                             <span class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Layer Visibility Toggles</span>
                             <div class="grid grid-cols-2 gap-2">
@@ -334,10 +333,13 @@
                                 <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
                                     <input type="checkbox" id="chk-show-wedges" checked onchange="toggleWedgesVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Sector Wedges
                                 </label>
+                                <label class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold cursor-pointer">
+                                    <input type="checkbox" id="chk-show-ibs" checked onchange="toggleIBSVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-600"> IBS Circles
+                                </label>
                                 <label class="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold cursor-pointer">
                                     <input type="checkbox" id="chk-show-nsb" checked onchange="toggleNSBVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-teal-600"> NSB Map Layer
                                 </label>
-                                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
+                                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer col-span-2">
                                     <input type="checkbox" id="chk-show-labels" onchange="toggleLabelsVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Pin Labels
                                 </label>
                             </div>
@@ -949,6 +951,7 @@
 
         let showPins = true;
         let showWedges = true;
+        let showIBS = true;
         let showLabels = false;
         let showNSB = true;
         let pinSize = 14;
@@ -1888,6 +1891,11 @@
             plotPinsAndWedges();
         }
 
+        function toggleIBSVisibility() {
+            showIBS = document.getElementById('chk-show-ibs').checked;
+            plotPinsAndWedges();
+        }
+
         function plotPinsAndWedges() {
             markersLayerGroup.clearLayers();
             wedgesLayerGroup.clearLayers();
@@ -2086,8 +2094,8 @@
                 });
             }
 
-            // CLICKABLE SECTOR WEDGES & IBS DONUT RINGS
-            if (showWedges && utilizationDataset.length > 0) {
+            // CLICKABLE SECTOR WEDGES & IBS DONUT RINGS (SEPARATED TOGGLES)
+            if (utilizationDataset.length > 0) {
                 const ibsSectorIndexTracker = {};
 
                 utilizationDataset.forEach(sec => {
@@ -2124,7 +2132,10 @@
                         `;
                     }).join('');
 
-                    if (rawSiteType.includes('IBS') || rawSiteType.includes('INDOOR') || rawSiteType.includes('BUILDING')) {
+                    const isIbsType = rawSiteType.includes('IBS') || rawSiteType.includes('INDOOR') || rawSiteType.includes('BUILDING');
+
+                    // RENDER INDEPENDENT IBS CONCENTRIC CIRCLES
+                    if (isIbsType && showIBS) {
                         ibsSectorIndexTracker[candidateKey] = (ibsSectorIndexTracker[candidateKey] || 0);
                         const currentIbsIdx = ibsSectorIndexTracker[candidateKey];
                         ibsSectorIndexTracker[candidateKey] += 1;
@@ -2168,7 +2179,9 @@
                             openMapTooltip(e.latlng, ibsTooltipHTML);
                             inspectWedge(sec, siteRef.data);
                         });
-                    } else {
+                    } 
+                    // RENDER INDEPENDENT SECTOR WEDGES
+                    else if (!isIbsType && showWedges) {
                         const bw = parseFloat(sec['BW'] || 65);
                         const radiusMeters = getWedgeRadiusMeters(rawSiteType);
 
