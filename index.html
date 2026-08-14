@@ -70,13 +70,14 @@
             background-color: #020617 !important;
         }
 
-        /* Custom Clickable Tooltip Styling */
+        /* Custom Clickable Tooltip Styling - Elevated Strict Top Layer */
         .leaflet-tooltip.clickable-tooltip {
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
             padding: 0 !important;
             pointer-events: auto !important;
+            z-index: 9999 !important;
         }
         .leaflet-tooltip-top.clickable-tooltip:before,
         .leaflet-tooltip-bottom.clickable-tooltip:before,
@@ -128,7 +129,7 @@
             }
         }
 
-        /* SVG Vector Layer Interactivity & Exact Lowercase Pane Selectors */
+        /* SVG Vector Layer Interactivity & Pane Selectors */
         .leaflet-interactive {
             cursor: pointer !important;
         }
@@ -143,6 +144,32 @@
         .leaflet-ibscirclespane-pane path {
             pointer-events: visiblePainted !important;
             cursor: pointer !important;
+        }
+
+        .leaflet-nsbpane-pane {
+            pointer-events: auto !important;
+            z-index: 650 !important;
+        }
+
+        .leaflet-pinspane-pane {
+            pointer-events: auto !important;
+            z-index: 700 !important;
+        }
+        .leaflet-pinspane-pane path,
+        .leaflet-pinspane-pane circle,
+        .leaflet-nsbpane-pane path,
+        .leaflet-nsbpane-pane circle,
+        .nsb-map-pin-wrapper {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+
+        .nsb-map-pin-svg {
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+            transition: transform 0.15s ease;
+        }
+        .nsb-map-pin-wrapper:hover .nsb-map-pin-svg {
+            transform: scale(1.25);
         }
 
         .exaggerated-pulse-container {
@@ -220,12 +247,14 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">Geospatial Modification Deck</h1>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2 flex-wrap">
                         <span>Swap: <strong class="text-slate-700 dark:text-slate-300">Main</strong></span>
                         <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
                         <span>SSV: <strong class="text-slate-700 dark:text-slate-300">Sheet1</strong></span>
                         <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
                         <span>Utilization: <strong class="text-slate-700 dark:text-slate-300">Active</strong></span>
+                        <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
+                        <span>NSB Layer: <strong class="text-teal-600 dark:text-teal-400">Independent</strong></span>
                         <span class="inline-block w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></span>
                         <span id="sync-status" class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Connecting...
@@ -276,6 +305,9 @@
                         <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="Utilization Sheet Endpoint">
                             Utilization: <span class="text-cyan-600 dark:text-cyan-400">AKfycbyc6k3G2iN...</span>
                         </div>
+                        <div class="truncate text-slate-700 dark:text-slate-300 font-mono text-[11px]" title="NSB Import Independent File Endpoint">
+                            Independent NSB: <span class="text-teal-600 dark:text-teal-400">NSB-IMPORT</span>
+                        </div>
                         <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800">
                             <span class="text-slate-500 dark:text-slate-400">Loaded Sites / Lookups:</span>
                             <span id="sidebar-record-count" class="font-bold text-slate-900 dark:text-white">0</span>
@@ -283,28 +315,69 @@
                     </div>
                 </div>
 
-                <!-- 2. Sector Azimuth Wedges & Congestion Legend -->
+                <!-- COMBINED: MAP & VISUAL DISPLAY CONTROLS -->
+                <!-- Groups: Sector Wedges, Band Congestion Key, Map Settings, & Distance Ruler -->
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        <span class="flex items-center gap-1.5"><i data-lucide="wifi" class="w-4 h-4 text-cyan-500"></i> Sector Wedges & Band Congestion</span>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><i data-lucide="layers" class="w-4 h-4 text-emerald-500"></i> Map & Visual Display Controls</span>
                     </div>
-                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 text-xs">
-                        <label class="flex items-center justify-between text-slate-700 dark:text-slate-300 cursor-pointer">
-                            <span class="font-semibold">Show Sector Wedges</span>
-                            <input type="checkbox" id="chk-show-wedges" checked onchange="toggleWedgesVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600">
-                        </label>
 
-                        <div class="space-y-1">
+                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 text-xs">
+
+                        <!-- Toggle Controls Section -->
+                        <div class="space-y-2 border-b border-slate-200 dark:border-slate-800/80 pb-3">
+                            <span class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Layer Visibility Toggles</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input type="checkbox" id="chk-show-pins" checked onchange="togglePinsVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Show Pins
+                                </label>
+                                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input type="checkbox" id="chk-show-wedges" checked onchange="toggleWedgesVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Sector Wedges
+                                </label>
+                                <label class="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold cursor-pointer">
+                                    <input type="checkbox" id="chk-show-nsb" checked onchange="toggleNSBVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-teal-600"> NSB Map Layer
+                                </label>
+                                <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input type="checkbox" id="chk-show-labels" onchange="toggleLabelsVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Pin Labels
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Map Style & Sizing Settings -->
+                        <div class="space-y-2 border-b border-slate-200 dark:border-slate-800/80 pb-3">
+                            <div>
+                                <label class="block text-slate-600 dark:text-slate-400 mb-1">Tile Provider</label>
+                                <select id="tile-provider-select" onchange="changeTileProvider()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="carto-dark">CartoDB Dark Matter</option>
+                                    <option value="carto-light">CartoDB Positron (Light)</option>
+                                    <option value="osm">OpenStreetMap Standard</option>
+                                    <option value="esri-sat">Esri World Imagery (Satellite)</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-slate-600 dark:text-slate-400 mb-1">Pin Size: <span id="pin-size-val">14px</span></label>
+                                    <input type="range" id="slider-pin-size" min="8" max="28" value="14" class="w-full accent-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 dark:text-slate-400 mb-1">Font Size: <span id="font-size-val">11px</span></label>
+                                    <input type="range" id="slider-font-size" min="8" max="16" value="11" class="w-full accent-blue-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wedge Radii Scope Metadata -->
+                        <div class="space-y-1 border-b border-slate-200 dark:border-slate-800/80 pb-3">
                             <div class="flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
                                 <span>Macro Wedge Outer Radius: <strong>200m</strong></span>
                                 <span>Small Cell / IBS: <strong>100m</strong></span>
                             </div>
-                            <div class="text-[10px] text-slate-400 italic">Sectors resize according to 'Site Type' column. IBS site types render as dynamic concentric circles.</div>
+                            <div class="text-[10px] text-slate-400 italic">Sectors resize according to 'Site Type' column. IBS renders as dynamic concentric circles.</div>
                         </div>
 
                         <!-- Congestion Heatmap Color Key -->
-                        <div class="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
-                            <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Band Congestion Key</span>
+                        <div class="space-y-1.5 border-b border-slate-200 dark:border-slate-800/80 pb-3">
+                            <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Band Congestion Heatmap Key</span>
                             <div class="grid grid-cols-4 gap-1 text-[10px] text-center font-bold font-mono">
                                 <div class="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 py-1 rounded">GREEN</div>
                                 <div class="bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/40 py-1 rounded">AMBER</div>
@@ -312,6 +385,20 @@
                                 <div class="bg-slate-900 text-slate-300 border border-slate-700 py-1 rounded">BLACK</div>
                             </div>
                         </div>
+
+                        <!-- Integrated Distance Ruler Tool -->
+                        <div class="space-y-2 pt-1">
+                            <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                <i data-lucide="ruler" class="w-3.5 h-3.5 text-amber-500"></i> Geospatial Distance Measurement
+                            </span>
+                            <button id="btn-ruler" onclick="toggleRulerMode()" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg font-medium transition flex items-center justify-center gap-1.5">
+                                <i data-lucide="ruler" class="w-4 h-4"></i> Activate Distance Ruler
+                            </button>
+                            <div id="ruler-result" class="hidden p-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-[11px] text-amber-600 dark:text-amber-400 font-mono text-center">
+                                Click on the map to add distance points
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -376,42 +463,6 @@
                     </div>
                 </div>
 
-                <!-- 6. Map Display Settings -->
-                <div class="space-y-3">
-                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                        <i data-lucide="layers" class="w-4 h-4 text-emerald-500"></i> Map Display Settings
-                    </div>
-                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3 text-xs">
-                        <div class="grid grid-cols-2 gap-2">
-                            <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
-                                <input type="checkbox" id="chk-show-pins" checked onchange="togglePinsVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Show Pins
-                            </label>
-                            <label class="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
-                                <input type="checkbox" id="chk-show-labels" onchange="toggleLabelsVisibility()" class="rounded bg-slate-200 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-blue-600"> Labels
-                            </label>
-                        </div>
-                        <div>
-                            <label class="block text-slate-600 dark:text-slate-400 mb-1">Tile Provider</label>
-                            <select id="tile-provider-select" onchange="changeTileProvider()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="carto-dark">CartoDB Dark Matter</option>
-                                <option value="carto-light">CartoDB Positron (Light)</option>
-                                <option value="osm">OpenStreetMap Standard</option>
-                                <option value="esri-sat">Esri World Imagery (Satellite)</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-slate-600 dark:text-slate-400 mb-1">Pin Size: <span id="pin-size-val">14px</span></label>
-                                <input type="range" id="slider-pin-size" min="8" max="28" value="14" class="w-full accent-blue-500">
-                            </div>
-                            <div>
-                                <label class="block text-slate-600 dark:text-slate-400 mb-1">Font Size: <span id="font-size-val">11px</span></label>
-                                <input type="range" id="slider-font-size" min="8" max="16" value="11" class="w-full accent-blue-500">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- 7. Color Legend Column Preset -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
@@ -448,21 +499,6 @@
                     </div>
                 </div>
 
-                <!-- 9. Geospatial Tools & Distance Ruler -->
-                <div class="space-y-3">
-                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                        <i data-lucide="ruler" class="w-4 h-4 text-amber-500"></i> Distance Ruler Tool
-                    </div>
-                    <div class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
-                        <button id="btn-ruler" onclick="toggleRulerMode()" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg font-medium transition flex items-center justify-center gap-1.5">
-                            <i data-lucide="ruler" class="w-4 h-4"></i> Activate Distance Ruler
-                        </button>
-                        <div id="ruler-result" class="hidden p-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-[11px] text-amber-600 dark:text-amber-400 font-mono text-center">
-                            Click on the map to add distance points
-                        </div>
-                    </div>
-                </div>
-
                 <!-- 10. Inspector Panel / Detail Editor -->
                 <div class="space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
@@ -470,7 +506,7 @@
                         <span id="inspect-site-id" class="text-blue-600 dark:text-blue-400 font-mono text-[10px]">None Selected</span>
                     </div>
                     <div id="inspector-container" class="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 text-xs">
-                        <div class="text-slate-500 italic text-center py-4">Click any site pin or wedge on the map to inspect or edit details.</div>
+                        <div class="text-slate-500 italic text-center py-4">Click any site pin, NSB map pin, or wedge on the map to inspect details.</div>
                     </div>
                 </div>
 
@@ -638,7 +674,7 @@
                         <i data-lucide="table" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h2 class="font-bold text-base text-slate-900 dark:text-white">Merged Spreadsheet Matrix (Includes All Sites & IBS)</h2>
+                        <h2 class="font-bold text-base text-slate-900 dark:white">Merged Spreadsheet Matrix (Includes All Sites & IBS)</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">Search and filter enriched dataset records with SSV lookup status</p>
                     </div>
                 </div>
@@ -847,21 +883,24 @@
         const PRIMARY_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxxn6Gxb28-E5Eu6WlCkPMi9vYnF_C12fTglt8CurPFd0YO-ldcYjesS0l3qRXqei5_QA/exec';
         const UTILIZATION_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyc6k3G2iNl-AkIj8APjkMiDfsUOQIc2_jFXTNSICIhtLxl6F9NQmP4BwXN1uAFUIT7/exec';
         const SSV_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbx-JSY8LuqG3lxcmqJGdhG6WXXE0xgUqFcSBbU40aA-S33BS46ZWJT_x7nZ-4gTACcQkw/exec';
+        const NSB_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxxn6Gxb28-E5Eu6WlCkPMi9vYnF_C12fTglt8CurPFd0YO-ldcYjesS0l3qRXqei5_QA/exec?sheet=NSB-IMPORT';
 
         const API_PRIMARY_PROXY = '/api/sheet-data';
         const API_UTILIZATION_PROXY = '/api/utilization-data';
         const API_SSV_PROXY = '/api/ssv-data';
+        const API_NSB_PROXY = '/api/nsb-data';
 
         let rawDataset = [];
         let utilizationDataset = [];
+        let nsbDataset = [];
         let ssvLookupCount = 0;
 
         let map = null;
         let sharedSvgRenderer = null;
-        let pinsCanvasRenderer = null;
         let markersLayerGroup = null;
         let wedgesLayerGroup = null;
         let ibsCirclesLayerGroup = null;
+        let nsbLayerGroup = null;
         let activeTileLayer = null;
         let leafletMarkers = [];
 
@@ -911,6 +950,7 @@
         let showPins = true;
         let showWedges = true;
         let showLabels = false;
+        let showNSB = true;
         let pinSize = 14;
         let labelFontSize = 11;
         let isDarkMode = true;
@@ -992,7 +1032,6 @@
         });
 
         function initMap() {
-            // FIX #1: Single shared SVG renderer for all vector features to prevent Canvas/SVG collision
             sharedSvgRenderer = L.svg({ padding: 0.5 });
 
             map = L.map('map', {
@@ -1003,7 +1042,7 @@
 
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            // Structure Map Panes: Wedges (400) -> IBS Circles (500) -> Pins (600)
+            // Structure Map Panes: Wedges (400) -> IBS Circles (500) -> NSB Layer (650) -> Pins (700)
             map.createPane('locationPane');
             map.getPane('locationPane').style.zIndex = 800;
 
@@ -1015,10 +1054,13 @@
             map.getPane('ibsCirclesPane').style.zIndex = 500;
             map.getPane('ibsCirclesPane').classList.add('leaflet-ibscirclespane-pane');
 
-            map.createPane('pinsPane');
-            map.getPane('pinsPane').style.zIndex = 600;
+            map.createPane('nsbPane');
+            map.getPane('nsbPane').style.zIndex = 650;
+            map.getPane('nsbPane').classList.add('leaflet-nsbpane-pane');
 
-            pinsCanvasRenderer = L.canvas({ padding: 0.5, pane: 'pinsPane' });
+            map.createPane('pinsPane');
+            map.getPane('pinsPane').style.zIndex = 700;
+            map.getPane('pinsPane').classList.add('leaflet-pinspane-pane');
 
             activeTileLayer = L.tileLayer(tileProviders['carto-dark'], {
                 maxZoom: 19,
@@ -1027,6 +1069,7 @@
 
             wedgesLayerGroup = L.featureGroup().addTo(map);
             ibsCirclesLayerGroup = L.featureGroup().addTo(map);
+            nsbLayerGroup = L.featureGroup().addTo(map);
             markersLayerGroup = L.featureGroup().addTo(map);
 
             map.on('click', (e) => {
@@ -1036,15 +1079,26 @@
             });
         }
 
-        // Single, centralized tooltip opening function
-        function openMapTooltip(latlng, htmlContent, directionVal = 'center') {
+        // Global Map Tooltip Handler with Top-Left Positioning, Manual Close & High Z-Index
+        function openMapTooltip(latlng, bodyHtmlContent) {
+            const wrappedContent = `
+                <div class="relative">
+                    <button onclick="map.closeTooltip();" class="absolute top-1.5 right-1.5 w-5 h-5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full flex items-center justify-center font-bold text-xs transition z-50 border border-slate-600/50" title="Close Popup">✕</button>
+                    ${bodyHtmlContent}
+                </div>
+            `;
+
             L.tooltip({
-                direction: directionVal,
-                opacity: 0.98,
+                direction: 'top',
+                offset: [-12, -8], // Top-Left Offset so it does not cover the clicked pin/wedge
+                opacity: 1.0,
+                autoClose: false,
+                closeOnClick: false,
+                interactive: true,
                 className: 'clickable-tooltip'
             })
             .setLatLng(latlng)
-            .setContent(htmlContent)
+            .setContent(wrappedContent)
             .openOn(map);
         }
 
@@ -1070,7 +1124,7 @@
             isInitialLoad = true;
             const syncStatus = document.getElementById('sync-status');
             if (syncStatus) {
-                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing Main, SSV & Utilization...';
+                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing Main, SSV, Utilization & NSB...';
             }
 
             const isStaticHost = window.location.hostname.includes('github.io') || 
@@ -1092,9 +1146,14 @@
                 ? [UTILIZATION_WEBAPP_URL, corsProxy + encodeURIComponent(UTILIZATION_WEBAPP_URL)]
                 : [API_UTILIZATION_PROXY, UTILIZATION_WEBAPP_URL, corsProxy + encodeURIComponent(UTILIZATION_WEBAPP_URL)];
 
+            const nsbEndpoints = isStaticHost
+                ? [NSB_WEBAPP_URL, corsProxy + encodeURIComponent(NSB_WEBAPP_URL)]
+                : [API_NSB_PROXY, NSB_WEBAPP_URL, corsProxy + encodeURIComponent(NSB_WEBAPP_URL)];
+
             let primaryCsvText = null;
             let ssvCsvText = null;
             let utilCsvText = null;
+            let nsbCsvText = null;
 
             for (const url of primaryEndpoints) {
                 const res = await fetchWithTimeout(url, 30000);
@@ -1111,6 +1170,11 @@
                 if (res) { utilCsvText = res; break; }
             }
 
+            for (const url of nsbEndpoints) {
+                const res = await fetchWithTimeout(url, 30000);
+                if (res) { nsbCsvText = res; break; }
+            }
+
             if (!primaryCsvText) {
                 if (syncStatus) {
                     syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed (Primary Web App Error)';
@@ -1118,10 +1182,11 @@
                 return;
             }
 
-            processCsvData(primaryCsvText, ssvCsvText, utilCsvText, syncStatus);
+            processCsvData(primaryCsvText, ssvCsvText, utilCsvText, nsbCsvText, syncStatus);
         }
 
-        function processCsvData(primaryCsv, ssvCsv, utilCsv, syncStatus) {
+        function processCsvData(primaryCsv, ssvCsv, utilCsv, nsbCsv, syncStatus) {
+            // STRICT ISOLATION: SSV Lookups use ONLY the SSV Tracker Sheet
             const ssvLookupMap = {};
 
             if (ssvCsv) {
@@ -1201,7 +1266,59 @@
                 generateFallbackUtilizationData();
             }
 
-            onSyncDatasetReady(syncStatus, `${ssvLookupCount} Physical SSV Lookups & ${utilizationDataset.length} Wedges`);
+            // PROCESS INDEPENDENT NSB-IMPORT FILE (COMPLETELY EXCLUDED FROM LOOKUPS)
+            if (nsbCsv) {
+                const parsedNSB = Papa.parse(nsbCsv, { header: true, skipEmptyLines: true });
+                if (parsedNSB.data && parsedNSB.data.length > 0) {
+                    nsbDataset = [];
+                    parsedNSB.data.forEach(row => {
+                        const hlMilestone = String(row['HIGH LEVEL MILESTONE'] || row['High Level Milestone'] || '').toUpperCase();
+                        // EXCLUDE sites tagged with "TRFS" in HIGH LEVEL MILESTONE
+                        if (hlMilestone.includes('TRFS')) return;
+
+                        // Check RTB Long/Lat first, then fallback to Nominal Point Long/Lat
+                        const rtbLatKey = Object.keys(row).find(k => k.toUpperCase().includes('RTB') && (k.toUpperCase().includes('LAT') || k.toUpperCase().includes('Y')));
+                        const rtbLonKey = Object.keys(row).find(k => k.toUpperCase().includes('RTB') && (k.toUpperCase().includes('LON') || k.toUpperCase().includes('LONG') || k.toUpperCase().includes('X')));
+
+                        const nomLatKey = Object.keys(row).find(k => (k.toUpperCase().includes('NOMINAL') || k.toUpperCase().includes('NP')) && (k.toUpperCase().includes('LAT') || k.toUpperCase().includes('Y')));
+                        const nomLonKey = Object.keys(row).find(k => (k.toUpperCase().includes('NOMINAL') || k.toUpperCase().includes('NP')) && (k.toUpperCase().includes('LON') || k.toUpperCase().includes('LONG') || k.toUpperCase().includes('X')));
+
+                        let validLat = null;
+                        let validLon = null;
+                        let coordSource = 'RTB';
+
+                        if (rtbLatKey && rtbLonKey) {
+                            const rLat = parseFloat(String(row[rtbLatKey] || '').replace(/[^0-9.-]/g, ''));
+                            const rLon = parseFloat(String(row[rtbLonKey] || '').replace(/[^0-9.-]/g, ''));
+                            if (!isNaN(rLat) && !isNaN(rLon) && rLat !== 0 && rLon !== 0) {
+                                validLat = rLat;
+                                validLon = rLon;
+                            }
+                        }
+
+                        if ((validLat === null || validLon === null) && nomLatKey && nomLonKey) {
+                            const nLat = parseFloat(String(row[nomLatKey] || '').replace(/[^0-9.-]/g, ''));
+                            const nLon = parseFloat(String(row[nomLonKey] || '').replace(/[^0-9.-]/g, ''));
+                            if (!isNaN(nLat) && !isNaN(nLon) && nLat !== 0 && nLon !== 0) {
+                                validLat = nLat;
+                                validLon = nLon;
+                                coordSource = 'Nominal Point';
+                            }
+                        }
+
+                        if (validLat !== null && validLon !== null) {
+                            nsbDataset.push({
+                                ...row,
+                                _computedLat: validLat,
+                                _computedLon: validLon,
+                                _coordSource: coordSource
+                            });
+                        }
+                    });
+                }
+            }
+
+            onSyncDatasetReady(syncStatus, `${ssvLookupCount} SSVs, ${utilizationDataset.length} Wedges & ${nsbDataset.length} Independent NSBs`);
         }
 
         function generateFallbackUtilizationData() {
@@ -1678,7 +1795,6 @@
         function calculateBlendedCongestionColor(sectorRow) {
             const rowKeys = Object.keys(sectorRow);
 
-            // Direct check if "Blended Congestion" column exists in the row
             const blendedColKey = rowKeys.find(k => k.trim().toLowerCase() === 'blended congestion' || k.trim().toLowerCase() === 'blended');
             if (blendedColKey) {
                 const blendedVal = String(sectorRow[blendedColKey] || '').toUpperCase().trim();
@@ -1688,7 +1804,6 @@
                 if (blendedVal.includes('BLACK')) return '#0f172a';
             }
 
-            // Fallback calculation across band metrics
             let red = 0, amber = 0, green = 0, black = 0, total = 0;
             TARGET_BANDS.forEach(targetBand => {
                 const matchingKey = rowKeys.find(k => k.trim().toUpperCase() === targetBand.toUpperCase());
@@ -1729,7 +1844,6 @@
             return 200;
         }
 
-        // FIX #2: Indented wedge generator that offsets the wedge origin 5 meters outward along azimuth
         function createIndentedWedgePolygonPoints(lat, lon, azimuth, radiusMeters, beamwidthDeg, indentMeters = 5) {
             const azRad = (azimuth * Math.PI) / 180;
             const startLat = lat + (indentMeters * Math.cos(azRad)) / 111111;
@@ -1751,7 +1865,6 @@
             return points;
         }
 
-        // FIX #3: True Concentric Donut Generator (Polygon with Inner Hole Cutout)
         function createIbsDonutRingPoints(lat, lon, outerRadiusMeters, innerRadiusMeters) {
             const outerPoints = [];
             const innerPoints = [];
@@ -1767,17 +1880,22 @@
                 innerPoints.push([lat + dLatInner, lon + dLonInner]);
             }
 
-            // Return outer ring clockwise, inner ring counter-clockwise (Leaflet hole definition)
             return [outerPoints, innerPoints.reverse()];
+        }
+
+        function toggleNSBVisibility() {
+            showNSB = document.getElementById('chk-show-nsb').checked;
+            plotPinsAndWedges();
         }
 
         function plotPinsAndWedges() {
             markersLayerGroup.clearLayers();
             wedgesLayerGroup.clearLayers();
             ibsCirclesLayerGroup.clearLayers();
+            nsbLayerGroup.clearLayers();
             leafletMarkers = [];
 
-            if (rawDataset.length === 0) return;
+            if (rawDataset.length === 0 && nsbDataset.length === 0) return;
 
             const latVals = [];
             const lonVals = [];
@@ -1785,7 +1903,7 @@
 
             const siteMap = {};
 
-            // Build Site Location Reference
+            // Build Main Site Location Reference
             rawDataset.forEach((row, index) => {
                 const groupVal = String(row[colGroup] || 'Unclassified').trim();
 
@@ -1828,28 +1946,27 @@
                                 radius: radius,
                                 fillColor: color,
                                 color: '#ffffff',
-                                weight: 1.5,
+                                weight: 2.0,
                                 opacity: 1,
-                                fillOpacity: 0.9,
+                                fillOpacity: 0.95,
                                 renderer: sharedSvgRenderer,
                                 interactive: true,
-                                pane: 'pinsPane' // pinsPane = 600
+                                zIndexOffset: 1000,
+                                pane: 'pinsPane'   // pinsPane = 700
                             });
 
                             const popupTitle = row[colId] || row['Site_ID'] || 'Site Details';
 
-                            // Save marker reference
                             keysToRegister.forEach(k => {
                                 if (siteMap[k]) siteMap[k].marker = marker;
                             });
 
-                            // PRINCIPLE 4: Site Pin handles strictly its own click events
                             marker.on('click', (e) => {
                                 L.DomEvent.stopPropagation(e);
 
                                 const pinTooltipHTML = `
                                     <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[220px] text-xs font-sans border border-blue-500/50 pointer-events-auto">
-                                        <div class="font-bold text-xs text-blue-400 border-b border-slate-700/80 pb-1.5 mb-2 flex items-center justify-between">
+                                        <div class="font-bold text-xs text-blue-400 border-b border-slate-700/80 pb-1.5 mb-2 flex items-center justify-between pr-5">
                                             <span>📍 Site: ${popupTitle}</span>
                                             <span class="w-2.5 h-2.5 rounded-full border border-white/50 shrink-0" style="background-color: ${color};"></span>
                                         </div>
@@ -1864,8 +1981,8 @@
                                     </div>
                                 `;
 
-                                openMapTooltip(e.latlng, pinTooltipHTML, 'top');
-                                inspectSite(index);
+                                openMapTooltip(e.latlng, pinTooltipHTML);
+                                inspectMainSite(index);
                             });
 
                             markersLayerGroup.addLayer(marker);
@@ -1874,6 +1991,100 @@
                     }
                 }
             });
+
+            // PLOT INDEPENDENT NSB SITES AS REDUCED PROPORTIONAL TEAL MAP PINS (16x20px)
+            if (showNSB && nsbDataset.length > 0) {
+                nsbDataset.forEach((nsbRow) => {
+                    const nLat = nsbRow._computedLat;
+                    const nLon = nsbRow._computedLon;
+                    latVals.push(nLat);
+                    lonVals.push(nLon);
+
+                    // Scaled Down Teal Location Drop-Pin SVG (16x20px)
+                    const nsbPinSvg = `
+                        <div class="nsb-map-pin-wrapper">
+                            <svg class="nsb-map-pin-svg" width="16" height="20" viewBox="0 0 24 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 0C5.37 0 0 5.37 0 12C0 21 12 30 12 30C12 30 24 21 24 12C24 5.37 18.63 0 12 0Z" fill="#14b8a6" stroke="#0f172a" stroke-width="1.8"/>
+                                <circle cx="12" cy="11" r="4.5" fill="#ffffff"/>
+                                <circle cx="12" cy="11" r="2.2" fill="#0f172a"/>
+                            </svg>
+                        </div>
+                    `;
+
+                    const nsbIcon = L.divIcon({
+                        className: 'custom-nsb-icon-container',
+                        html: nsbPinSvg,
+                        iconSize: [16, 20],
+                        iconAnchor: [8, 20] // Anchor at exact tip of the pin
+                    });
+
+                    const nsbMarker = L.marker([nLat, nLon], {
+                        icon: nsbIcon,
+                        zIndexOffset: 850,
+                        pane: 'nsbPane' // nsbPane = 650
+                    });
+
+                    // FIXED CLICKABLE NSB TOOLTIP CARD
+                    const nsbTooltipHTML = `
+                        <div class="glass-card rounded-xl p-3.5 shadow-2xl min-w-[280px] max-w-sm text-xs font-sans border border-teal-500/80 pointer-events-auto">
+                            <div class="font-bold text-xs text-teal-400 border-b border-slate-700/80 pb-2 mb-2 flex items-center justify-between pr-5">
+                                <span class="truncate">🚀 NSB: ${nsbRow['BCF NAME'] || nsbRow['PLA ID'] || nsbRow['Serial Number'] || 'NSB Target'}</span>
+                                <span class="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 font-mono text-[10px] border border-teal-500/40 shrink-0 mr-1">${nsbRow._coordSource}</span>
+                            </div>
+                            <div class="space-y-1.5 text-[11px]">
+                                <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
+                                    <span class="text-slate-400 font-medium">Serial Number:</span>
+                                    <span class="font-bold text-slate-100 font-mono select-all">${nsbRow['Serial Number'] || '--'}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
+                                    <span class="text-slate-400 font-medium">SearchRing Name:</span>
+                                    <span class="font-bold text-slate-100 font-mono select-all">${nsbRow['SearchRing Name'] || '--'}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
+                                    <span class="text-slate-400 font-medium">TCO/BAU:</span>
+                                    <span class="font-bold text-slate-100 font-mono select-all">${nsbRow['TCO/BAU'] || '--'}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
+                                    <span class="text-slate-400 font-medium">Vendor:</span>
+                                    <span class="font-bold text-slate-100 font-mono select-all">${nsbRow['Vendor'] || '--'}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
+                                    <span class="text-slate-400 font-medium">PLA ID:</span>
+                                    <span class="font-bold text-teal-300 font-mono select-all">${nsbRow['PLA ID'] || '--'}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
+                                    <span class="text-slate-400 font-medium">BCF NAME:</span>
+                                    <span class="font-bold text-slate-100 font-mono select-all">${nsbRow['BCF NAME'] || '--'}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
+                                    <span class="text-slate-400 font-medium">PLANNED TECH (Y2026 PSOW V2.0):</span>
+                                    <span class="font-bold text-amber-400 font-mono select-all">${nsbRow['PLANNED TECH (Y2026 PSOW V2.0)'] || '--'}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
+                                    <span class="text-slate-400 font-medium">TELECOM VENDOR:</span>
+                                    <span class="font-bold text-slate-100 font-mono select-all">${nsbRow['TELECOM VENDOR'] || '--'}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
+                                    <span class="text-slate-400 font-medium">LOW LEVEL MILESTONE:</span>
+                                    <span class="font-bold text-slate-100 font-mono select-all">${nsbRow['LOW LEVEL MILESTONE'] || '--'}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 pt-0.5">
+                                    <span class="text-slate-400 font-medium">HIGH LEVEL MILESTONE:</span>
+                                    <span class="font-black text-emerald-400 font-mono select-all">${nsbRow['HIGH LEVEL MILESTONE'] || '--'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    nsbMarker.on('click', (e) => {
+                        L.DomEvent.stopPropagation(e);
+                        openMapTooltip(e.latlng, nsbTooltipHTML);
+                        inspectNSBSite(nsbRow);
+                    });
+
+                    nsbLayerGroup.addLayer(nsbMarker);
+                });
+            }
 
             // CLICKABLE SECTOR WEDGES & IBS DONUT RINGS
             if (showWedges && utilizationDataset.length > 0) {
@@ -1921,7 +2132,6 @@
                         const outerRadius = Math.max(30, 110 - (currentIbsIdx * 20));
                         const innerRadius = Math.max(10, outerRadius - 20);
 
-                        // True Non-Overlapping Donut Polygon (Hole Cutout)
                         const donutPoints = createIbsDonutRingPoints(siteRef.lat, siteRef.lon, outerRadius, innerRadius);
 
                         const ibsPolygon = L.polygon(donutPoints, {
@@ -1937,7 +2147,7 @@
 
                         const ibsTooltipHTML = `
                             <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[240px] text-xs border border-emerald-500/60 select-text pointer-events-auto">
-                                <div class="font-bold text-xs text-emerald-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between items-center">
+                                <div class="font-bold text-xs text-emerald-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between items-center pr-5">
                                     <span>📶 Site: ${displaySiteName}</span>
                                     <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono border border-emerald-500/30">IBS Ring #${currentIbsIdx + 1}</span>
                                 </div>
@@ -1953,10 +2163,9 @@
                         ibsPolygon.off('mouseover');
                         ibsPolygon.off('mouseout');
 
-                        // PRINCIPLE 5: Donut handles clicks everywhere outside the inner hole and site pin
                         ibsPolygon.on('click', (e) => {
                             L.DomEvent.stopPropagation(e);
-                            openMapTooltip(e.latlng, ibsTooltipHTML, 'top');
+                            openMapTooltip(e.latlng, ibsTooltipHTML);
                             inspectWedge(sec, siteRef.data);
                         });
                     } else {
@@ -1964,7 +2173,6 @@
                         const radiusMeters = getWedgeRadiusMeters(rawSiteType);
 
                         if (!isNaN(az)) {
-                            // FIX #2: Indented Wedge (5m Gap from Lat/Lon Origin)
                             const wedgePoints = createIndentedWedgePolygonPoints(siteRef.lat, siteRef.lon, az, radiusMeters, bw, 5);
 
                             const polygon = L.polygon(wedgePoints, {
@@ -1979,7 +2187,7 @@
 
                             const sectorTooltipHTML = `
                                 <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[240px] text-xs border border-amber-500/60 select-text pointer-events-auto">
-                                    <div class="font-bold text-xs text-amber-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between items-center">
+                                    <div class="font-bold text-xs text-amber-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between items-center pr-5">
                                         <span>📐 Site: ${displaySiteName}</span>
                                         <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono border border-amber-500/30">
                                             Azimuth: ${az}°
@@ -2014,10 +2222,9 @@
                             polygon.off('mouseover');
                             polygon.off('mouseout');
 
-                            // PRINCIPLE 5: Wedge handles clicks everywhere outside the pin
                             polygon.on('click', (e) => {
                                 L.DomEvent.stopPropagation(e);
-                                openMapTooltip(e.latlng, sectorTooltipHTML, 'center');
+                                openMapTooltip(e.latlng, sectorTooltipHTML);
                                 inspectWedge(sec, siteRef.data);
                             });
                         }
@@ -2034,6 +2241,62 @@
 
             updateLegendSwatches();
             updateFloatingLegend();
+        }
+
+        // INSPECT MAIN SITE PIN IN SIDEBAR INSPECTOR PANEL
+        function inspectMainSite(index) {
+            const container = document.getElementById('inspector-container');
+            const site = rawDataset[index];
+            if (!site) return;
+
+            const siteId = site[colId] || site['Site_ID'] || `Row #${index + 1}`;
+            document.getElementById('inspect-site-id').innerText = `${siteId} (Main Site)`;
+
+            const keys = Object.keys(site);
+            const rowsHTML = keys.map(k => `
+                <div class="flex justify-between items-center p-1 bg-slate-900 rounded border border-slate-800 gap-2">
+                    <span class="font-mono text-slate-400 truncate max-w-[130px]">${k}:</span>
+                    <span class="font-bold font-mono text-slate-100 truncate max-w-[150px] select-all">${site[k] || '--'}</span>
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="space-y-2 text-[11px]">
+                    <div class="p-2 bg-blue-950/60 border border-blue-500/40 rounded-lg flex items-center justify-between">
+                        <span class="font-bold text-blue-400 uppercase text-[10px]">Main Site Details:</span>
+                        <span class="font-mono font-bold text-slate-300 text-[10px]">${site[colGroup] || '--'}</span>
+                    </div>
+                    <div class="space-y-1 max-h-80 overflow-y-auto custom-scrollbar pr-1">
+                        ${rowsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function inspectNSBSite(nsbRow) {
+            const container = document.getElementById('inspector-container');
+            const siteId = nsbRow['BCF NAME'] || nsbRow['PLA ID'] || nsbRow['Serial Number'] || 'NSB Site';
+            document.getElementById('inspect-site-id').innerText = `${siteId} (NSB Target)`;
+
+            container.innerHTML = `
+                <div class="space-y-2 text-[11px]">
+                    <div class="p-2 bg-teal-950/60 border border-teal-500/40 rounded-lg">
+                        <span class="font-bold text-teal-400 uppercase text-[10px]">NSB Independent Details (${nsbRow._coordSource}):</span>
+                    </div>
+                    <div class="space-y-1">
+                        <div><b>Serial Number:</b> ${nsbRow['Serial Number'] || '--'}</div>
+                        <div><b>SearchRing Name:</b> ${nsbRow['SearchRing Name'] || '--'}</div>
+                        <div><b>TCO/BAU:</b> ${nsbRow['TCO/BAU'] || '--'}</div>
+                        <div><b>Vendor:</b> ${nsbRow['Vendor'] || '--'}</div>
+                        <div><b>PLA ID:</b> ${nsbRow['PLA ID'] || '--'}</div>
+                        <div><b>BCF NAME:</b> ${nsbRow['BCF NAME'] || '--'}</div>
+                        <div><b>Planned Tech:</b> ${nsbRow['PLANNED TECH (Y2026 PSOW V2.0)'] || '--'}</div>
+                        <div><b>Telecom Vendor:</b> ${nsbRow['TELECOM VENDOR'] || '--'}</div>
+                        <div><b>Low Level Milestone:</b> ${nsbRow['LOW LEVEL MILESTONE'] || '--'}</div>
+                        <div><b>High Level Milestone:</b> ${nsbRow['HIGH LEVEL MILESTONE'] || '--'}</div>
+                    </div>
+                </div>
+            `;
         }
 
         function inspectWedge(utilRow, siteRow) {
@@ -2070,7 +2333,7 @@
                     </div>
                     <div class="p-2 bg-slate-900/90 rounded-lg border border-slate-800 flex items-center justify-between">
                         <span class="font-bold text-slate-400">Blended Congestion:</span>
-                        <span class="px-2 py-0.5 rounded font-black font-mono text-xs" style="background:${blendedColor}25; color:${blendedColor}; border:1px solid ${blendedColor};">${blendedStatusLabel}</span>
+                        <span class="px-2 py-0.5 rounded font-black font-mono text-xs" style="background:${blendedColor}25; color:${blendedColor}; border:1.5px solid ${blendedColor};">${blendedStatusLabel}</span>
                     </div>
                     <div class="pt-2 border-t border-slate-800 space-y-1">
                         <div class="font-bold text-slate-400 text-[10px] uppercase">Band Breakdown:</div>
@@ -2246,7 +2509,7 @@
             rawDataset.forEach(d => { const val = String(d[colGroup] || 'Unclassified').trim(); counts[val] = (counts[val] || 0) + 1; });
             const categories = [...new Set(rawDataset.map(d => String(d[colGroup] || 'Unclassified').trim()))].sort();
 
-            container.innerHTML = categories.map(cat => {
+            let html = categories.map(cat => {
                 const count = counts[cat] || 0;
                 const isVisible = categoryVisibility[cat] !== false;
                 return `
@@ -2259,6 +2522,20 @@
                     </div>
                 `;
             }).join('');
+
+            if (showNSB && nsbDataset.length > 0) {
+                html += `
+                    <div class="pt-1.5 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="w-2.5 h-3 rounded-t-full rounded-b-sm inline-block shrink-0 bg-teal-500 border border-slate-900"></span>
+                            <span class="text-teal-600 dark:text-teal-400 font-bold truncate">NSB Map Pins</span>
+                        </div>
+                        <span class="font-bold text-teal-500 font-mono">${nsbDataset.length}</span>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
         }
 
         function toggleRulerMode() {
@@ -2854,7 +3131,7 @@
         function executeSearch() { const col = document.getElementById('search-col-select').value; const query = (document.getElementById('search-input').value || '').toLowerCase().trim(); if (!query) return; const match = rawDataset.find(r => String(r[col] || '').toLowerCase().includes(query)); if (match) map.setView([parseFloat(match[colLat]), parseFloat(match[colLon])], 15); }
         function clearSearch() { document.getElementById('search-input').value = ''; }
         function exportToKML() { alert("KML Export Ready"); }
-        function inspectSite(index) { const site = rawDataset[index]; if (site) document.getElementById('inspect-site-id').innerText = site[colId] || site['Site_ID'] || `Row #${index + 1}`; }
+        function inspectSite(index) { inspectMainSite(index); }
         function onGroupColumnChanged() { colGroup = document.getElementById('map-col-group').value; initCategoryVisibility(); plotPinsAndWedges(); }
         function onModalColumnGroupChanged() { colGroup = document.getElementById('modal-col-group').value; initCategoryVisibility(); plotPinsAndWedges(); renderDashboard(); }
         function onFilterColumnChanged(slotIdx) { const sel = document.getElementById(`filter-col-select-${slotIdx}`); if (sel) filtersState[slotIdx].col = sel.value; }
