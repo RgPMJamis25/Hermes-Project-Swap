@@ -265,6 +265,12 @@
         </div>
 
         <div class="flex items-center gap-2">
+            <!-- Unentered TRFS Flagging Tool Button -->
+            <button onclick="openFlaggedTrfsModal()" class="px-2.5 py-1.5 text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition flex items-center gap-1.5 shadow-sm" title="Check TRFS NSBs with Actual TRFS Date missing from Main Database">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Flag Unentered TRFS</span>
+                <span id="badge-unentered-count" class="ml-1 bg-white text-rose-700 font-extrabold px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+            </button>
+
             <button onclick="toggleTheme()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-500 dark:text-amber-300 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5" title="Toggle Light / Dark Theme">
                 <i id="theme-icon" data-lucide="sun" class="w-4 h-4"></i>
                 <span id="theme-label" class="text-xs font-semibold text-slate-800 dark:text-slate-200 hidden md:inline">Light Mode</span>
@@ -688,6 +694,54 @@
             </div>
 
         </main>
+    </div>
+
+    <!-- Unentered TRFS Missing Audit Modal -->
+    <div id="flag-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex flex-col p-4 sm:p-8">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-rose-600/20 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-500/30">
+                        <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-base text-slate-900 dark:text-white">Unentered TRFS Audit (Missing From Main Database)</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">List of NSB Import sites with TRFS status and TRFS Actual Date not yet present in the Main Swap Sheet</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportFlaggedTrfsCSV()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Export TRFS Flag List
+                    </button>
+                    <button onclick="closeFlaggedTrfsModal()" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 text-xs">
+                <span id="flag-status-count" class="text-rose-500 font-mono font-bold">0 unentered TRFS sites detected</span>
+            </div>
+
+            <div class="flex-1 overflow-auto custom-scrollbar p-2">
+                <table class="w-full text-left text-xs text-slate-800 dark:text-slate-300 border-collapse">
+                    <thead class="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 uppercase tracking-wider font-bold sticky top-0 border-b border-slate-200 dark:border-slate-800">
+                        <tr>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800 text-center w-10">#</th>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800">Serial Number</th>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800">SearchRing Name</th>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800">Town</th>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800">Province</th>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800">Telecom Vendor</th>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800">TRFS Actual Date</th>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800">RTB Long / Lat</th>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="flag-tbody" class="divide-y divide-slate-200 dark:divide-slate-800/60 font-mono"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Data Table Matrix Modal -->
@@ -1292,17 +1346,12 @@
                 generateFallbackUtilizationData();
             }
 
-            // PROCESS INDEPENDENT NSB-IMPORT FILE (COMPLETELY EXCLUDED FROM LOOKUPS)
+            // PROCESS INDEPENDENT NSB-IMPORT FILE
             if (nsbCsv) {
                 const parsedNSB = Papa.parse(nsbCsv, { header: true, skipEmptyLines: true });
                 if (parsedNSB.data && parsedNSB.data.length > 0) {
                     nsbDataset = [];
                     parsedNSB.data.forEach(row => {
-                        const hlMilestone = String(row['HIGH LEVEL MILESTONE'] || row['High Level Milestone'] || '').toUpperCase();
-                        // EXCLUDE sites tagged with "TRFS" in HIGH LEVEL MILESTONE
-                        if (hlMilestone.includes('TRFS')) return;
-
-                        // Check RTB Long/Lat first, then fallback to Nominal Point Long/Lat
                         const rtbLatKey = Object.keys(row).find(k => k.toUpperCase().includes('RTB') && (k.toUpperCase().includes('LAT') || k.toUpperCase().includes('Y')));
                         const rtbLonKey = Object.keys(row).find(k => k.toUpperCase().includes('RTB') && (k.toUpperCase().includes('LON') || k.toUpperCase().includes('LONG') || k.toUpperCase().includes('X')));
 
@@ -1344,7 +1393,158 @@
                 }
             }
 
+            auditUnenteredTrfsSites();
             onSyncDatasetReady(syncStatus, `${ssvLookupCount} SSVs, ${utilizationDataset.length} Wedges & ${nsbDataset.length} Independent NSBs`);
+        }
+
+        // Helper function to check if a TRFS Actual Date string is valid
+        function hasValidTrfsActualDate(nsbRow) {
+            const dateVal = getNsbFieldValue(nsbRow, ['TRFS ACTUAL DATE', 'ACTUAL TRFS DATE', 'TRFS DATE', 'TRFS ACTUAL']);
+            if (!dateVal || dateVal === '--') return false;
+            const str = String(dateVal).trim().toUpperCase();
+            return str !== '' && str !== 'NULL' && str !== 'N/A' && str !== 'UNDEFINED';
+        }
+
+        // AUDIT FEATURE: Detect TRFS NSB Sites with TRFS Actual Date missing from Main Database
+        let unenteredTrfsList = [];
+
+        function getNsbFieldValue(row, fieldKeywords) {
+            const keys = Object.keys(row);
+            for (const keyword of fieldKeywords) {
+                const foundKey = keys.find(k => k.trim().toUpperCase().includes(keyword));
+                if (foundKey && row[foundKey]) return row[foundKey];
+            }
+            return '--';
+        }
+
+        function auditUnenteredTrfsSites() {
+            unenteredTrfsList = [];
+            if (!nsbDataset || nsbDataset.length === 0) return;
+
+            // Build Main Database Key Set
+            const mainKeys = new Set();
+            rawDataset.forEach(row => {
+                const keys = [
+                    String(row[colId] || '').trim().toUpperCase(),
+                    String(row['Site_ID'] || '').trim().toUpperCase(),
+                    String(row['Site ID'] || '').trim().toUpperCase(),
+                    String(row['PLAID'] || '').trim().toUpperCase(),
+                    String(row['BCF'] || '').trim().toUpperCase()
+                ];
+                keys.forEach(k => { if (k) mainKeys.add(k); });
+            });
+
+            nsbDataset.forEach(nsbRow => {
+                const hlMilestone = String(nsbRow['HIGH LEVEL MILESTONE'] || nsbRow['High Level Milestone'] || '').toUpperCase();
+                const hasActualDate = hasValidTrfsActualDate(nsbRow);
+
+                // STRICT INCLUSION: Must have TRFS in High Level Milestone AND a valid TRFS Actual Date
+                if (hlMilestone.includes('TRFS') && hasActualDate) {
+                    const candidates = [
+                        String(nsbRow['PLA ID'] || '').trim().toUpperCase(),
+                        String(nsbRow['BCF NAME'] || '').trim().toUpperCase(),
+                        String(nsbRow['Serial Number'] || '').trim().toUpperCase(),
+                        String(nsbRow['SearchRing Name'] || '').trim().toUpperCase()
+                    ];
+
+                    const existsInMain = candidates.some(c => c && mainKeys.has(c));
+                    if (!existsInMain) {
+                        unenteredTrfsList.push(nsbRow);
+                    }
+                }
+            });
+
+            const badge = document.getElementById('badge-unentered-count');
+            if (badge) badge.innerText = unenteredTrfsList.length;
+        }
+
+        function openFlaggedTrfsModal() {
+            document.getElementById('flag-modal').classList.remove('hidden');
+            renderFlaggedTrfsTable();
+        }
+
+        function closeFlaggedTrfsModal() {
+            document.getElementById('flag-modal').classList.add('hidden');
+        }
+
+        function renderFlaggedTrfsTable() {
+            const statusEl = document.getElementById('flag-status-count');
+            const tbody = document.getElementById('flag-tbody');
+
+            if (statusEl) statusEl.innerText = `${unenteredTrfsList.length} unentered TRFS sites detected (TRFS tagged with Actual Date, Missing in Main DB)`;
+
+            if (!unenteredTrfsList || unenteredTrfsList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400 italic">All TRFS NSB sites with TRFS Actual Date are registered in the Main Database.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = unenteredTrfsList.map((row, idx) => {
+                const town = getNsbFieldValue(row, ['TOWN', 'CITY', 'MUNICIPALITY']);
+                const province = getNsbFieldValue(row, ['PROVINCE', 'REGION']);
+                const vendor = getNsbFieldValue(row, ['TELECOM VENDOR', 'VENDOR']);
+                const trfsDate = getNsbFieldValue(row, ['TRFS ACTUAL DATE', 'ACTUAL TRFS DATE', 'TRFS DATE', 'TRFS ACTUAL']);
+                const longLatStr = `${row._computedLon.toFixed(5)}, ${row._computedLat.toFixed(5)} (${row._coordSource})`;
+
+                return `
+                    <tr class="hover:bg-rose-900/20 transition border-b border-slate-800">
+                        <td class="p-2.5 border border-slate-200 dark:border-slate-800 text-center font-bold text-slate-400">${idx + 1}</td>
+                        <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-bold text-rose-400">${row['Serial Number'] || '--'}</td>
+                        <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-semibold">${row['SearchRing Name'] || '--'}</td>
+                        <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-medium">${town}</td>
+                        <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-medium">${province}</td>
+                        <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-bold text-cyan-400">${vendor}</td>
+                        <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-mono text-emerald-400">${trfsDate}</td>
+                        <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-mono text-[10px] text-amber-300">${longLatStr}</td>
+                        <td class="p-2.5 border border-slate-200 dark:border-slate-800 text-center">
+                            <button onclick="focusUnenteredNsb(${idx})" class="px-2 py-1 bg-teal-600 hover:bg-teal-500 text-white rounded font-bold text-[10px]">
+                                Locate Pin
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function focusUnenteredNsb(flagIndex) {
+            const row = unenteredTrfsList[flagIndex];
+            if (row) {
+                closeFlaggedTrfsModal();
+                map.setView([row._computedLat, row._computedLon], 16);
+                inspectNSBSite(row);
+            }
+        }
+
+        function exportFlaggedTrfsCSV() {
+            if (!unenteredTrfsList || unenteredTrfsList.length === 0) return;
+            const headers = ['Serial Number', 'SearchRing Name', 'PLA ID', 'BCF NAME', 'Town', 'Province', 'Telecom Vendor', 'TRFS Actual Date', 'HIGH LEVEL MILESTONE', 'Longitude', 'Latitude', 'Coord Source'];
+            let csvContent = headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(',') + "\r\n";
+
+            unenteredTrfsList.forEach(row => {
+                const town = getNsbFieldValue(row, ['TOWN', 'CITY', 'MUNICIPALITY']);
+                const province = getNsbFieldValue(row, ['PROVINCE', 'REGION']);
+                const vendor = getNsbFieldValue(row, ['TELECOM VENDOR', 'VENDOR']);
+                const trfsDate = getNsbFieldValue(row, ['TRFS ACTUAL DATE', 'ACTUAL TRFS DATE', 'TRFS DATE', 'TRFS ACTUAL']);
+
+                csvContent += [
+                    row['Serial Number'] || '',
+                    row['SearchRing Name'] || '',
+                    row['PLA ID'] || '',
+                    row['BCF NAME'] || '',
+                    town === '--' ? '' : town,
+                    province === '--' ? '' : province,
+                    vendor === '--' ? '' : vendor,
+                    trfsDate === '--' ? '' : trfsDate,
+                    row['HIGH LEVEL MILESTONE'] || '',
+                    row._computedLon || '',
+                    row._computedLat || '',
+                    row._coordSource || ''
+                ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',') + "\r\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `Unentered_TRFS_Missing_Sites_${Date.now()}.csv`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         }
 
         function generateFallbackUtilizationData() {
@@ -1735,7 +1935,7 @@
             });
             sitesWithDistance.sort((a, b) => a.distanceMeters - b.distanceMeters);
 
-            // 2. FIXED: Calculate Nearest Independent NSB Sites (directly querying nsbDataset)
+            // 2. Calculate Nearest Independent NSB Sites (directly querying nsbDataset)
             const nsbWithDistance = [];
             if (nsbDataset && nsbDataset.length > 0) {
                 nsbDataset.forEach((nsbRow, nsbIndex) => {
@@ -2128,9 +2328,15 @@
                 }
             });
 
-            // PLOT INDEPENDENT NSB SITES AS REDUCED PROPORTIONAL TEAL MAP PINS (16x20px)
+            // PLOT INDEPENDENT NSB SITES (STRICT EXCLUSION RULE: Exclude TRFS tagged WITH valid TRFS Actual Date)
             if (showNSB && nsbDataset.length > 0) {
                 nsbDataset.forEach((nsbRow) => {
+                    const hlMilestone = String(nsbRow['HIGH LEVEL MILESTONE'] || nsbRow['High Level Milestone'] || '').toUpperCase();
+                    const hasActualDate = hasValidTrfsActualDate(nsbRow);
+
+                    // STRICT EXCLUSION: Exclude if Tagged TRFS AND Has Actual Date
+                    if (hlMilestone.includes('TRFS') && hasActualDate) return;
+
                     const nLat = nsbRow._computedLat;
                     const nLon = nsbRow._computedLon;
                     latVals.push(nLat);
@@ -2151,7 +2357,7 @@
                         className: 'custom-nsb-icon-container',
                         html: nsbPinSvg,
                         iconSize: [16, 20],
-                        iconAnchor: [8, 20] // Anchor at exact tip of the pin
+                        iconAnchor: [8, 20]
                     });
 
                     const nsbMarker = L.marker([nLat, nLon], {
@@ -2160,7 +2366,8 @@
                         pane: 'nsbPane' // nsbPane = 650
                     });
 
-                    // FIXED CLICKABLE NSB TOOLTIP CARD
+                    const trfsDateDisplay = getNsbFieldValue(nsbRow, ['TRFS ACTUAL DATE', 'ACTUAL TRFS DATE', 'TRFS DATE', 'TRFS ACTUAL']);
+
                     const nsbTooltipHTML = `
                         <div class="glass-card rounded-xl p-3.5 shadow-2xl min-w-[280px] max-w-sm text-xs font-sans border border-teal-500/80 pointer-events-auto">
                             <div class="font-bold text-xs text-teal-400 border-b border-slate-700/80 pb-2 mb-2 flex items-center justify-between pr-5">
@@ -2191,6 +2398,10 @@
                                 <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
                                     <span class="text-slate-400 font-medium">BCF NAME:</span>
                                     <span class="font-bold text-slate-100 font-mono select-all">${nsbRow['BCF NAME'] || '--'}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
+                                    <span class="text-slate-400 font-medium">TRFS Actual Date:</span>
+                                    <span class="font-bold text-emerald-400 font-mono select-all">${trfsDateDisplay}</span>
                                 </div>
                                 <div class="flex justify-between items-center gap-2 border-b border-slate-800/60 pb-1">
                                     <span class="text-slate-400 font-medium">PLANNED TECH (Y2026 PSOW V2.0):</span>
@@ -2419,6 +2630,8 @@
             const siteId = nsbRow['BCF NAME'] || nsbRow['PLA ID'] || nsbRow['Serial Number'] || 'NSB Site';
             document.getElementById('inspect-site-id').innerText = `${siteId} (NSB Target)`;
 
+            const trfsDateDisplay = getNsbFieldValue(nsbRow, ['TRFS ACTUAL DATE', 'ACTUAL TRFS DATE', 'TRFS DATE', 'TRFS ACTUAL']);
+
             container.innerHTML = `
                 <div class="space-y-2 text-[11px]">
                     <div class="p-2 bg-teal-950/60 border border-teal-500/40 rounded-lg">
@@ -2431,6 +2644,7 @@
                         <div><b>Vendor:</b> ${nsbRow['Vendor'] || '--'}</div>
                         <div><b>PLA ID:</b> ${nsbRow['PLA ID'] || '--'}</div>
                         <div><b>BCF NAME:</b> ${nsbRow['BCF NAME'] || '--'}</div>
+                        <div><b>TRFS Actual Date:</b> <span class="font-mono text-emerald-400 font-bold">${trfsDateDisplay}</span></div>
                         <div><b>Planned Tech:</b> ${nsbRow['PLANNED TECH (Y2026 PSOW V2.0)'] || '--'}</div>
                         <div><b>Telecom Vendor:</b> ${nsbRow['TELECOM VENDOR'] || '--'}</div>
                         <div><b>Low Level Milestone:</b> ${nsbRow['LOW LEVEL MILESTONE'] || '--'}</div>
