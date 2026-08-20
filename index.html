@@ -375,6 +375,8 @@
                     <thead class="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 uppercase tracking-wider font-bold sticky top-0 border-b border-slate-200 dark:border-slate-800">
                         <tr>
                             <th class="p-2.5 border border-slate-200 dark:border-slate-800 text-center w-10">#</th>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800">BCF Name</th>
+                            <th class="p-2.5 border border-slate-200 dark:border-slate-800">PLAID</th>
                             <th class="p-2.5 border border-slate-200 dark:border-slate-800">Serial Number</th>
                             <th class="p-2.5 border border-slate-200 dark:border-slate-800">SearchRing Name</th>
                             <th class="p-2.5 border border-slate-200 dark:border-slate-800">Town</th>
@@ -416,22 +418,104 @@
         </div>
     </div>
 
+    <!-- Analytics Dashboard Modal -->
     <div id="dashboard-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex flex-col p-3 sm:p-6">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden">
+
+            <!-- Restored Header Controls & Multi-Select Filters -->
             <div class="p-4 border-b border-slate-200 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3 bg-slate-50/90 dark:bg-slate-950/90 shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="p-2.5 bg-purple-600/20 text-purple-600 dark:text-purple-400 rounded-xl border border-purple-500/30"><i data-lucide="bar-chart-2" class="w-6 h-6"></i></div>
-                    <div><h2 class="font-black text-lg text-slate-900 dark:text-white">Cluster Rollout Analytics</h2></div>
-                </div>
-                <div class="flex flex-wrap items-center gap-2.5">
-                    <button onclick="exportAnalyticsReport()" class="px-3 py-1.5 bg-purple-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"><i data-lucide="download" class="w-4 h-4"></i> Export Report</button>
-                    <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3 py-1.5">
-                        <i data-lucide="palette" class="w-4 h-4 text-purple-500"></i><span class="text-xs font-bold text-slate-600 dark:text-slate-300">Status Col:</span>
-                        <select id="modal-col-group" onchange="onModalColumnGroupChanged()" class="bg-transparent text-xs font-bold text-blue-600 dark:text-blue-400 outline-none max-w-[140px] truncate"></select>
+                    <div>
+                        <h2 class="font-black text-lg text-slate-900 dark:text-white">Cluster Rollout Analytics</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Dynamic filtered metrics & pivot breakdown</p>
                     </div>
-                    <button onclick="closeDashboardModal()" class="p-2 text-slate-400 hover:text-white rounded-xl"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+
+                <!-- RESTORED ANALYTICS FILTERS TOOLBAR -->
+                <div class="flex flex-wrap items-center gap-2">
+
+                    <!-- Province Filter -->
+                    <div class="relative flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 py-1 shadow-xs">
+                        <i data-lucide="map" class="w-3.5 h-3.5 text-purple-500"></i>
+                        <span class="text-[11px] font-bold text-slate-500">Prov:</span>
+                        <div class="relative">
+                            <button id="modal-prov-multiselect-btn" onclick="toggleModalFilterDropdown('prov')" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none flex items-center justify-between gap-1 min-w-[80px] max-w-[120px] font-mono">
+                                <span id="modal-prov-multiselect-label" class="truncate">All Provinces</span>
+                                <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                            </button>
+                            <div id="modal-prov-multiselect-panel" class="hidden absolute top-full left-0 mt-1.5 w-60 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2">
+                                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1 px-1">
+                                    <span class="text-[10px] uppercase font-bold text-slate-400">Provinces</span>
+                                    <div class="flex items-center gap-2 text-[10px]">
+                                        <button onclick="selectAllModalFilterValues('prov')" class="text-blue-500 font-bold">All</button>
+                                        <span class="text-slate-500">|</span>
+                                        <button onclick="clearAllModalFilterValues('prov')" class="text-rose-500 font-bold">Clear</button>
+                                    </div>
+                                </div>
+                                <div id="modal-prov-checkbox-list" class="max-h-48 overflow-y-auto custom-scrollbar space-y-1 text-xs"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Town Filter -->
+                    <div class="relative flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 py-1 shadow-xs">
+                        <i data-lucide="building-2" class="w-3.5 h-3.5 text-indigo-500"></i>
+                        <span class="text-[11px] font-bold text-slate-500">Town:</span>
+                        <div class="relative">
+                            <button id="modal-town-multiselect-btn" onclick="toggleModalFilterDropdown('town')" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none flex items-center justify-between gap-1 min-w-[80px] max-w-[120px] font-mono">
+                                <span id="modal-town-multiselect-label" class="truncate">All Towns</span>
+                                <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                            </button>
+                            <div id="modal-town-multiselect-panel" class="hidden absolute top-full left-0 mt-1.5 w-60 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2">
+                                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1 px-1">
+                                    <span class="text-[10px] uppercase font-bold text-slate-400">Towns</span>
+                                    <div class="flex items-center gap-2 text-[10px]">
+                                        <button onclick="selectAllModalFilterValues('town')" class="text-blue-500 font-bold">All</button>
+                                        <span class="text-slate-500">|</span>
+                                        <button onclick="clearAllModalFilterValues('town')" class="text-rose-500 font-bold">Clear</button>
+                                    </div>
+                                </div>
+                                <div id="modal-town-checkbox-list" class="max-h-48 overflow-y-auto custom-scrollbar space-y-1 text-xs"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Column Filter -->
+                    <div class="relative flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 py-1 shadow-xs">
+                        <i data-lucide="filter" class="w-3.5 h-3.5 text-emerald-500"></i>
+                        <select id="modal-custom-col-select" onchange="onModalCustomColumnChanged()" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-300 outline-none max-w-[90px] truncate"></select>
+                        <div class="relative">
+                            <button id="modal-custom-multiselect-btn" onclick="toggleModalFilterDropdown('custom')" class="text-xs font-bold text-slate-800 dark:text-slate-200 outline-none flex items-center justify-between gap-1 min-w-[70px] max-w-[110px] font-mono">
+                                <span id="modal-custom-multiselect-label" class="truncate">All</span>
+                                <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                            </button>
+                            <div id="modal-custom-multiselect-panel" class="hidden absolute top-full left-0 mt-1.5 w-60 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-2xl z-50 p-2 space-y-2">
+                                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1 px-1">
+                                    <span class="text-[10px] uppercase font-bold text-slate-400">Values</span>
+                                    <div class="flex items-center gap-2 text-[10px]">
+                                        <button onclick="selectAllModalFilterValues('custom')" class="text-blue-500 font-bold">All</button>
+                                        <span class="text-slate-500">|</span>
+                                        <button onclick="clearAllModalFilterValues('custom')" class="text-rose-500 font-bold">Clear</button>
+                                    </div>
+                                </div>
+                                <div id="modal-custom-checkbox-list" class="max-h-48 overflow-y-auto custom-scrollbar space-y-1 text-xs"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Column Select -->
+                    <div class="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 py-1">
+                        <i data-lucide="palette" class="w-3.5 h-3.5 text-purple-500"></i>
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Status:</span>
+                        <select id="modal-col-group" onchange="onModalColumnGroupChanged()" class="bg-transparent text-xs font-bold text-blue-600 dark:text-blue-400 outline-none max-w-[110px] truncate"></select>
+                    </div>
+
+                    <button onclick="exportAnalyticsReport()" class="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> Export</button>
+                    <button onclick="closeDashboardModal()" class="p-1.5 text-slate-400 hover:text-white rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
             </div>
+
             <div class="flex-1 p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden bg-slate-100/60 dark:bg-slate-950/60">
                 <div class="lg:col-span-5 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
                     <div class="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl space-y-4">
@@ -547,6 +631,13 @@
                 [0, 1, 2].forEach(idx => {
                     const btn = document.getElementById(`filter-multiselect-btn-${idx}`);
                     const panel = document.getElementById(`filter-multiselect-panel-${idx}`);
+                    if (panel && !panel.classList.contains('hidden') && !panel.contains(e.target) && !btn.contains(e.target)) {
+                        panel.classList.add('hidden');
+                    }
+                });
+                ['prov', 'town', 'custom'].forEach(type => {
+                    const btn = document.getElementById(`modal-${type}-multiselect-btn`);
+                    const panel = document.getElementById(`modal-${type}-multiselect-panel`);
                     if (panel && !panel.classList.contains('hidden') && !panel.contains(e.target) && !btn.contains(e.target)) {
                         panel.classList.add('hidden');
                     }
@@ -817,8 +908,8 @@
 
                 if (hlMilestone.includes('TRFS') && hasActualDate) {
                     const candidates = [
-                        String(nsbRow['PLA ID'] || '').trim().toUpperCase(),
-                        String(nsbRow['BCF NAME'] || '').trim().toUpperCase(),
+                        String(nsbRow['PLA ID'] || nsbRow['PLAID'] || '').trim().toUpperCase(),
+                        String(nsbRow['BCF NAME'] || nsbRow['BCF Name'] || '').trim().toUpperCase(),
                         String(nsbRow['Serial Number'] || '').trim().toUpperCase(),
                         String(nsbRow['SearchRing Name'] || '').trim().toUpperCase()
                     ];
@@ -840,13 +931,15 @@
             if (statusEl) statusEl.innerText = `${unenteredTrfsList.length} unentered TRFS sites detected`;
 
             if (!unenteredTrfsList || unenteredTrfsList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400 italic">All TRFS sites present in Main Database.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-400 italic">All TRFS sites present in Main Database.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = unenteredTrfsList.map((row, idx) => `
                 <tr class="hover:bg-rose-900/20 transition border-b border-slate-800">
                     <td class="p-2.5 border border-slate-200 dark:border-slate-800 text-center font-bold text-slate-400">${idx + 1}</td>
+                    <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-bold text-teal-400">${getNsbFieldValue(row, ['BCF NAME', 'BCF Name', 'BCF'])}</td>
+                    <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-bold text-blue-400">${getNsbFieldValue(row, ['PLA ID', 'PLAID', 'Site_ID'])}</td>
                     <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-bold text-rose-400">${row['Serial Number'] || '--'}</td>
                     <td class="p-2.5 border border-slate-200 dark:border-slate-800 font-semibold">${row['SearchRing Name'] || '--'}</td>
                     <td class="p-2.5 border border-slate-200 dark:border-slate-800">${getNsbFieldValue(row, ['TOWN', 'CITY'])}</td>
@@ -866,10 +959,23 @@
 
         function exportFlaggedTrfsCSV() {
             if (!unenteredTrfsList || unenteredTrfsList.length === 0) return;
-            const headers = ['Serial Number', 'SearchRing Name', 'PLA ID', 'BCF NAME', 'Town', 'Province', 'Telecom Vendor', 'TRFS Actual Date', 'HIGH LEVEL MILESTONE', 'Longitude', 'Latitude', 'Coord Source'];
+            const headers = ['BCF Name', 'PLAID', 'Serial Number', 'SearchRing Name', 'Town', 'Province', 'Telecom Vendor', 'TRFS Actual Date', 'HIGH LEVEL MILESTONE', 'Longitude', 'Latitude', 'Coord Source'];
             let csvContent = headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(',') + "\r\n";
             unenteredTrfsList.forEach(row => {
-                csvContent += [row['Serial Number']||'', row['SearchRing Name']||'', row['PLA ID']||'', row['BCF NAME']||'', getNsbFieldValue(row, ['TOWN', 'CITY']), getNsbFieldValue(row, ['PROVINCE', 'REGION']), getNsbFieldValue(row, ['TELECOM VENDOR', 'VENDOR']), getNsbFieldValue(row, ['TRFS ACTUAL DATE']), row['HIGH LEVEL MILESTONE']||'', row._computedLon||'', row._computedLat||'', row._coordSource||''].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',') + "\r\n";
+                csvContent += [
+                    getNsbFieldValue(row, ['BCF NAME', 'BCF Name', 'BCF']),
+                    getNsbFieldValue(row, ['PLA ID', 'PLAID', 'Site_ID']),
+                    row['Serial Number']||'',
+                    row['SearchRing Name']||'',
+                    getNsbFieldValue(row, ['TOWN', 'CITY']),
+                    getNsbFieldValue(row, ['PROVINCE', 'REGION']),
+                    getNsbFieldValue(row, ['TELECOM VENDOR', 'VENDOR']),
+                    getNsbFieldValue(row, ['TRFS ACTUAL DATE']),
+                    row['HIGH LEVEL MILESTONE']||'',
+                    row._computedLon||'',
+                    row._computedLat||'',
+                    row._coordSource||''
+                ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',') + "\r\n";
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -1184,7 +1290,6 @@
             return 200;
         }
 
-        // AZIMUTH CORRECTION ENGINE: Map Geographic Compass Angles (0° N) to Math Trigonometric Angles
         function createIndentedWedgePolygonPoints(lat, lon, azimuthDeg, radiusMeters, beamwidthDeg = 65, indentMeters = 5) {
             const mathAzimuthDeg = 90 - azimuthDeg;
             const bw = (beamwidthDeg && !isNaN(beamwidthDeg) && beamwidthDeg > 0) ? parseFloat(beamwidthDeg) : 65;
@@ -1292,7 +1397,29 @@
                     const nsbPinSvg = `<div class="nsb-map-pin-wrapper"><svg class="nsb-map-pin-svg" width="16" height="20" viewBox="0 0 24 30" fill="none"><path d="M12 0C5.37 0 0 5.37 0 12C0 21 12 30 12 30C12 30 24 21 24 12C24 5.37 18.63 0 12 0Z" fill="#14b8a6" stroke="#0f172a" stroke-width="1.8"/><circle cx="12" cy="11" r="4.5" fill="#ffffff"/><circle cx="12" cy="11" r="2.2" fill="#0f172a"/></svg></div>`;
                     const nsbMarker = L.marker([nLat, nLon], { icon: L.divIcon({ className: 'custom-nsb-icon-container', html: nsbPinSvg, iconSize: [16, 20], iconAnchor: [8, 20] }), zIndexOffset: 850, pane: 'nsbPane' });
 
-                    const nsbTooltipHTML = `<div class="glass-card rounded-xl p-3.5 shadow-2xl min-w-[280px] max-w-sm text-xs border border-teal-500/80 pointer-events-auto"><div class="font-bold text-xs text-teal-400 border-b border-slate-700/80 pb-2 mb-2 flex justify-between pr-5"><span class="truncate">🚀 NSB: ${nsbRow['BCF NAME'] || nsbRow['PLA ID'] || nsbRow['Serial Number'] || 'NSB Target'}</span><span class="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 font-mono text-[10px] border border-teal-500/40">${nsbRow._coordSource}</span></div><div class="space-y-1.5 text-[11px]"><div class="flex justify-between items-center border-b border-slate-800/60 pb-1"><span class="text-slate-400 font-medium">Serial Number:</span><span class="font-bold text-slate-100 font-mono select-all">${nsbRow['Serial Number'] || '--'}</span></div><div class="flex justify-between items-center border-b border-slate-800/60 pb-1"><span class="text-slate-400 font-medium">PLA ID:</span><span class="font-bold text-teal-300 font-mono select-all">${nsbRow['PLA ID'] || '--'}</span></div><div class="flex justify-between items-center border-b border-slate-800/60 pb-1"><span class="text-slate-400 font-medium">TRFS Actual Date:</span><span class="font-bold text-emerald-400 font-mono select-all">${getNsbFieldValue(nsbRow, ['TRFS ACTUAL DATE'])}</span></div><div class="flex justify-between items-center pt-0.5"><span class="text-slate-400 font-medium">HIGH LEVEL MILESTONE:</span><span class="font-black text-emerald-400 font-mono select-all">${nsbRow['HIGH LEVEL MILESTONE'] || '--'}</span></div></div></div>`;
+                    const bcfName = nsbRow['BCF NAME'] || nsbRow['BCF Name'] || nsbRow['BCF'] || '--';
+                    const plaid = nsbRow['PLA ID'] || nsbRow['PLAID'] || nsbRow['Site_ID'] || '--';
+                    const searchRing = nsbRow['SearchRing Name'] || nsbRow['Search Ring Name'] || '--';
+                    const serialNumber = nsbRow['Serial Number'] || nsbRow['Serial_Number'] || '--';
+                    const lowMilestone = nsbRow['LOW LEVEL MILESTONE'] || nsbRow['Low Level Milestone'] || '--';
+                    const highMilestone = nsbRow['HIGH LEVEL MILESTONE'] || nsbRow['High Level Milestone'] || '--';
+
+                    const nsbTooltipHTML = `
+                        <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[260px] text-xs border border-teal-500/80 pointer-events-auto">
+                            <div class="font-bold text-xs text-teal-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between pr-5">
+                                <span class="truncate">BCF Name: ${bcfName}</span>
+                            </div>
+                            <div class="space-y-1 text-[11px]">
+                                <div class="flex justify-between items-center"><span class="text-slate-400 font-medium">PLAID:</span><span class="font-bold text-slate-100 font-mono select-all">${plaid}</span></div>
+                                <div class="flex justify-between items-center"><span class="text-slate-400 font-medium">Search Ring Name:</span><span class="font-bold text-slate-100 font-mono select-all">${searchRing}</span></div>
+                                <div class="flex justify-between items-center"><span class="text-slate-400 font-medium">Serial Number:</span><span class="font-bold text-teal-300 font-mono select-all">${serialNumber}</span></div>
+                                <div class="pt-1.5 mt-1.5 border-t border-slate-800 space-y-1">
+                                    <div class="flex justify-between items-center"><span class="text-slate-400 font-medium">Low Level Milestone:</span><span class="font-bold text-amber-400 font-mono select-all">${lowMilestone}</span></div>
+                                    <div class="flex justify-between items-center"><span class="text-slate-400 font-medium">High Level Milestone:</span><span class="font-black text-emerald-400 font-mono select-all">${highMilestone}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
 
                     nsbMarker.on('click', (e) => { L.DomEvent.stopPropagation(e); openMapTooltip(e.latlng, nsbTooltipHTML); inspectNSBSite(nsbRow); });
                     nsbLayerGroup.addLayer(nsbMarker);
@@ -1305,7 +1432,7 @@
                     const secKeys = Object.keys(sec);
                     const idKey = secKeys.find(k => ['SITE_ID', 'SITE ID', 'PLAID', 'BCF'].includes(k.trim().toUpperCase())) || secKeys[0];
                     const azKey = secKeys.find(k => ['AZIMUTH', 'AZI', 'BEARING'].includes(k.trim().toUpperCase()));
-                    const secNameKey = secKeys.find(k => ['SECTOR_NAME', 'SECTOR NAME', 'CELL_NAME'].includes(k.trim().toUpperCase()));
+                    const secNameKey = secKeys.find(k => ['SECTOR_NAME', 'SECTOR NAME', 'CELL_NAME', 'SECTOR'].includes(k.trim().toUpperCase()));
                     const typeKey = secKeys.find(k => ['SITE TYPE', 'TYPE'].includes(k.trim().toUpperCase()));
 
                     const candidateKey = String(sec[idKey] || '').trim().toUpperCase();
@@ -1322,6 +1449,47 @@
 
                     const isIbsType = rawSiteType.includes('IBS') || rawSiteType.includes('INDOOR') || rawSiteType.includes('BUILDING');
 
+                    const utilSectorName = (secNameKey ? sec[secNameKey] : '') || sec['Sector Name'] || sec['SECTOR NAME'] || '--';
+                    const utilPlaid = sec['PLAID'] || sec['Site_ID'] || sec['Site ID'] || candidateKey || '--';
+                    const utilSiteName = sec['SITE NAME'] || sec['Site Name'] || displaySiteName || '--';
+
+                    const l18 = sec['L18'] || sec['L18 Utilization'] || sec['FDD 1800'] || '--';
+                    const l21 = sec['L21'] || sec['L21 Utilization'] || sec['FDD 2100'] || '--';
+                    const l7 = sec['L7'] || sec['L7 Utilization'] || sec['FDD 700'] || '--';
+                    const l9 = sec['L9'] || sec['L9 Utilization'] || sec['FDD 900'] || '--';
+                    const l23 = sec['L23'] || sec['L23 Utilization'] || sec['TDD 2300'] || '--';
+                    const l26 = sec['L26'] || sec['L26 Utilization'] || sec['TDD 2600'] || '--';
+                    const l26mm = sec['L26MM'] || sec['L26MM Utilization'] || sec['TDD 2600 MM'] || '--';
+
+                    // RESTORED BLENDED CONGESTION BADGE IN UTILIZATION TOOLTIP
+                    const utilTooltipHTML = `
+                        <div class="glass-card rounded-xl p-3 shadow-2xl min-w-[250px] text-xs border border-amber-500/60 pointer-events-auto">
+                            <div class="font-bold text-xs text-amber-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between pr-5">
+                                <span class="truncate">Sector: ${utilSectorName}</span>
+                            </div>
+                            <div class="space-y-1 text-[11px] mb-2">
+                                <div class="flex justify-between items-center"><span class="text-slate-400 font-medium">PLAID:</span><span class="font-bold text-slate-100 font-mono select-all">${utilPlaid}</span></div>
+                                <div class="flex justify-between items-center"><span class="text-slate-400 font-medium">SITE NAME:</span><span class="font-bold text-slate-100 font-mono select-all">${utilSiteName}</span></div>
+                            </div>
+                            <div class="p-2 mb-2 bg-slate-900/90 rounded-lg border border-slate-800 flex justify-between items-center">
+                                <span class="font-bold text-slate-400 text-[11px]">Blended Congestion:</span>
+                                <span class="px-2 py-0.5 rounded font-black font-mono text-xs" style="background:${blendedColor}25; color:${blendedColor}; border:1.5px solid ${blendedColor};">${blendedStatusLabel}</span>
+                            </div>
+                            <div class="pt-1.5 border-t border-slate-700/80">
+                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Band Utilization</div>
+                                <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] font-mono">
+                                    <div><span class="text-slate-400">L18:</span> <strong style="color:${getBandColorHex(l18)}">${l18}</strong></div>
+                                    <div><span class="text-slate-400">L21:</span> <strong style="color:${getBandColorHex(l21)}">${l21}</strong></div>
+                                    <div><span class="text-slate-400">L7:</span> <strong style="color:${getBandColorHex(l7)}">${l7}</strong></div>
+                                    <div><span class="text-slate-400">L9:</span> <strong style="color:${getBandColorHex(l9)}">${l9}</strong></div>
+                                    <div><span class="text-slate-400">L23:</span> <strong style="color:${getBandColorHex(l23)}">${l23}</strong></div>
+                                    <div><span class="text-slate-400">L26:</span> <strong style="color:${getBandColorHex(l26)}">${l26}</strong></div>
+                                    <div class="col-span-2"><span class="text-slate-400">L26MM:</span> <strong style="color:${getBandColorHex(l26mm)}">${l26mm}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
                     if (isIbsType && showIBS) {
                         ibsSectorIndexTracker[candidateKey] = (ibsSectorIndexTracker[candidateKey] || 0);
                         const currentIbsIdx = ibsSectorIndexTracker[candidateKey];
@@ -1333,8 +1501,7 @@
                             fillColor: blendedColor, fillOpacity: 0.65, color: '#ffffff', weight: 1, dashArray: '3, 3', renderer: sharedSvgRenderer, interactive: true, pane: 'ibsCirclesPane'
                         }).addTo(ibsCirclesLayerGroup);
 
-                        const ibsTooltipHTML = `<div class="glass-card rounded-xl p-3 shadow-2xl min-w-[240px] text-xs border border-emerald-500/60 pointer-events-auto"><div class="font-bold text-xs text-emerald-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between pr-5"><span>📶 Site: ${displaySiteName}</span><span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono border border-emerald-500/30">IBS Ring #${currentIbsIdx + 1}</span></div><div class="space-y-0.5 mb-2.5">${TARGET_BANDS.map(b => `<div class="flex justify-between text-[10px]"><span class="text-slate-300">${b}:</span><span style="color:${getBandColorHex(sec[b])}">${sec[b]||'BLACK'}</span></div>`).join('')}</div><div class="pt-2 border-t border-slate-700/80 flex justify-between text-[11px]"><span class="font-bold text-slate-400">Blended Congestion:</span><span class="px-2 py-0.5 rounded font-black font-mono text-xs" style="background:${blendedColor}25; color:${blendedColor}; border:1.5px solid ${blendedColor};">${blendedStatusLabel}</span></div></div>`;
-                        ibsPolygon.on('click', (e) => { L.DomEvent.stopPropagation(e); openMapTooltip(e.latlng, ibsTooltipHTML); inspectWedge(sec, siteRef.data); });
+                        ibsPolygon.on('click', (e) => { L.DomEvent.stopPropagation(e); openMapTooltip(e.latlng, utilTooltipHTML); inspectWedge(sec, siteRef.data); });
                     } else if (!isIbsType && showWedges && azMatch) {
                         const az = parseFloat(azMatch[0]);
                         const bw = parseFloat(sec['BW'] || 65);
@@ -1343,8 +1510,7 @@
                             fillColor: blendedColor, fillOpacity: 0.7, color: '#ffffff', weight: 1, renderer: sharedSvgRenderer, interactive: true, pane: 'wedgesPane'
                         }).addTo(wedgesLayerGroup);
 
-                        const sectorTooltipHTML = `<div class="glass-card rounded-xl p-3 shadow-2xl min-w-[240px] text-xs border border-amber-500/60 pointer-events-auto"><div class="font-bold text-xs text-amber-400 border-b border-slate-700/80 pb-1.5 mb-2 flex justify-between pr-5"><span>📐 Site: ${displaySiteName}</span><span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono border border-amber-500/30">Azimuth: ${az}°</span></div><div class="pt-2 border-t border-slate-700/80 flex justify-between text-[11px]"><span class="font-bold text-slate-400">Blended Congestion:</span><span class="px-2 py-0.5 rounded font-black font-mono text-xs" style="background:${blendedColor}25; color:${blendedColor}; border:1.5px solid ${blendedColor};">${blendedStatusLabel}</span></div></div>`;
-                        polygon.on('click', (e) => { L.DomEvent.stopPropagation(e); openMapTooltip(e.latlng, sectorTooltipHTML); inspectWedge(sec, siteRef.data); });
+                        polygon.on('click', (e) => { L.DomEvent.stopPropagation(e); openMapTooltip(e.latlng, utilTooltipHTML); inspectWedge(sec, siteRef.data); });
                     }
                 });
             }
@@ -1366,7 +1532,7 @@
         function inspectNSBSite(nsbRow) {
             const container = document.getElementById('inspector-container');
             document.getElementById('inspect-site-id').innerText = `${nsbRow['BCF NAME'] || nsbRow['PLA ID'] || nsbRow['Serial Number'] || 'NSB Site'} (NSB Target)`;
-            container.innerHTML = `<div class="space-y-2 text-[11px]"><div class="p-2 bg-teal-950/60 border border-teal-500/40 rounded-lg"><span class="font-bold text-teal-400 uppercase text-[10px]">NSB Details (${nsbRow._coordSource}):</span></div><div class="space-y-1"><div><b>Serial Number:</b> ${nsbRow['Serial Number'] || '--'}</div><div><b>PLA ID:</b> ${nsbRow['PLA ID'] || '--'}</div><div><b>BCF NAME:</b> ${nsbRow['BCF NAME'] || '--'}</div><div><b>TRFS Actual Date:</b> <span class="font-mono text-emerald-400 font-bold">${getNsbFieldValue(nsbRow, ['TRFS ACTUAL DATE'])}</span></div><div><b>HIGH LEVEL MILESTONE:</b> <span class="font-black text-emerald-400">${nsbRow['HIGH LEVEL MILESTONE'] || '--'}</span></div></div></div>`;
+            container.innerHTML = `<div class="space-y-2 text-[11px]"><div class="p-2 bg-teal-950/60 border border-teal-500/40 rounded-lg"><span class="font-bold text-teal-400 uppercase text-[10px]">NSB Details (${nsbRow._coordSource}):</span></div><div class="space-y-1"><div><b>BCF Name:</b> ${nsbRow['BCF NAME'] || nsbRow['BCF Name'] || '--'}</div><div><b>PLAID:</b> ${nsbRow['PLA ID'] || nsbRow['PLAID'] || '--'}</div><div><b>Search Ring Name:</b> ${nsbRow['SearchRing Name'] || nsbRow['Search Ring Name'] || '--'}</div><div><b>Serial Number:</b> ${nsbRow['Serial Number'] || '--'}</div><div><b>Low Level Milestone:</b> ${nsbRow['LOW LEVEL MILESTONE'] || nsbRow['Low Level Milestone'] || '--'}</div><div><b>High Level Milestone:</b> <span class="font-black text-emerald-400">${nsbRow['HIGH LEVEL MILESTONE'] || nsbRow['High Level Milestone'] || '--'}</span></div></div></div>`;
         }
 
         function inspectWedge(utilRow, siteRow) {
